@@ -1,0 +1,88 @@
+{
+  "common": {
+    "appName": "Fidélité Digitale",
+    "save": "Enregistrer",
+    "saved": "Enregistré avec succès",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "actions": "Actions",
+    "back": "Retour",
+    "submit": "Valider",
+    "signOut": "Se déconnecter"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "program": "Programme de fidélité",
+    "scanner": "Scanner de caisse",
+    "customers": "Clients",
+    "settings": "Paramètres",
+    "signIn": "Connexion",
+    "signUp": "Créer un compte"
+  },
+  "auth": {
+    "signInTitle": "Connexion Commerçant",
+    "signInSubtitle": "Accédez à la gestion de votre programme de fidélité",
+    "signUpTitle": "Créer un compte commerçant",
+    "signUpSubtitle": "Démarrez votre programme de fidélité en quelques minutes",
+    "emailLabel": "Adresse email",
+    "passwordLabel": "Mot de passe",
+    "nameLabel": "Votre nom",
+    "businessNameLabel": "Nom de votre commerce",
+    "signInButton": "Se connecter",
+    "signUpButton": "Créer mon compte",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "hasAccount": "Vous avez déjà un compte ?"
+  },
+  "program": {
+    "title": "Configuration du programme",
+    "subtitle": "Personnalisez votre carte à tampons pour vos clients",
+    "nameLabel": "Nom du programme",
+    "stampsRequiredLabel": "Nombre de tampons requis",
+    "stampsRequiredHint": "Nombre de visites nécessaires pour débloquer la récompense (ex: 8 ou 10)",
+    "rewardLabel": "Intitulé de la récompense",
+    "rewardPlaceholder": "Ex: 1 Café offert, 1 Coupe gratuite, etc.",
+    "brandColorLabel": "Couleur principale de la marque",
+    "logoLabel": "Logo du commerce",
+    "saveButton": "Enregistrer le programme",
+    "programType": "Type de programme",
+    "stampsType": "Tampons (Visites)"
+  },
+  "customer": {
+    "joinTitle": "Rejoignez le programme de fidélité",
+    "joinSubtitle": "Obtenez votre carte immédiatement sur votre smartphone, sans téléchargement d'application.",
+    "fullName": "Nom & Prénom",
+    "phoneNumber": "Numéro de téléphone",
+    "phoneHint": "Numéro de mobile algérien (ex: 0550 12 34 56 ou 06 / 07)",
+    "joinButton": "Obtenir ma carte de fidélité",
+    "cardTitle": "Carte de Fidélité",
+    "stampsCollected": "{current} sur {total} tampons collectés",
+    "rewardReady": "Félicitations ! Votre récompense est prête",
+    "rewardReadySubtitle": "Présentez ce QR code à la caisse pour recevoir votre récompense.",
+    "showQrAtTill": "Présentez ce QR code en caisse à chaque visite pour recevoir votre tampon.",
+    "addToHomeScreen": "Ajouter à l'écran d'accueil"
+  },
+  "till": {
+    "title": "Scanner de Caisse",
+    "subtitle": "Scannez le QR code du client pour ajouter un tampon ou valider un cadeau",
+    "cameraPermissionPrompt": "Veuillez autoriser l'accès à la caméra pour scanner les QR codes.",
+    "scanSuccess": "Tampon validé avec succès !",
+    "cooldownWarning": "Ce client a déjà reçu un tampon il y a un instant. Veuillez patienter.",
+    "rewardAvailable": "Cadeau disponible !",
+    "rewardRedeemPrompt": "Le client a complété sa carte. Valider le cadeau et réinitialiser la carte ?",
+    "redeemButton": "Valider le cadeau",
+    "scanningActive": "Caméra active... Alignez le QR code"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "totalCustomers": "Clients inscrits",
+    "totalStamps": "Tampons attribués",
+    "rewardsRedeemed": "Cadeaux offerts",
+    "quickLinks": "Accès rapides",
+    "openScanner": "Ouvrir le scanner de caisse",
+    "viewJoinLink": "Lien d'inscription client",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié dans le presse-papiers !"
+  }
+}

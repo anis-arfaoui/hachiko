@@ -9,19 +9,33 @@
     "lint": "eslint",
     "check": "ultracite check",
     "fix": "ultracite fix",
-    "prepare": "husky && lefthook install"
+    "prepare": "husky && lefthook install --force",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "better-auth": "^1.7.7",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.3",
+    "html5-qrcode": "^2.3.8",
+    "lucide-react": "^1.52.0",
     "next": "16.3.8",
+    "next-intl": "^4.14.9",
+    "qrcode": "^1.5.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@shadcn/lint": "^0.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
     "eslint-config-next": "16.3.8",
     "husky": "^9.1.7",
     "lefthook": "^2.1.16",

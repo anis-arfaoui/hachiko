@@ -1,12 +1,12 @@
 import { defineConfig } from "oxlint";
-import core from "ultracite/oxlint/core";
-import react from "ultracite/oxlint/react";
-import next from "ultracite/oxlint/next";
-import vitest from "ultracite/oxlint/vitest";
-import nextJsPlugins from "ultracite/oxlint/next/js-plugins";
-import shadcn from "ultracite/oxlint/shadcn";
 import antiSlop from "ultracite/oxlint/anti-slop";
+import core from "ultracite/oxlint/core";
 import { jsPluginSettings, selectJsPlugins } from "ultracite/oxlint/js-plugins";
+import next from "ultracite/oxlint/next";
+import nextJsPlugins from "ultracite/oxlint/next/js-plugins";
+import react from "ultracite/oxlint/react";
+import shadcn from "ultracite/oxlint/shadcn";
+import vitest from "ultracite/oxlint/vitest";
 
 const jsPlugins = selectJsPlugins(["react-doctor"]);
 
@@ -22,6 +22,6 @@ export default defineConfig({
     jsPlugins,
   ],
   ignorePatterns: core.ignorePatterns,
-  jsPlugins: [...jsPlugins.jsPlugins, ...shadcn.jsPlugins],
+  jsPlugins: [...(jsPlugins.jsPlugins ?? []), ...(shadcn.jsPlugins ?? [])],
   settings: jsPluginSettings,
 });

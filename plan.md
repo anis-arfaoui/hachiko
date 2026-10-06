@@ -2,7 +2,7 @@
 
 Inspired by [fidelix.ma](https://fidelix.ma/en). Built solo, for the Algerian market, on a near-zero budget.
 
-*Last updated: stack changed to Neon + Drizzle + Better Auth; wallet section corrected.*
+_Last updated: stack changed to Neon + Drizzle + Better Auth; wallet section corrected._
 
 ---
 
@@ -10,9 +10,7 @@ Inspired by [fidelix.ma](https://fidelix.ma/en). Built solo, for the Algerian ma
 
 A SaaS platform where small businesses (cafés, bakeries, barbers, etc.) create a digital loyalty card. Customers get the card on their phone with no app to install. Staff scan the customer's QR code at the till to add a stamp or points. Owners see simple stats.
 
-**Who builds it:** me
-**Market:** Algeria.
-**Billing:** manual (cash or BaridiMob). The developer extends each business's subscription by hand.
+**Who builds it:** me **Market:** Algeria. **Billing:** manual (cash or BaridiMob). The developer extends each business's subscription by hand.
 
 ### Out of scope (decided)
 
@@ -36,7 +34,7 @@ Four systems:
 ## 3. Tech Stack
 
 | Layer | Choice | Why |
-|---|---|---|
+| --- | --- | --- |
 | App | Next.js (App Router) + React + TypeScript (strict) | One codebase for UI and backend |
 | UI | Tailwind CSS + shadcn/ui + lucide-react | Fast, consistent UI |
 | Backend | Server Actions + Route Handlers | No separate API server |
@@ -77,11 +75,11 @@ Wallet passes are an upgrade, not the foundation. The product must work fully as
 
 ### Decision table
 
-| Apple | Google | Plan |
-|---|---|---|
-| Works | Works | Build both in Phase 3 |
-| Works | Doesn't | Apple only, web card for Android |
-| Doesn't | Works | Google only, web card for iPhone |
+| Apple   | Google  | Plan                                     |
+| ------- | ------- | ---------------------------------------- |
+| Works   | Works   | Build both in Phase 3                    |
+| Works   | Doesn't | Apple only, web card for Android         |
+| Doesn't | Works   | Google only, web card for iPhone         |
 | Doesn't | Doesn't | Web card only (still a complete product) |
 
 **Rule:** do not promise wallet cards to a shop owner until you have seen a pass save on a real phone.
@@ -95,7 +93,7 @@ Better Auth creates its own tables (`user`, `session`, `account`, `verification`
 Your own tables:
 
 | Table | Purpose | Key fields |
-|---|---|---|
+| --- | --- | --- |
 | `locations` | Shops belonging to a business | organization_id, name, address |
 | `programs` | Loyalty programme config | organization_id, type (`stamps` / `points`), stamps_required, colours, logo_url |
 | `rewards` | What customers can redeem | program_id, label, cost |
@@ -127,48 +125,55 @@ Your own tables:
 
 ## 7. Phase 1: MVP (one shop can use it)
 
-**Complexity: easy to medium.** Hardest parts: tenant scoping done correctly, camera scanning on real phones (iOS Safari is picky), and double-stamp prevention.
-**Estimated effort:** 3-4 weeks part-time.
+**Complexity: easy to medium.** Hardest parts: tenant scoping done correctly, camera scanning on real phones (iOS Safari is picky), and double-stamp prevention. **Estimated effort:** 3-4 weeks part-time.
 
 ### Steps
 
 **Step 1: Setup**
+
 - `bun create next-app`, add Tailwind and shadcn/ui, set up next-intl (FR only).
 - Create a Neon project, connect Drizzle, deploy an empty page to Vercel.
 - Done when: your site is live at a URL and connects to the database.
 
 **Step 2: Auth and database**
+
 - Set up Better Auth with the Drizzle adapter and the organization plugin.
 - Generate the auth tables, then add your tables (`programs`, `customers`, `cards`, `transactions`).
 - Build the data-access layer: every query requires `organizationId`.
 - Done when: two test businesses exist and neither can read the other's data through your code.
 
 **Step 3: Merchant login and programme setup**
+
 - Signup, login, create the business (organization).
 - Form to create a stamp programme: name, logo (Vercel Blob), colour, stamps needed, reward label.
 - Done when: a business owner can create their programme.
 
 **Step 4: Customer join page**
+
 - Public page `/j/[business]` with name and phone.
 - Creates the customer and a card with a random token.
 - Done when: you open the link on your phone and receive a card.
 
 **Step 5: Customer card page**
+
 - Branded page showing the QR code and stamp progress.
 - PWA manifest so it can be added to the home screen.
 - Done when: the card opens from the home screen like an app.
 
 **Step 6: Staff scanner**
+
 - Page that opens the camera, reads the QR, and adds a stamp (atomic write via `db.batch()`).
 - Cooldown to block accidental double scans.
 - When the card is full, show "reward ready" and reset on redeem.
 - Done when: scanning one phone with another makes the stamp appear.
 
 **Step 7: Basic dashboard**
+
 - Customer count, visits per day, rewards given.
 - Done when: the owner sees real numbers after test scans.
 
 **Step 8: Real-world test**
+
 - Give it to one real shop for a week.
 - Write down everything that confuses people.
 
@@ -178,15 +183,14 @@ Your own tables:
 
 ## 8. Phase 2: Sellable
 
-**Complexity: medium to hard.** Contains the hardest feature in the project: offline mode.
-**Estimated effort:** 4-6 weeks part-time.
+**Complexity: medium to hard.** Contains the hardest feature in the project: offline mode. **Estimated effort:** 4-6 weeks part-time.
 
 ### Steps
 
 1. **Staff accounts**
    - Owner invites staff through the organization plugin. Staff role sees only the scanner.
    - Revoke access in one click.
-2. **Offline till mode** *(hardest part)*
+2. **Offline till mode** _(hardest part)_
    - Service worker caches the scanner page.
    - Scans are saved locally in IndexedDB with a `client_uuid`.
    - Sync when the connection returns. The unique `client_uuid` prevents duplicates.
@@ -209,8 +213,7 @@ Your own tables:
 
 ## 9. Phase 3: Wallet and Retention
 
-**Complexity: mixed.** Apple Wallet is hard (certificates, signing, push web service). Google Wallet is medium. Most other features are easy.
-**Estimated effort:** open-ended, 1-3 months depending on what you pick. Optional: you can launch and charge without it.
+**Complexity: mixed.** Apple Wallet is hard (certificates, signing, push web service). Google Wallet is medium. Most other features are easy. **Estimated effort:** open-ended, 1-3 months depending on what you pick. Optional: you can launch and charge without it.
 
 ### Steps (in this order)
 
@@ -231,7 +234,7 @@ Your own tables:
 ## 10. Complexity Summary
 
 | Phase | Difficulty | Hardest part | Effort (part-time) |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1: MVP | Easy to medium | Tenant scoping, camera scanning | 3-4 weeks |
 | 2: Sellable | Medium to hard | **Offline mode** | 4-6 weeks |
 | 3: Wallet and retention | Mixed | Apple Wallet | 1-3 months, optional |
@@ -241,7 +244,7 @@ Your own tables:
 ## 11. Risks and Mitigations
 
 | Risk | Mitigation |
-|---|---|
+| --- | --- |
 | A query forgets `organizationId` and leaks data | One data-access layer, no direct table queries in pages, test with two businesses in Step 2 |
 | Camera scanning breaks on some phones | Test on real iPhones and Androids early in Step 6 |
 | Double stamps | Cooldown + unique `client_uuid` + atomic writes via `db.batch()` |
