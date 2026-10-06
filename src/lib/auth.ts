@@ -4,8 +4,31 @@ import { organization } from "better-auth/plugins";
 
 import { db } from "@/db";
 
+const APP_URL = "https://hachiko-phi.vercel.app";
+
+const getBaseUrl = (): string => {
+  if (process.env.BETTER_AUTH_URL) {
+    return process.env.BETTER_AUTH_URL.replace(/\/+$/u, "");
+  }
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3000";
+  }
+  return APP_URL;
+};
+
+const trustedOrigins = [
+  "http://localhost:3000",
+  APP_URL,
+  ...(process.env.BETTER_AUTH_URL
+    ? [process.env.BETTER_AUTH_URL.replace(/\/+$/u, "")]
+    : []),
+];
+
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  advanced: {
+    trustedProxyHeaders: true,
+  },
+  baseURL: getBaseUrl(),
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
@@ -16,6 +39,7 @@ export const auth = betterAuth({
   secret:
     process.env.BETTER_AUTH_SECRET ??
     "development-secret-loyalty-app-min-32-chars!!",
+  trustedOrigins,
 });
 
 export type Session = typeof auth.$Infer.Session;
