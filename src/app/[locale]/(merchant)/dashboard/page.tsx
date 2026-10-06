@@ -16,6 +16,7 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 
 import { getDashboardDataAction } from "@/app/actions/dashboard";
+import { DashboardHowItWorks } from "@/components/dashboard/how-it-works";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useActiveOrganization } from "@/lib/auth-client";
+import { orgClient, useActiveOrganization } from "@/lib/auth-client";
 
 interface DashboardStatsState {
   recentActivity: {
@@ -39,10 +40,28 @@ interface DashboardStatsState {
   totalStamps: number;
 }
 
+interface ServerOrg {
+  id: string;
+  name: string;
+  slug: string | null;
+}
+
+const getQrPlaceholder = (hasUrl: boolean, loading: boolean): string => {
+  if (hasUrl) {
+    return "Génération...";
+  }
+  if (loading) {
+    return "Chargement...";
+  }
+  return "Non disponible";
+};
+
 const DashboardPage = () => {
   const locale = useLocale();
   const { data: activeOrg } = useActiveOrganization();
 
+  const [serverOrg, setServerOrg] = useState<ServerOrg | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStatsState>({
     recentActivity: [],
     totalCustomers: 0,
@@ -52,7 +71,8 @@ const DashboardPage = () => {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const orgSlug = activeOrg?.slug || activeOrg?.id || "";
+  const effectiveOrg = activeOrg ?? serverOrg;
+  const orgSlug = effectiveOrg?.slug || effectiveOrg?.id || "";
   const joinUrl =
     typeof window !== "undefined" && orgSlug
       ? `${window.location.origin}/${locale}/j/${orgSlug}`
@@ -61,12 +81,21 @@ const DashboardPage = () => {
   useEffect(() => {
     const loadData = async () => {
       const data = await getDashboardDataAction();
-      if (data?.stats) {
-        setStats(data.stats);
+      if (data) {
+        if (data.stats) {
+          setStats(data.stats);
+        }
+        if (data.organization) {
+          setServerOrg(data.organization);
+          if (!activeOrg?.id) {
+            orgClient.setActive({ organizationId: data.organization.id });
+          }
+        }
       }
+      setIsInitialLoading(false);
     };
     loadData();
-  }, []);
+  }, [activeOrg?.id]);
 
   useEffect(() => {
     if (!joinUrl) {
@@ -104,7 +133,7 @@ const DashboardPage = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl">
-            {activeOrg?.name ?? "Tableau de bord"}
+            {effectiveOrg?.name ?? "Tableau de bord"}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
             Aperçu de votre programme de fidélité et de vos clients.
@@ -217,7 +246,7 @@ const DashboardPage = () => {
                   />
                 ) : (
                   <div className="border-border bg-card text-muted-foreground flex h-36 w-36 items-center justify-center rounded-lg border text-xs">
-                    Génération...
+                    {getQrPlaceholder(Boolean(joinUrl), isInitialLoading)}
                   </div>
                 )}
 
@@ -227,8 +256,19 @@ const DashboardPage = () => {
                       Lien direct d&apos;inscription
                     </h4>
                     <p className="text-muted-foreground text-xs break-all">
-                      {joinUrl || "Chargement..."}
+                      {joinUrl ||
+                        (isInitialLoading
+                          ? "Chargement..."
+                          : "Aucun commerce configuré")}
                     </p>
+                    {!isInitialLoading && !orgSlug && (
+                      <Link
+                        href={`/${locale}/sign-up`}
+                        className="text-primary mt-1 inline-block text-xs font-medium hover:underline"
+                      >
+                        Configurer votre commerce →
+                      </Link>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
@@ -271,59 +311,7 @@ const DashboardPage = () => {
         </Card>
 
         {/* Quick Instructions */}
-        <Card className="lg:col-span-5">
-          <CardHeader>
-            <CardTitle>Comment ça marche</CardTitle>
-            <CardDescription>
-              Les 3 étapes clés pour votre commerce
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <span className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                  1
-                </span>
-                <div>
-                  <h5 className="text-sm font-semibold">Le client rejoint</h5>
-                  <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
-                    Le client scanne le QR code du comptoir, entre son nom et
-                    son téléphone, et obtient sa carte de fidélité.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                  2
-                </span>
-                <div>
-                  <h5 className="text-sm font-semibold">La caisse scanne</h5>
-                  <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
-                    Le personnel ouvre le scanner de caisse sur son smartphone
-                    et flashe le QR code du client pour valider le tampon.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                  3
-                </span>
-                <div>
-                  <h5 className="text-sm font-semibold">
-                    Le cadeau est débloqué
-                  </h5>
-                  <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
-                    Une fois la carte pleine, le scanner propose de valider le
-                    cadeau et réinitialise automatiquement la carte pour le
-                    cycle suivant.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <DashboardHowItWorks />
       </div>
     </div>
   );

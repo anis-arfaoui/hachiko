@@ -1,23 +1,20 @@
 "use server";
 
-import { headers } from "next/headers";
-
+import { getMerchantSession } from "@/dal/merchant";
 import { getMerchantStats } from "@/dal/stats";
-import { auth } from "@/lib/auth";
 
 export const getDashboardDataAction = async () => {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
+  const merchantSession = await getMerchantSession();
 
-  if (!session?.user || !session.session.activeOrganizationId) {
+  if (!merchantSession) {
     return null;
   }
 
-  const organizationId = session.session.activeOrganizationId;
-  const stats = await getMerchantStats(organizationId);
+  const stats = await getMerchantStats(merchantSession.organizationId);
 
   return {
-    organizationId,
+    organization: merchantSession.organization,
+    organizationId: merchantSession.organizationId,
     stats,
   };
 };

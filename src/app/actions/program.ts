@@ -1,10 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 
+import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization, upsertProgram } from "@/dal/program";
-import { auth } from "@/lib/auth";
 
 export interface SaveProgramInput {
   brandColor: string;
@@ -14,20 +13,13 @@ export interface SaveProgramInput {
 }
 
 export const saveProgramAction = async (input: SaveProgramInput) => {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
+  const merchantSession = await getMerchantSession();
 
-  if (!session?.user) {
+  if (!merchantSession) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
-  const organizationId = session.session.activeOrganizationId;
-
-  if (!organizationId) {
-    return { error: "NO_ACTIVE_ORGANIZATION", success: false };
-  }
-
-  const program = await upsertProgram(organizationId, {
+  const program = await upsertProgram(merchantSession.organizationId, {
     brandColor: input.brandColor,
     logoUrl: input.logoUrl,
     rewardLabel: input.rewardLabel.trim(),
@@ -41,12 +33,11 @@ export const saveProgramAction = async (input: SaveProgramInput) => {
 };
 
 export const getMyProgramAction = async () => {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
+  const merchantSession = await getMerchantSession();
 
-  if (!session?.user || !session.session.activeOrganizationId) {
+  if (!merchantSession) {
     return null;
   }
 
-  return getProgramByOrganization(session.session.activeOrganizationId);
+  return getProgramByOrganization(merchantSession.organizationId);
 };

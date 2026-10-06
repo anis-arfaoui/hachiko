@@ -1,16 +1,15 @@
 "use server";
 
 import { eq, or } from "drizzle-orm";
-import { headers } from "next/headers";
 
 import { findOrCreateCard, getCardByToken } from "@/dal/card";
 import { findOrCreateCustomer } from "@/dal/customer";
+import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization, upsertProgram } from "@/dal/program";
 import { addStampToCard, redeemCardReward } from "@/dal/transaction";
 import type { AddStampResult, RedeemRewardResult } from "@/dal/transaction";
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
-import { auth } from "@/lib/auth";
 import { isValidAlgerianPhone } from "@/lib/phone";
 
 export interface JoinProgramInput {
@@ -106,19 +105,16 @@ export type ScanStampActionResult =
 export const scanStampAction = async (
   input: ScanStampInput
 ): Promise<ScanStampActionResult> => {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
+  const merchantSession = await getMerchantSession();
 
-  if (!session?.user || !session.session.activeOrganizationId) {
+  if (!merchantSession) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
-  const organizationId = session.session.activeOrganizationId;
-
   return addStampToCard({
     clientUuid: input.clientUuid,
-    organizationId,
-    staffUserId: session.user.id,
+    organizationId: merchantSession.organizationId,
+    staffUserId: merchantSession.userId,
     token: input.token,
   });
 };
@@ -133,18 +129,15 @@ export type ScanRedeemActionResult =
 export const scanRedeemAction = async (
   token: string
 ): Promise<ScanRedeemActionResult> => {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
+  const merchantSession = await getMerchantSession();
 
-  if (!session?.user || !session.session.activeOrganizationId) {
+  if (!merchantSession) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
-  const organizationId = session.session.activeOrganizationId;
-
   return redeemCardReward({
-    organizationId,
-    staffUserId: session.user.id,
+    organizationId: merchantSession.organizationId,
+    staffUserId: merchantSession.userId,
     token,
   });
 };
