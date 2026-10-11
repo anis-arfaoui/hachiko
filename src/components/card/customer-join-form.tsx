@@ -56,6 +56,12 @@ export const CustomerJoinForm = ({ locale, slug }: CustomerJoinFormProps) => {
           setError("Commerce introuvable. Veuillez vérifier le lien.");
         } else if (res.error === "INVALID_PHONE") {
           setError("Numéro de téléphone invalide.");
+        } else if (res.error === "INVALID_NAME") {
+          setError("Veuillez entrer un nom valide (entre 2 et 60 caractères).");
+        } else if (res.error === "RATE_LIMITED") {
+          setError(
+            "Trop de tentatives récentes. Veuillez patienter quelques minutes avant de réessayer."
+          );
         } else {
           setError("Une erreur est survenue lors de la création de la carte.");
         }

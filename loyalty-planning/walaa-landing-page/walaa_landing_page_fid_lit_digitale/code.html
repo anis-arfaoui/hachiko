@@ -1,0 +1,1316 @@
+<!doctype html>
+<html class="scroll-smooth" lang="fr" style="">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Walaa | Fidélité Digitale Sans Application</title>
+    <!-- Tailwind CSS CDN with Forms & Container Queries plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Google Fonts: Plus Jakarta Sans for ultra-modern SaaS look -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', "sans-serif"],
+            },
+            colors: {
+              brand: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                200: "#bfdbfe",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+                800: "#1e40af",
+                900: "#1e3a8a",
+                950: "#0c1a30",
+              },
+              navy: {
+                800: "#111e38",
+                900: "#0b1329",
+                950: "#070c1b",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style data-purpose="custom-decorations">
+      /* Subtle custom ranges and glass effects */
+      input[type="range"] {
+        accent-color: #2563eb;
+      }
+      .custom-gradient-bg {
+        background: radial-gradient(
+          circle at 85% 20%,
+          #dbeafe 0%,
+          #eff6ff 45%,
+          #ffffff 80%
+        );
+      }
+      .dark-curve-shape {
+        border-radius: 48px 48px 0 0;
+      }
+      @media (min-width: 1024px) {
+        .dark-curve-shape {
+          border-radius: 80px 80px 0 0;
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="selection:bg-brand-500 bg-[#f8faff] font-sans text-slate-800 antialiased selection:text-white"
+  >
+    <!-- BEGIN: MainHeader -->
+    <header class="sticky top-0 z-50 bg-[#f8faff]/80 backdrop-blur-md">
+      <div
+        class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
+      >
+        <!-- Logo Container -->
+        <a
+          class="group flex items-center gap-2.5 focus:outline-none"
+          data-purpose="site-brand"
+          href="#"
+        >
+          <!-- Brand clover / 4-petal flower icon -->
+          <svg
+            class="text-brand-600 h-8 w-8 transition-transform group-hover:scale-105"
+            fill="currentColor"
+            viewBox="0 0 32 32"
+          >
+            <circle cx="10" cy="10" fill="#2563eb" r="6"></circle>
+            <circle cx="22" cy="10" fill="#3b82f6" r="6"></circle>
+            <circle cx="10" cy="22" fill="#1d4ed8" r="6"></circle>
+            <circle cx="22" cy="22" fill="#2563eb" r="6"></circle>
+            <circle cx="16" cy="16" fill="#ffffff" r="3"></circle>
+          </svg>
+          <span class="text-2xl font-extrabold tracking-tight text-slate-900"
+            >Walaa</span
+          >
+        </a>
+        <!-- Desktop Navigation Menu (Centered) -->
+        <nav
+          aria-label="Main Navigation"
+          class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex"
+        >
+          <a
+            class="hover:text-brand-600 transition-colors"
+            href="#fonctionnalites"
+            >Fonctionnalités</a
+          >
+          <a class="hover:text-brand-600 transition-colors" href="#tarifs"
+            >Tarifs</a
+          >
+          <a class="hover:text-brand-600 transition-colors" href="#etapes"
+            >Exemples</a
+          >
+          <a class="hover:text-brand-600 transition-colors" href="#calculateur"
+            >Ressources</a
+          >
+          <a class="hover:text-brand-600 transition-colors" href="#"
+            >À propos</a
+          >
+        </nav>
+        <!-- Action Button -->
+        <div class="flex items-center gap-4">
+          <a
+            class="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:scale-[1.02] hover:bg-slate-800 active:scale-95 sm:text-sm"
+            href="#tarifs"
+          >
+            Commencer <span class="ml-1.5">→</span>
+          </a>
+        </div>
+      </div>
+    </header>
+    <!-- END: MainHeader -->
+    <!-- BEGIN: HeroSection -->
+    <section
+      class="custom-gradient-bg relative overflow-hidden pt-6 pb-16 lg:pt-12 lg:pb-24"
+      data-purpose="hero-section"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div
+          class="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-8"
+        >
+          <!-- Left Hero Content -->
+          <div class="z-10 flex flex-col items-start lg:col-span-5">
+            <!-- Micro Badge -->
+            <div
+              class="bg-brand-100/70 border-brand-200/80 text-brand-700 mb-6 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold tracking-wide uppercase shadow-sm"
+            >
+              <span class="">✦</span>
+              <span class="">FIDÉLITÉ DIGITALE • SANS APPLICATION</span>
+            </div>
+            <!-- Headline -->
+            <h1
+              class="mb-6 text-4xl leading-[1.12] font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-[3.5rem]"
+            >
+              Faites <span class="text-brand-600">revenir.</span><br />
+              Vos meilleurs clients.
+            </h1>
+            <!-- Value Proposition Subtitle -->
+            <p
+              class="mb-8 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg"
+            >
+              Des cartes de fidélité digitales simples et puissantes, avec des
+              récompenses automatiques. Sans cartes papier, sans effort, juste
+              plus de fidélité.
+            </p>
+            <!-- Call to Action Button Group -->
+            <div
+              class="mb-8 flex w-full flex-col items-stretch gap-3.5 sm:w-auto sm:flex-row sm:items-center"
+            >
+              <a
+                class="bg-brand-600 shadow-brand-500/25 hover:bg-brand-700 hover:shadow-brand-500/40 inline-flex items-center justify-center rounded-full px-7 py-3.5 text-center text-sm font-bold text-white shadow-lg transition-all"
+                href="#tarifs"
+              >
+                Créer mon programme <span class="ml-2">→</span>
+              </a>
+              <a
+                class="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-7 py-3.5 text-center text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+                href="#demo"
+              >
+                Voir la démo <span class="ml-2">→</span>
+              </a>
+            </div>
+            <!-- Trust Badges -->
+            <div
+              class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500"
+            >
+              <span class="text-brand-600 inline-flex items-center">
+                <svg
+                  class="mr-1.5 h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></path>
+                </svg>
+                Simple à lancer
+              </span>
+              <span class="text-slate-300">•</span>
+              <span class="">Sans matériel</span>
+              <span class="text-slate-300">•</span>
+              <span class="">Prêt en quelques minutes</span>
+            </div>
+          </div>
+          <!-- Right Hero Visual -->
+          <div
+            class="relative flex items-center justify-center lg:col-span-7 lg:justify-end"
+          >
+            <div
+              class="relative flex w-full items-center justify-center lg:-mr-10 lg:justify-end"
+            >
+              <img
+                alt="Application de fidélité Walaa Café Lina"
+                class="h-auto w-full max-w-2xl object-cover drop-shadow-2xl transition-transform duration-500 hover:scale-[1.01]"
+                loading="eager"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHdx8l5WjWHU6uxwcLKY8f-SQgzyumOqHNURSBZGACQ-oNWEcFC3V9TtuZ3rI4wnXQ8vrzXLn5k0OQHmbfUHRlDb03-zGBgHFb-tuZ7UkkaOhw5hNGJ2r47nJJBUFxUWYBrP4GdRf23ZgRTpJGV193TEbVsv1ahNe-AqBzommYAkFNne2CKXfVr4uIT0BzfYVIii8tcHzFVuN_TmXG85mCFk8hSZImP1dkglpDJSDehyC9pyluU4VowGmVMUrvmFX0oA"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- END: HeroSection -->
+    <!-- BEGIN: KeyMetricsBar -->
+    <section
+      class="border-y border-slate-100 bg-white py-12"
+      data-purpose="metrics-bar"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 gap-8 md:grid-cols-4 lg:gap-12">
+          <!-- Stat Item 1 -->
+          <div class="flex items-start gap-4">
+            <div
+              class="text-brand-600 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50"
+            >
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <div
+                class="text-3xl font-extrabold tracking-tight text-slate-900 lg:text-4xl"
+              >
+                +42%
+              </div>
+              <p class="mt-1 text-xs leading-snug text-slate-500 sm:text-sm">
+                de fréquentation en moyenne chez nos partenaires.
+              </p>
+            </div>
+          </div>
+          <!-- Stat Item 2 -->
+          <div class="flex items-start gap-4">
+            <div
+              class="text-brand-600 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50"
+            >
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <div
+                class="text-3xl font-extrabold tracking-tight text-slate-900 lg:text-4xl"
+              >
+                100%
+              </div>
+              <p class="mt-1 text-xs leading-snug text-slate-500 sm:text-sm">
+                des cartes sur mobile sans matériel additionnel.
+              </p>
+            </div>
+          </div>
+          <!-- Stat Item 3 -->
+          <div class="flex items-start gap-4">
+            <div
+              class="text-brand-600 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50"
+            >
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <div
+                class="text-3xl font-extrabold tracking-tight text-slate-900 lg:text-4xl"
+              >
+                3x
+              </div>
+              <p class="mt-1 text-xs leading-snug text-slate-500 sm:text-sm">
+                plus de visites chez les clients fidèles.
+              </p>
+            </div>
+          </div>
+          <!-- Stat Item 4 -->
+          <div class="flex items-start gap-4">
+            <div
+              class="text-brand-600 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50"
+            >
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <div
+                class="text-3xl font-extrabold tracking-tight text-slate-900 lg:text-4xl"
+              >
+                &lt; 5 Min
+              </div>
+              <p class="mt-1 text-xs leading-snug text-slate-500 sm:text-sm">
+                pour lancer votre programme de fidélité.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- END: KeyMetricsBar -->
+    <!-- BEGIN: RoiCalculatorSection -->
+    <section
+      class="bg-[#f4f7fc] py-20 lg:py-28"
+      data-purpose="roi-calculator"
+      id="calculateur"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="mx-auto mb-16 max-w-3xl text-center">
+          <div
+            class="text-brand-700 mb-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-bold tracking-wider uppercase"
+          >
+            UNE SOLUTION SIMPLE ET PUISSANTE
+          </div>
+          <h2
+            class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+          >
+            Découvrez combien vous
+            <span class="text-brand-600">pouvez gagner</span> avec Walaa.
+          </h2>
+          <p class="mt-4 text-sm text-slate-600 sm:text-base">
+            Adaptez le système de fidélité à votre activité et commencez à voir
+            les résultats dès les premiers jours. (Exemple basé sur un café.)
+          </p>
+        </div>
+        <!-- Interactive Calculator Card Container -->
+        <div
+          class="mx-auto grid max-w-5xl grid-cols-1 items-stretch gap-8 rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-10 lg:grid-cols-12"
+        >
+          <!-- Left Column: Sliders -->
+          <div class="flex flex-col justify-between space-y-6 lg:col-span-7">
+            <!-- Slider 1 -->
+            <div>
+              <div class="mb-2 flex items-center justify-between">
+                <label
+                  class="text-sm font-bold text-slate-700"
+                  for="visits-range"
+                  >Vos visites moyennes par client</label
+                >
+                <span
+                  class="text-brand-600 rounded-lg bg-blue-50 px-2.5 py-0.5 text-base font-extrabold"
+                  id="visits-val"
+                  >10</span
+                >
+              </div>
+              <input
+                class="h-2 w-full cursor-pointer rounded-lg bg-slate-200"
+                id="visits-range"
+                max="30"
+                min="1"
+                type="range"
+                value="10"
+              />
+              <div
+                class="mt-1 flex justify-between text-xs font-semibold text-slate-400"
+              >
+                <span class="">1</span>
+                <span class="">30</span>
+              </div>
+            </div>
+            <!-- Slider 2 -->
+            <div>
+              <div class="mb-2 flex items-center justify-between">
+                <label
+                  class="text-sm font-bold text-slate-700"
+                  for="basket-range"
+                  >Panier moyen par visite (DZD)</label
+                >
+                <span
+                  class="text-brand-600 rounded-lg bg-blue-50 px-2.5 py-0.5 text-base font-extrabold"
+                  id="basket-val"
+                  >350</span
+                >
+              </div>
+              <input
+                class="h-2 w-full cursor-pointer rounded-lg bg-slate-200"
+                id="basket-range"
+                max="1000"
+                min="100"
+                step="50"
+                type="range"
+                value="350"
+              />
+              <div
+                class="mt-1 flex justify-between text-xs font-semibold text-slate-400"
+              >
+                <span class="">100</span>
+                <span class="">1000</span>
+              </div>
+            </div>
+            <!-- Slider 3 -->
+            <div>
+              <div class="mb-2 flex items-center justify-between">
+                <label
+                  class="text-sm font-bold text-slate-700"
+                  for="reward-range"
+                  >Coût d'une récompense (DZD)</label
+                >
+                <span
+                  class="text-brand-600 rounded-lg bg-blue-50 px-2.5 py-0.5 text-base font-extrabold"
+                  id="reward-val"
+                  >500</span
+                >
+              </div>
+              <input
+                class="h-2 w-full cursor-pointer rounded-lg bg-slate-200"
+                id="reward-range"
+                max="2000"
+                min="100"
+                step="50"
+                type="range"
+                value="500"
+              />
+              <div
+                class="mt-1 flex justify-between text-xs font-semibold text-slate-400"
+              >
+                <span class="">100</span>
+                <span class="">2000</span>
+              </div>
+            </div>
+            <!-- Information Callout Box -->
+            <div
+              class="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/80 p-4"
+            >
+              <div
+                class="bg-brand-600 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+              >
+                i
+              </div>
+              <p class="text-xs leading-snug text-slate-700 sm:text-sm">
+                Avec un programme de fidélité bien conçu, vous pouvez augmenter
+                la rétention de vos clients <strong>jusqu'à 60%</strong>.
+              </p>
+            </div>
+          </div>
+          <!-- Right Column: Result Card -->
+          <div
+            class="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-[#16274e] to-[#0f1b36] p-6 text-white shadow-lg sm:p-8 lg:col-span-5"
+          >
+            <!-- Background glow circle -->
+            <div
+              class="bg-brand-600/30 pointer-events-none absolute -right-10 -bottom-10 h-44 w-44 rounded-full blur-3xl"
+            ></div>
+            <div>
+              <div
+                class="mb-2 flex items-center justify-between text-xs font-semibold tracking-wider text-blue-200 uppercase"
+              >
+                <span class="">Par mois (estimation)</span>
+                <span
+                  class="flex h-6 w-6 items-center justify-center rounded-md bg-white/10"
+                  >📈</span
+                >
+              </div>
+              <!-- Big Outcome Display -->
+              <div class="my-4 flex items-baseline gap-3">
+                <span
+                  class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
+                  id="calc-total"
+                  >405 000</span
+                >
+                <span class="text-lg font-bold text-blue-200">DZD</span>
+                <span
+                  class="ml-auto inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-300"
+                >
+                  +42%
+                </span>
+              </div>
+              <p class="mb-6 text-xs font-medium text-blue-300/80">
+                revenus additionnels estimés
+              </p>
+              <!-- Metrics details breakdown -->
+              <div
+                class="space-y-3 border-t border-white/10 pt-4 text-xs sm:text-sm"
+              >
+                <div class="flex justify-between text-slate-300">
+                  <span class="">Clients fidèles estimés</span>
+                  <span class="font-bold text-white" id="calc-clients"
+                    >1 200</span
+                  >
+                </div>
+                <div class="flex justify-between text-slate-300">
+                  <span class="">Visites supplémentaires</span>
+                  <span class="font-bold text-white" id="calc-extra-visits"
+                    >3 600</span
+                  >
+                </div>
+                <div class="flex justify-between text-slate-300">
+                  <span class="">Panier moyen</span>
+                  <span class="font-bold text-white" id="calc-avg-basket"
+                    >350 DZD</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Bottom Action -->
+            <a
+              class="bg-brand-600 hover:bg-brand-500 mt-8 inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-center text-sm font-bold text-white shadow-md transition-all"
+              href="#tarifs"
+            >
+              Lancer mon programme <span class="ml-2">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- END: RoiCalculatorSection -->
+    <!-- BEGIN: ThreeStepsSection -->
+    <section
+      class="bg-white py-20 lg:py-28"
+      data-purpose="how-it-works"
+      id="etapes"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-16 max-w-3xl text-center">
+          <div
+            class="text-brand-700 mb-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-bold tracking-wider uppercase"
+          >
+            EN 3 ÉTAPES SIMPLES
+          </div>
+          <h2
+            class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+          >
+            De l'inscription au premier scan <br /><span class="text-brand-600"
+              >en 10 minutes.</span
+            >
+          </h2>
+          <p class="mt-4 text-sm text-slate-600 sm:text-base">
+            Pas besoin de matériel coûteux. Créez votre programme, personnalisez
+            vos récompenses et commencez à fidéliser vos clients immédiatement.
+          </p>
+        </div>
+        <!-- 3 Steps Grid -->
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <!-- Step 1 -->
+          <div
+            class="flex flex-col justify-between rounded-3xl border border-slate-100 bg-[#f8faff] p-8 transition-shadow hover:shadow-lg"
+          >
+            <div>
+              <div
+                class="bg-brand-600 mb-6 flex h-10 w-10 items-center justify-center rounded-full text-sm font-extrabold text-white"
+              >
+                1
+              </div>
+              <h3 class="mb-3 text-xl font-bold text-slate-900">
+                Inscription rapide
+              </h3>
+              <p class="text-sm leading-relaxed text-slate-600">
+                Créez votre compte en quelques clics et configurez votre
+                établissement en toute simplicité.
+              </p>
+            </div>
+            <a
+              class="text-brand-600 hover:text-brand-700 group mt-8 inline-flex items-center text-sm font-bold"
+              href="#demo"
+            >
+              Voir comment ça marche
+              <span
+                class="ml-1.5 transition-transform group-hover:translate-x-1"
+                >→</span
+              >
+            </a>
+          </div>
+          <!-- Step 2 -->
+          <div
+            class="flex flex-col justify-between rounded-3xl border border-slate-100 bg-[#f8faff] p-8 transition-shadow hover:shadow-lg"
+          >
+            <div>
+              <div
+                class="bg-brand-600 mb-6 flex h-10 w-10 items-center justify-center rounded-full text-sm font-extrabold text-white"
+              >
+                2
+              </div>
+              <h3 class="mb-3 text-xl font-bold text-slate-900">
+                Personnalisez votre carte
+              </h3>
+              <p class="text-sm leading-relaxed text-slate-600">
+                Choisissez vos récompenses, vos paliers de tampons et votre
+                design aux couleurs de votre marque.
+              </p>
+            </div>
+            <a
+              class="text-brand-600 hover:text-brand-700 group mt-8 inline-flex items-center text-sm font-bold"
+              href="#exemples"
+            >
+              Voir les exemples
+              <span
+                class="ml-1.5 transition-transform group-hover:translate-x-1"
+                >→</span
+              >
+            </a>
+          </div>
+          <!-- Step 3 -->
+          <div
+            class="flex flex-col justify-between rounded-3xl border border-slate-100 bg-[#f8faff] p-8 transition-shadow hover:shadow-lg"
+          >
+            <div>
+              <div
+                class="bg-brand-600 mb-6 flex h-10 w-10 items-center justify-center rounded-full text-sm font-extrabold text-white"
+              >
+                3
+              </div>
+              <h3 class="mb-3 text-xl font-bold text-slate-900">
+                Lancez et fidélisez
+              </h3>
+              <p class="text-sm leading-relaxed text-slate-600">
+                Vos clients commencent à scanner et à accumuler des points. Vous
+                suivez tout en temps réel.
+              </p>
+            </div>
+            <a
+              class="text-brand-600 hover:text-brand-700 group mt-8 inline-flex items-center text-sm font-bold"
+              href="#tarifs"
+            >
+              Voir le tableau de bord
+              <span
+                class="ml-1.5 transition-transform group-hover:translate-x-1"
+                >→</span
+              >
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- END: ThreeStepsSection -->
+    <!-- BEGIN: BentoFeaturesSection -->
+    <section
+      class="bg-[#f4f7fc] py-20 lg:py-28"
+      data-purpose="bento-features"
+      id="fonctionnalites"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-16 max-w-3xl text-center">
+          <div
+            class="text-brand-700 mb-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-bold tracking-wider uppercase"
+          >
+            TOUT CE DONT VOUS AVEZ BESOIN
+          </div>
+          <h2
+            class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+          >
+            Tout ce qu'il vous faut pour transformer <br /><span
+              class="text-brand-600"
+              >des visiteurs en clients fidèles.</span
+            >
+          </h2>
+          <p class="mt-4 text-sm text-slate-600 sm:text-base">
+            Des fonctionnalités pensées pour simplifier votre quotidien et
+            maximiser votre impact commercial.
+          </p>
+        </div>
+        <!-- Features 6 Cards Grid -->
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <!-- Card 1 -->
+          <div
+            class="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div
+              class="text-brand-600 mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-xl"
+            >
+              ⭐
+            </div>
+            <h3 class="mb-2 text-lg font-bold text-slate-900">
+              Récompenses flexibles
+            </h3>
+            <p class="text-sm leading-relaxed text-slate-600">
+              Offrez des réductions, des produits gratuits, ou des avantages
+              exclusifs personnalisés selon vos besoins.
+            </p>
+          </div>
+          <!-- Card 2 -->
+          <div
+            class="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div
+              class="text-brand-600 mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-xl"
+            >
+              📢
+            </div>
+            <h3 class="mb-2 text-lg font-bold text-slate-900">
+              Notifications &amp; offres
+            </h3>
+            <p class="text-sm leading-relaxed text-slate-600">
+              Envoyez des offres personnalisées directes à vos clients et
+              boostez leur engagement lors des heures creuses.
+            </p>
+          </div>
+          <!-- Card 3 -->
+          <div
+            class="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div
+              class="text-brand-600 mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-xl"
+            >
+              📊
+            </div>
+            <h3 class="mb-2 text-lg font-bold text-slate-900">
+              Suivi en temps réel
+            </h3>
+            <p class="text-sm leading-relaxed text-slate-600">
+              Analysez vos résultats, suivez vos passages en caisse et ajustez
+              votre stratégie d'acquisition en un clic.
+            </p>
+          </div>
+          <!-- Card 4 -->
+          <div
+            class="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div
+              class="text-brand-600 mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-xl"
+            >
+              📱
+            </div>
+            <h3 class="mb-2 text-lg font-bold text-slate-900">100% mobile</h3>
+            <p class="text-sm leading-relaxed text-slate-600">
+              Vos clients ajoutent instantanément leur carte depuis Apple Wallet
+              ou Google Pay, sans télécharger d'application.
+            </p>
+          </div>
+          <!-- Card 5 -->
+          <div
+            class="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div
+              class="bg-brand-50 text-brand-600 mb-6 flex h-12 w-12 items-center justify-center rounded-2xl text-xl"
+            >
+              ⚙️
+            </div>
+            <h3 class="mb-2 text-lg font-bold text-slate-900">
+              Simple et rapide
+            </h3>
+            <p class="text-sm leading-relaxed text-slate-600">
+              Une interface intuitive et fluide, extrêmement facile à prendre en
+              main pour vous et l'ensemble de vos équipes.
+            </p>
+          </div>
+          <!-- Card 6 -->
+          <div
+            class="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div
+              class="text-brand-600 mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-xl"
+            >
+              🛡️
+            </div>
+            <h3 class="mb-2 text-lg font-bold text-slate-900">Sécurisé</h3>
+            <p class="text-sm leading-relaxed text-slate-600">
+              Des données protégées et une solution hautement fiable, conforme
+              aux standards de sécurité les plus modernes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- END: BentoFeaturesSection -->
+    <!-- BEGIN: TestimonialsSection -->
+    <section
+      class="bg-white py-20 lg:py-28"
+      data-purpose="social-proof"
+      id="avis"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-16 max-w-3xl text-center">
+          <div
+            class="text-brand-700 mb-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-bold tracking-wider uppercase"
+          >
+            ILS NOUS FONT CONFIANCE
+          </div>
+          <h2
+            class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+          >
+            Des commerçants comme vous <br />qui ont déjà choisi Walaa.
+          </h2>
+          <p class="mt-4 text-sm text-slate-600 sm:text-base">
+            Rejoignez des centaines d'entreprises qui augmentent leur chiffre
+            d'affaires grâce à la fidélité digitale.
+          </p>
+        </div>
+        <!-- Testimonial Cards -->
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <!-- Testimonial 1 -->
+          <div
+            class="flex flex-col justify-between rounded-3xl border border-slate-100 bg-[#f8faff] p-8"
+          >
+            <div>
+              <div class="mb-4 flex gap-1 text-sm text-amber-400">★★★★★</div>
+              <p class="text-sm leading-relaxed text-slate-700 italic">
+                "Depuis qu'on utilise Walaa, on a vu une vraie différence. Nos
+                clients reviennent plus souvent et dépensent plus."
+              </p>
+            </div>
+            <div
+              class="mt-8 flex items-center gap-3 border-t border-slate-200/60 pt-6"
+            >
+              <div
+                class="text-brand-700 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-bold"
+              >
+                S
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-slate-900">Sofia B.</h4>
+                <p class="text-xs text-slate-500">Propriétaire - Café Lina</p>
+              </div>
+            </div>
+          </div>
+          <!-- Testimonial 2 -->
+          <div
+            class="flex flex-col justify-between rounded-3xl border border-slate-100 bg-[#f8faff] p-8"
+          >
+            <div>
+              <div class="mb-4 flex gap-1 text-sm text-amber-400">★★★★★</div>
+              <p class="text-sm leading-relaxed text-slate-700 italic">
+                "C'est simple à utiliser, et le support est toujours réactif. Je
+                recommande à 100% !"
+              </p>
+            </div>
+            <div
+              class="mt-8 flex items-center gap-3 border-t border-slate-200/60 pt-6"
+            >
+              <div
+                class="text-brand-700 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-bold"
+              >
+                M
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-slate-900">Mehdi T.</h4>
+                <p class="text-xs text-slate-500">Gérant - La Boutique</p>
+              </div>
+            </div>
+          </div>
+          <!-- Testimonial 3 -->
+          <div
+            class="flex flex-col justify-between rounded-3xl border border-slate-100 bg-[#f8faff] p-8"
+          >
+            <div>
+              <div class="mb-4 flex gap-1 text-sm text-amber-400">★★★★★</div>
+              <p class="text-sm leading-relaxed text-slate-700 italic">
+                "Une solution parfaite pour fidéliser nos clients sans prise de
+                tête. Les résultats sont au rendez-vous dès le 1er mois."
+              </p>
+            </div>
+            <div
+              class="mt-8 flex items-center gap-3 border-t border-slate-200/60 pt-6"
+            >
+              <div
+                class="text-brand-700 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-bold"
+              >
+                N
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-slate-900">Nadia K.</h4>
+                <p class="text-xs text-slate-500">
+                  Propriétaire - Beauty &amp; Co
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- END: TestimonialsSection -->
+    <!-- BEGIN: DarkTransitionContainer (Pricing + Final CTA + Footer) -->
+    <div
+      class="bg-navy-900 dark-curve-shape relative pt-20 text-white"
+      data-purpose="dark-section-wrapper"
+    >
+      <!-- Pricing Section -->
+      <section class="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8" id="tarifs">
+        <div class="mx-auto mb-16 max-w-2xl text-center">
+          <div
+            class="mb-3 inline-block rounded-full border border-blue-700/40 bg-blue-900/60 px-3 py-1 text-xs font-bold tracking-wider text-blue-300 uppercase"
+          >
+            DES TARIFS SIMPLES
+          </div>
+          <h2
+            class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
+          >
+            Une offre adaptée à votre activité.
+          </h2>
+          <p class="mt-4 text-sm text-slate-300 sm:text-base">
+            Choisissez le plan qui correspond à vos besoins et commencez dès
+            aujourd'hui.
+          </p>
+        </div>
+        <!-- Pricing Plans Cards -->
+        <div
+          class="mx-auto grid max-w-4xl grid-cols-1 items-stretch gap-8 md:grid-cols-2"
+        >
+          <!-- Plan 1: Essentiel -->
+          <div
+            class="border-brand-500 relative flex flex-col justify-between rounded-3xl border-2 bg-white p-8 text-slate-900 shadow-2xl"
+          >
+            <!-- Popular Badge -->
+            <div
+              class="bg-brand-600 absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-xs font-bold tracking-wider text-white uppercase shadow-md"
+            >
+              Le plus populaire
+            </div>
+            <div>
+              <h3 class="mb-1 text-xl font-extrabold">Essentiel</h3>
+              <p class="mb-6 text-xs text-slate-500">
+                Parfait pour les petites entreprises.
+              </p>
+              <div
+                class="mb-6 flex items-baseline border-b border-slate-100 pb-6"
+              >
+                <span class="text-4xl font-black text-slate-900">4,900</span>
+                <span class="ml-1.5 text-sm font-bold text-slate-500"
+                  >DZD / mois</span
+                >
+              </div>
+              <ul
+                class="space-y-3.5 text-xs font-medium text-slate-700 sm:text-sm"
+              >
+                <li class="flex items-center gap-2.5">
+                  <svg
+                    class="text-brand-600 h-4 w-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      fill-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Jusqu'à 1 000 clients
+                </li>
+                <li class="flex items-center gap-2.5">
+                  <svg
+                    class="text-brand-600 h-4 w-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      fill-rule="evenodd"
+                    ></path>
+                  </svg>
+                  1 établissement
+                </li>
+                <li class="flex items-center gap-2.5">
+                  <svg
+                    class="text-brand-600 h-4 w-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      fill-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Toutes les fonctionnalités de base
+                </li>
+                <li class="flex items-center gap-2.5">
+                  <svg
+                    class="text-brand-600 h-4 w-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      fill-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Support par email réactif
+                </li>
+              </ul>
+            </div>
+            <a
+              class="bg-brand-600 hover:bg-brand-700 mt-8 inline-flex w-full items-center justify-center rounded-full px-6 py-3.5 text-sm font-bold text-white shadow-md transition"
+              href="#"
+            >
+              Commencer <span class="ml-1.5">→</span>
+            </a>
+          </div>
+          <!-- Plan 2: Pro -->
+          <div
+            class="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-8 text-slate-900 shadow-xl"
+          >
+            <div>
+              <h3 class="mb-1 text-xl font-extrabold">Pro</h3>
+              <p class="mb-6 text-xs text-slate-500">
+                Pour les entreprises en pleine croissance.
+              </p>
+              <div
+                class="mb-6 flex items-baseline border-b border-slate-100 pb-6"
+              >
+                <span class="text-4xl font-black text-slate-900">9,900</span>
+                <span class="ml-1.5 text-sm font-bold text-slate-500"
+                  >DZD / mois</span
+                >
+              </div>
+              <ul
+                class="space-y-3.5 text-xs font-medium text-slate-700 sm:text-sm"
+              >
+                <li class="flex items-center gap-2.5">
+                  <svg
+                    class="text-brand-600 h-4 w-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      fill-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Jusqu'à 10 000 clients
+                </li>
+                <li class="flex items-center gap-2.5">
+                  <svg
+                    class="text-brand-600 h-4 w-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      fill-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Jusqu'à 3 établissements
+                </li>
+                <li class="flex items-center gap-2.5">
+                  <svg
+                    class="text-brand-600 h-4 w-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      fill-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Toutes les fonctionnalités avancées
+                </li>
+                <li class="flex items-center gap-2.5">
+                  <svg
+                    class="text-brand-600 h-4 w-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      fill-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Support prioritaire téléphonique &amp; WhatsApp
+                </li>
+              </ul>
+            </div>
+            <a
+              class="text-brand-600 border-brand-600 hover:bg-brand-50 mt-8 inline-flex w-full items-center justify-center rounded-full border bg-white px-6 py-3.5 text-sm font-bold transition"
+              href="#"
+            >
+              Commencer <span class="ml-1.5">→</span>
+            </a>
+          </div>
+        </div>
+      </section>
+      <!-- BEGIN: FinalCallToAction -->
+      <section
+        class="mx-auto max-w-5xl border-t border-slate-800/80 px-4 py-16 text-center sm:px-6 lg:px-8"
+        data-purpose="final-cta"
+      >
+        <h2
+          class="mb-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
+        >
+          Prêt à faire revenir vos clients ?
+        </h2>
+        <p class="mx-auto mb-8 max-w-xl text-sm text-slate-400 sm:text-base">
+          Créez votre programme de fidélité en quelques minutes et commencez dès
+          aujourd'hui.
+        </p>
+        <div
+          class="flex flex-col items-center justify-center gap-4 sm:flex-row"
+        >
+          <a
+            class="bg-brand-600 hover:bg-brand-500 shadow-brand-600/30 inline-flex w-full items-center justify-center rounded-full px-8 py-3.5 text-sm font-bold text-white shadow-lg transition sm:w-auto"
+            href="#tarifs"
+          >
+            Créer mon programme <span class="ml-2">→</span>
+          </a>
+          <a
+            class="inline-flex w-full items-center justify-center rounded-full border border-white/20 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-white/15 sm:w-auto"
+            href="#demo"
+          >
+            Voir la démo
+          </a>
+        </div>
+      </section>
+      <!-- END: FinalCallToAction -->
+      <!-- BEGIN: MainFooter -->
+      <footer
+        class="border-t border-slate-800/80 pt-12 pb-10 text-xs text-slate-400"
+      >
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div
+            class="flex flex-col items-center justify-between gap-6 border-b border-slate-800 pb-8 md:flex-row"
+          >
+            <!-- Logo & Slogan -->
+            <div class="flex items-center gap-3">
+              <svg
+                class="text-brand-500 h-7 w-7"
+                fill="currentColor"
+                viewBox="0 0 32 32"
+              >
+                <circle cx="10" cy="10" fill="#3b82f6" r="6"></circle>
+                <circle cx="22" cy="10" fill="#60a5fa" r="6"></circle>
+                <circle cx="10" cy="22" fill="#2563eb" r="6"></circle>
+                <circle cx="22" cy="22" fill="#3b82f6" r="6"></circle>
+                <circle cx="16" cy="16" fill="#ffffff" r="3"></circle>
+              </svg>
+              <div>
+                <div class="text-lg font-bold tracking-tight text-white">
+                  Walaa
+                </div>
+                <p class="text-[11px] text-slate-400">
+                  Plus de fidélité, plus de clients.
+                </p>
+              </div>
+            </div>
+            <!-- Footer Links -->
+            <div
+              class="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-300"
+            >
+              <a class="transition hover:text-white" href="#fonctionnalites"
+                >Fonctionnalités</a
+              >
+              <a class="transition hover:text-white" href="#tarifs">Tarifs</a>
+              <a class="transition hover:text-white" href="#etapes">Exemples</a>
+              <a class="transition hover:text-white" href="#calculateur"
+                >Ressources</a
+              >
+              <a class="transition hover:text-white" href="#">À propos</a>
+            </div>
+            <!-- Social Media Links -->
+            <div class="flex items-center gap-4 text-slate-400">
+              <a
+                aria-label="X (Twitter)"
+                class="transition hover:text-white"
+                href="#"
+              >
+                <span class="font-bold">𝕏</span>
+              </a>
+              <a
+                aria-label="LinkedIn"
+                class="transition hover:text-white"
+                href="#"
+              >
+                <svg class="fill-currentColor h-4 w-4" viewBox="0 0 24 24">
+                  <path
+                    d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
+                  ></path>
+                </svg>
+              </a>
+              <a
+                aria-label="Instagram"
+                class="transition hover:text-white"
+                href="#"
+              >
+                <svg class="fill-currentColor h-4 w-4" viewBox="0 0 24 24">
+                  <path
+                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                  ></path>
+                </svg>
+              </a>
+              <a
+                aria-label="YouTube"
+                class="transition hover:text-white"
+                href="#"
+              >
+                <svg class="fill-currentColor h-4 w-4" viewBox="0 0 24 24">
+                  <path
+                    d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+          <div
+            class="flex flex-col items-center justify-between pt-6 text-[11px] text-slate-500 sm:flex-row"
+          >
+            <div class="">© 2025 Walaa. Tous droits réservés.</div>
+            <div class="mt-2 flex gap-4 sm:mt-0">
+              <a class="hover:underline" href="#"
+                >Politique de confidentialité</a
+              >
+              <a class="hover:underline" href="#">Conditions d'utilisation</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+      <!-- END: MainFooter -->
+    </div>
+    <!-- END: DarkTransitionContainer -->
+    <!-- BEGIN: ScriptHandlers -->
+    <script data-purpose="calculator-interaction">
+      document.addEventListener("DOMContentLoaded", () => {
+        // Calculator DOM nodes
+        const visitsInput = document.getElementById("visits-range");
+        const basketInput = document.getElementById("basket-range");
+        const rewardInput = document.getElementById("reward-range");
+
+        const visitsVal = document.getElementById("visits-val");
+        const basketVal = document.getElementById("basket-val");
+        const rewardVal = document.getElementById("reward-val");
+
+        const calcTotal = document.getElementById("calc-total");
+        const calcClients = document.getElementById("calc-clients");
+        const calcExtraVisits = document.getElementById("calc-extra-visits");
+        const calcAvgBasket = document.getElementById("calc-avg-basket");
+
+        function updateCalculator() {
+          const visits = parseInt(visitsInput.value, 10);
+          const basket = parseInt(basketInput.value, 10);
+          const reward = parseInt(rewardInput.value, 10);
+
+          // Update slider value indicators
+          visitsVal.textContent = visits;
+          basketVal.textContent = basket;
+          rewardVal.textContent = reward;
+
+          // Dynamic realistic calculation logic based on reference numbers (10 visits, 350 DZD -> 105,000 DZD)
+          const clientsEstimate = Math.round(visits * 120);
+          const additionalVisits = Math.round(clientsEstimate * 3);
+          const grossGain = additionalVisits * (basket * 0.35); // Estimated uplift factor
+          const rewardCosts = clientsEstimate * 0.4 * (reward * 0.15);
+          const netUplift = Math.max(
+            15000,
+            Math.round(grossGain - rewardCosts)
+          );
+
+          // Format to readable strings with commas
+          calcTotal.textContent = Number(netUplift).toLocaleString("fr-FR");
+          calcClients.textContent =
+            Number(clientsEstimate).toLocaleString("fr-FR");
+          calcExtraVisits.textContent =
+            Number(additionalVisits).toLocaleString("fr-FR");
+          calcAvgBasket.textContent = `${basket} DZD`;
+        }
+
+        visitsInput.addEventListener("input", updateCalculator);
+        basketInput.addEventListener("input", updateCalculator);
+        rewardInput.addEventListener("input", updateCalculator);
+
+        // Initial compute
+        updateCalculator();
+      });
+    </script>
+    <!-- END: ScriptHandlers -->
+  </body>
+</html>

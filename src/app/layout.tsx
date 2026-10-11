@@ -15,8 +15,9 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  description: "Plateforme de carte de fidélité digitale pour commerces",
-  title: "Fidélité Digitale",
+  description:
+    "Plateforme de carte de fidélité digitale pour commerces sans application",
+  title: "Walaa | Fidélité Digitale Sans Application",
 };
 
 interface RootLayoutProps {

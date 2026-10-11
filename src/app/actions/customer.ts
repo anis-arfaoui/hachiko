@@ -1,6 +1,7 @@
 "use server";
 
 import { eq, or } from "drizzle-orm";
+import { headers } from "next/headers";
 
 import { findOrCreateCard, getCardByToken } from "@/dal/card";
 import { findOrCreateCustomer } from "@/dal/customer";
@@ -11,6 +12,7 @@ import type { AddStampResult, RedeemRewardResult } from "@/dal/transaction";
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
 import { isValidAlgerianPhone } from "@/lib/phone";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export interface JoinProgramInput {
   name: string;
@@ -20,7 +22,12 @@ export interface JoinProgramInput {
 
 export type JoinProgramResult =
   | {
-      error: "BUSINESS_NOT_FOUND" | "INVALID_PHONE" | "PROGRAM_NOT_FOUND";
+      error:
+        | "BUSINESS_NOT_FOUND"
+        | "INVALID_NAME"
+        | "INVALID_PHONE"
+        | "PROGRAM_NOT_FOUND"
+        | "RATE_LIMITED";
       success: false;
     }
   | {
@@ -29,11 +36,53 @@ export type JoinProgramResult =
       token: string;
     };
 
+const IP_WINDOW_MS = 10 * 60 * 1000;
+const MAX_JOINS_PER_IP = 10;
+const MAX_JOINS_PER_PHONE = 5;
+
 export const joinProgramAction = async (
   input: JoinProgramInput
 ): Promise<JoinProgramResult> => {
+  const trimmedName = input.name.trim();
+
+  // Name length validation
+  if (trimmedName.length < 2 || trimmedName.length > 60) {
+    return { error: "INVALID_NAME", success: false };
+  }
+
+  // Phone validation
   if (!isValidAlgerianPhone(input.phone)) {
     return { error: "INVALID_PHONE", success: false };
+  }
+
+  // Anti-abuse IP rate limiting
+  const reqHeaders = await headers();
+  const forwardedFor = reqHeaders.get("x-forwarded-for");
+  const clientIp =
+    forwardedFor?.split(",")[0]?.trim() ||
+    reqHeaders.get("x-real-ip") ||
+    reqHeaders.get("cf-connecting-ip") ||
+    "ip_unknown";
+
+  const ipLimit = checkRateLimit(
+    `join_ip:${clientIp}`,
+    MAX_JOINS_PER_IP,
+    IP_WINDOW_MS
+  );
+
+  if (!ipLimit.success) {
+    return { error: "RATE_LIMITED", success: false };
+  }
+
+  // Anti-abuse phone rate limiting
+  const phoneLimit = checkRateLimit(
+    `join_phone:${input.phone}`,
+    MAX_JOINS_PER_PHONE,
+    IP_WINDOW_MS
+  );
+
+  if (!phoneLimit.success) {
+    return { error: "RATE_LIMITED", success: false };
   }
 
   // Look up business by slug or ID
@@ -71,7 +120,7 @@ export const joinProgramAction = async (
 
   // Find or create customer for this business
   const customer = await findOrCreateCustomer(business.id, {
-    name: input.name,
+    name: trimmedName,
     phone: input.phone,
   });
 

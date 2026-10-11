@@ -4,25 +4,51 @@ import { organization } from "better-auth/plugins";
 
 import { db } from "@/db";
 
-const APP_URL = "https://hachiko-phi.vercel.app";
+const DEFAULT_PROD_URL = "https://hachiko-phi.vercel.app";
 
 const getBaseUrl = (): string => {
   if (process.env.BETTER_AUTH_URL) {
     return process.env.BETTER_AUTH_URL.replace(/\/+$/u, "");
   }
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/u, "");
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/+$/u, "")}`;
+  }
   if (process.env.NODE_ENV === "development") {
     return "http://localhost:3000";
   }
-  return APP_URL;
+  return DEFAULT_PROD_URL;
 };
 
-const trustedOrigins = [
+const getAuthSecret = (): string => {
+  const secret = process.env.BETTER_AUTH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "FATAL: BETTER_AUTH_SECRET environment variable is missing in production. Generate one via `openssl rand -base64 32`."
+      );
+    }
+    return "dev-secret-loyalty-app-min-32-chars-strictly-for-local-development";
+  }
+  return secret;
+};
+
+const configuredOrigins = [
   "http://localhost:3000",
-  APP_URL,
-  ...(process.env.BETTER_AUTH_URL
-    ? [process.env.BETTER_AUTH_URL.replace(/\/+$/u, "")]
-    : []),
-];
+  DEFAULT_PROD_URL,
+  process.env.BETTER_AUTH_URL?.replace(/\/+$/u, ""),
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/u, ""),
+  process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL.replace(/\/+$/u, "")}`
+    : undefined,
+  process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/+$/u, "")}`
+    : undefined,
+].filter((url): url is string => Boolean(url));
+
+const trustedOrigins = [...new Set(configuredOrigins)];
 
 export const auth = betterAuth({
   advanced: {
@@ -36,9 +62,7 @@ export const auth = betterAuth({
     enabled: true,
   },
   plugins: [organization()],
-  secret:
-    process.env.BETTER_AUTH_SECRET ??
-    "development-secret-loyalty-app-min-32-chars!!",
+  secret: getAuthSecret(),
   trustedOrigins,
 });
 
