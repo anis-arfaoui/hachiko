@@ -33,7 +33,12 @@
     "signInButton": "Se connecter",
     "signUpButton": "Créer mon compte",
     "noAccount": "Vous n'avez pas de compte ?",
-    "hasAccount": "Vous avez déjà un compte ?"
+    "hasAccount": "Vous avez déjà un compte ?",
+    "forgotPasswordLink": "Mot de passe oublié ?",
+    "forgotPasswordTitle": "Mot de passe oublié",
+    "forgotPasswordSubtitle": "Entrez votre adresse email pour recevoir un lien de réinitialisation sécurisé",
+    "resetPasswordTitle": "Nouveau mot de passe",
+    "resetPasswordSubtitle": "Définissez un nouveau mot de passe pour votre compte"
   },
   "program": {
     "title": "Configuration du programme",

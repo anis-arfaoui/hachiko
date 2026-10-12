@@ -95,7 +95,15 @@ const SignInPage = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="password">Mot de passe</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Mot de passe</Label>
+                  <Link
+                    href={`/${locale}/forgot-password`}
+                    className="text-muted-foreground hover:text-primary text-xs underline-offset-4 transition-colors hover:underline"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
+                </div>
                 <Input
                   id="password"
                   type="password"

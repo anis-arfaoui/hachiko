@@ -7,6 +7,8 @@ export const authClient = createAuthClient({
 
 export const {
   organization: orgClient,
+  requestPasswordReset,
+  resetPassword,
   signIn,
   signOut,
   signUp,

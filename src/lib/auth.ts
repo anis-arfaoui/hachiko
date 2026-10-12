@@ -3,8 +3,9 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 
 import { db } from "@/db";
+import { sendPasswordResetEmail } from "@/lib/email";
 
-const DEFAULT_PROD_URL = "https://hachiko-phi.vercel.app";
+const DEFAULT_PROD_URL = "https://www.walaa.tech";
 
 const getBaseUrl = (): string => {
   if (process.env.BETTER_AUTH_URL) {
@@ -38,6 +39,8 @@ const getAuthSecret = (): string => {
 const configuredOrigins = [
   "http://localhost:3000",
   DEFAULT_PROD_URL,
+  "https://www.walaa.tech",
+  "https://hachiko-phi.vercel.app",
   process.env.BETTER_AUTH_URL?.replace(/\/+$/u, ""),
   process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/u, ""),
   process.env.VERCEL_URL
@@ -60,6 +63,14 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    resetPasswordTokenExpiresIn: 3600,
+    sendResetPassword: async ({ user, url }) => {
+      await sendPasswordResetEmail({
+        to: user.email,
+        url,
+        userName: user.name,
+      });
+    },
   },
   plugins: [organization()],
   secret: getAuthSecret(),
