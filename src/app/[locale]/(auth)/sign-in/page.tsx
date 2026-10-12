@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn } from "@/lib/auth-client";
+import { sendVerificationEmail, signIn } from "@/lib/auth-client";
 
 const SignInPage = () => {
   const router = useRouter();
@@ -27,20 +27,38 @@ const SignInPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUnverified, setIsUnverified] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendStatus, setResendStatus] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsUnverified(false);
+    setResendStatus(null);
     setIsLoading(true);
 
     try {
       const res = await signIn.email({
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
 
       if (res.error) {
-        setError(res.error.message ?? "Email ou mot de passe incorrect");
+        const errorMsg = res.error.message ?? "";
+        const isNotVerified =
+          res.error.code === "EMAIL_NOT_VERIFIED" ||
+          errorMsg.toLowerCase().includes("verified") ||
+          errorMsg.toLowerCase().includes("vérifié");
+
+        if (isNotVerified) {
+          setIsUnverified(true);
+          setError(
+            "Votre compte n'est pas encore activé. Veuillez cliquer sur le lien envoyé à votre adresse email."
+          );
+        } else {
+          setError(res.error.message ?? "Email ou mot de passe incorrect");
+        }
         setIsLoading(false);
         return;
       }
@@ -49,6 +67,35 @@ const SignInPage = () => {
     } catch {
       setError("Une erreur inattendue est survenue");
       setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email || isResending) {
+      return;
+    }
+    setIsResending(true);
+    setResendStatus(null);
+
+    try {
+      const res = await sendVerificationEmail({
+        callbackURL: `/${locale}/dashboard`,
+        email: email.trim().toLowerCase(),
+      });
+
+      if (res.error) {
+        setResendStatus(
+          res.error.message ?? "Impossible de renvoyer l'email de confirmation"
+        );
+        setIsResending(false);
+        return;
+      }
+
+      setResendStatus("Email d'activation renvoyé ! Vérifiez votre boîte.");
+      setIsResending(false);
+    } catch {
+      setResendStatus("Erreur lors du renvoi");
+      setIsResending(false);
     }
   };
 
@@ -77,9 +124,31 @@ const SignInPage = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border p-3 text-sm">
-                  {error}
+                <div className="bg-destructive/10 border-destructive/20 text-destructive space-y-2 rounded-lg border p-3 text-sm">
+                  <p>{error}</p>
+                  {isUnverified && (
+                    <div className="pt-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={handleResend}
+                        disabled={isResending}
+                      >
+                        {isResending
+                          ? "Renvoi en cours..."
+                          : "Renvoyer l'email d'activation"}
+                      </Button>
+                    </div>
+                  )}
                 </div>
+              )}
+
+              {resendStatus && (
+                <p className="text-muted-foreground text-center text-xs">
+                  {resendStatus}
+                </p>
               )}
 
               <div className="space-y-1.5">

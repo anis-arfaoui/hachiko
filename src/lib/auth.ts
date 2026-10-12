@@ -3,7 +3,37 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 
 import { db } from "@/db";
-import { sendPasswordResetEmail } from "@/lib/email";
+import { member, organization as orgTable } from "@/db/schema/auth";
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmailMessage,
+} from "@/lib/email";
+
+interface SignUpContext {
+  body?: {
+    businessName?: string;
+  };
+}
+
+const getBusinessNameFromContext = (
+  context: SignUpContext | undefined,
+  fallback: string
+): string => {
+  const raw = context?.body?.businessName;
+  if (!raw) {
+    return fallback;
+  }
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : fallback;
+};
+
+const slugify = (text: string): string =>
+  text
+    .toLowerCase()
+    .trim()
+    .replaceAll(/[\s_]+/gu, "-")
+    .replaceAll(/[^\w-]+/gu, "")
+    .replaceAll(/--+/gu, "-");
 
 const DEFAULT_PROD_URL = "https://www.walaa.tech";
 
@@ -61,11 +91,57 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (createdUser, context) => {
+          // SAFETY: Better Auth passes EndpointContext which contains optional body with businessName
+          const ctx = context as SignUpContext | undefined;
+          const businessName = getBusinessNameFromContext(
+            ctx,
+            `Boutique de ${createdUser.name}`
+          );
+          const slug =
+            slugify(businessName) || `shop-${crypto.randomUUID().slice(0, 8)}`;
+          const orgId = crypto.randomUUID();
+          const now = new Date();
+
+          await db.insert(orgTable).values({
+            createdAt: now,
+            id: orgId,
+            name: businessName,
+            slug,
+          });
+
+          await db.insert(member).values({
+            createdAt: now,
+            id: crypto.randomUUID(),
+            organizationId: orgId,
+            role: "owner",
+            userId: createdUser.id,
+          });
+        },
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
     resetPasswordTokenExpiresIn: 3600,
     sendResetPassword: async ({ user, url }) => {
       await sendPasswordResetEmail({
+        to: user.email,
+        url,
+        userName: user.name,
+      });
+    },
+  },
+  emailVerification: {
+    autoSignInAfterVerification: true,
+    expiresIn: 3600,
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmailMessage({
         to: user.email,
         url,
         userName: user.name,

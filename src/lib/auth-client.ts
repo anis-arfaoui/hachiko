@@ -9,6 +9,7 @@ export const {
   organization: orgClient,
   requestPasswordReset,
   resetPassword,
+  sendVerificationEmail,
   signIn,
   signOut,
   signUp,
