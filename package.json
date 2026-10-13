@@ -12,7 +12,8 @@
     "prepare": "husky && lefthook install --force",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:clean": "bun run scripts/reset-db.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

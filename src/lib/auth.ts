@@ -8,6 +8,7 @@ import {
   sendPasswordResetEmail,
   sendVerificationEmailMessage,
 } from "@/lib/email";
+import { generateUniqueSlug } from "@/lib/slug";
 
 interface SignUpContext {
   body?: {
@@ -26,14 +27,6 @@ const getBusinessNameFromContext = (
   const trimmed = raw.trim();
   return trimmed.length > 0 ? trimmed : fallback;
 };
-
-const slugify = (text: string): string =>
-  text
-    .toLowerCase()
-    .trim()
-    .replaceAll(/[\s_]+/gu, "-")
-    .replaceAll(/[^\w-]+/gu, "")
-    .replaceAll(/--+/gu, "-");
 
 const DEFAULT_PROD_URL = "https://www.walaa.tech";
 
@@ -70,6 +63,7 @@ const configuredOrigins = [
   "http://localhost:3000",
   DEFAULT_PROD_URL,
   "https://www.walaa.tech",
+  "https://walaa.tech",
   "https://hachiko-phi.vercel.app",
   process.env.BETTER_AUTH_URL?.replace(/\/+$/u, ""),
   process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/u, ""),
@@ -95,31 +89,37 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (createdUser, context) => {
-          // SAFETY: Better Auth passes EndpointContext which contains optional body with businessName
-          const ctx = context as SignUpContext | undefined;
-          const businessName = getBusinessNameFromContext(
-            ctx,
-            `Boutique de ${createdUser.name}`
-          );
-          const slug =
-            slugify(businessName) || `shop-${crypto.randomUUID().slice(0, 8)}`;
-          const orgId = crypto.randomUUID();
-          const now = new Date();
+          try {
+            // SAFETY: Better Auth passes EndpointContext which contains optional body with businessName
+            const ctx = context as SignUpContext | undefined;
+            const businessName = getBusinessNameFromContext(
+              ctx,
+              `Boutique de ${createdUser.name}`
+            );
+            const slug = await generateUniqueSlug(businessName);
+            const orgId = crypto.randomUUID();
+            const now = new Date();
 
-          await db.insert(orgTable).values({
-            createdAt: now,
-            id: orgId,
-            name: businessName,
-            slug,
-          });
+            await db.insert(orgTable).values({
+              createdAt: now,
+              id: orgId,
+              name: businessName,
+              slug,
+            });
 
-          await db.insert(member).values({
-            createdAt: now,
-            id: crypto.randomUUID(),
-            organizationId: orgId,
-            role: "owner",
-            userId: createdUser.id,
-          });
+            await db.insert(member).values({
+              createdAt: now,
+              id: crypto.randomUUID(),
+              organizationId: orgId,
+              role: "owner",
+              userId: createdUser.id,
+            });
+          } catch (error) {
+            console.error(
+              "[Auth Hook] Failed to create organization in user.create.after:",
+              error
+            );
+          }
         },
       },
     },

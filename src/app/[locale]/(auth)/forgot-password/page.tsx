@@ -102,7 +102,8 @@ const ForgotPasswordPage = () => {
                   </p>
                   <ul className="list-inside list-disc space-y-0.5">
                     <li>
-                      Vérifiez votre dossier de courriers indésirables (spams).
+                      Pensez à vérifier vos courriers indésirables si
+                      l&apos;email tarde à arriver.
                     </li>
                     <li>Vérifiez l&apos;orthographe de votre adresse email.</li>
                   </ul>

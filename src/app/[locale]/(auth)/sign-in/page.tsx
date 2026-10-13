@@ -3,7 +3,6 @@
 import { Store } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
 
@@ -20,7 +19,6 @@ import { Label } from "@/components/ui/label";
 import { sendVerificationEmail, signIn } from "@/lib/auth-client";
 
 const SignInPage = () => {
-  const router = useRouter();
   const locale = useLocale();
 
   const [email, setEmail] = useState("");
@@ -63,7 +61,8 @@ const SignInPage = () => {
         return;
       }
 
-      router.push(`/${locale}/dashboard`);
+      // Full page navigation ensures session cookies are reliably sent to server layout
+      window.location.href = `/${locale}/dashboard`;
     } catch {
       setError("Une erreur inattendue est survenue");
       setIsLoading(false);

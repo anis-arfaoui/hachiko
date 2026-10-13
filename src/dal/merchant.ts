@@ -8,6 +8,7 @@ import {
   session as sessionTable,
 } from "@/db/schema/auth";
 import { auth } from "@/lib/auth";
+import { generateUniqueSlug } from "@/lib/slug";
 
 export interface ResolvedMerchantSession {
   organization: {
@@ -73,13 +74,44 @@ export const getMerchantSession =
       }
     }
 
-    if (!orgData || !organizationId) {
-      return null;
+    // Auto-heal: If an authenticated merchant user has no organization yet, create one seamlessly
+    if (!orgData) {
+      const fallbackOrgName = `Boutique de ${session.user.name || "Commerçant"}`;
+      const uniqueSlug = await generateUniqueSlug(fallbackOrgName);
+      const newOrgId = crypto.randomUUID();
+      const now = new Date();
+
+      await db.insert(organization).values({
+        createdAt: now,
+        id: newOrgId,
+        name: fallbackOrgName,
+        slug: uniqueSlug,
+      });
+
+      await db.insert(member).values({
+        createdAt: now,
+        id: crypto.randomUUID(),
+        organizationId: newOrgId,
+        role: "owner",
+        userId: session.user.id,
+      });
+
+      orgData = {
+        id: newOrgId,
+        name: fallbackOrgName,
+        slug: uniqueSlug,
+      };
+      organizationId = newOrgId;
+
+      await db
+        .update(sessionTable)
+        .set({ activeOrganizationId: organizationId })
+        .where(eq(sessionTable.id, session.session.id));
     }
 
     return {
       organization: orgData,
-      organizationId,
+      organizationId: orgData.id,
       userId: session.user.id,
     };
   };

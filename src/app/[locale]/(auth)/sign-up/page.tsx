@@ -143,16 +143,17 @@ const SignUpPage = () => {
                   </p>
                 </div>
 
-                <div className="bg-muted/40 text-muted-foreground space-y-1 rounded-lg border p-3 text-xs">
+                <div className="bg-muted/40 text-muted-foreground space-y-1.5 rounded-lg border p-3 text-xs">
                   <p className="text-foreground font-medium">
-                    Vous ne trouvez pas l&apos;email ?
+                    Vous n&apos;avez pas reçu l&apos;email ?
                   </p>
                   <ul className="list-inside list-disc space-y-0.5">
                     <li>
-                      Vérifiez votre dossier de courriers indésirables (spams).
+                      Pensez à vérifier vos courriers indésirables si
+                      l&apos;email tarde à arriver.
                     </li>
                     <li>
-                      L&apos;email est envoyé depuis{" "}
+                      L&apos;expéditeur officiel est{" "}
                       <strong>noreply@walaa.tech</strong>.
                     </li>
                   </ul>
