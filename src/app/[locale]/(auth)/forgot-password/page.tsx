@@ -2,6 +2,7 @@
 
 import { CheckCircle2, KeyRound, Mail } from "lucide-react";
 import { useLocale } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -59,8 +60,21 @@ const ForgotPasswordPage = () => {
     <div className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-2 text-center">
-          <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl">
-            <KeyRound className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center">
+            {isSubmitted ? (
+              <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl">
+                <KeyRound className="h-6 w-6" />
+              </div>
+            ) : (
+              <Image
+                src="/walaa-logo.png"
+                alt="Walaa"
+                width={48}
+                height={48}
+                className="h-12 w-12 rounded-full object-cover shadow-sm"
+                priority
+              />
+            )}
           </div>
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Walaa &bull; Récupération
@@ -94,19 +108,6 @@ const ForgotPasswordPage = () => {
                     <strong>{email}</strong>, un email contenant un lien valable
                     pendant 1 heure vient d&apos;être envoyé.
                   </p>
-                </div>
-
-                <div className="bg-muted/40 text-muted-foreground space-y-1 rounded-lg border p-3 text-xs">
-                  <p className="text-foreground font-medium">
-                    Vous ne recevez rien ?
-                  </p>
-                  <ul className="list-inside list-disc space-y-0.5">
-                    <li>
-                      Pensez à vérifier vos courriers indésirables si
-                      l&apos;email tarde à arriver.
-                    </li>
-                    <li>Vérifiez l&apos;orthographe de votre adresse email.</li>
-                  </ul>
                 </div>
 
                 <div className="space-y-2 pt-2">

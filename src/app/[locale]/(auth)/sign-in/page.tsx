@@ -1,7 +1,7 @@
 "use client";
 
-import { Store } from "lucide-react";
 import { useLocale } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
@@ -102,8 +102,15 @@ const SignInPage = () => {
     <div className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-2 text-center">
-          <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl">
-            <Store className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center">
+            <Image
+              src="/walaa-logo.png"
+              alt="Walaa"
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-full object-cover shadow-sm"
+              priority
+            />
           </div>
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Fidélité Digitale

@@ -17,6 +17,13 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   description:
     "Plateforme de carte de fidélité digitale pour commerces sans application",
+  icons: {
+    apple: "/apple-icon.png",
+    icon: [
+      { sizes: "any", url: "/favicon.ico" },
+      { type: "image/png", url: "/icon.png" },
+    ],
+  },
   title: "Walaa | Fidélité Digitale Sans Application",
 };
 

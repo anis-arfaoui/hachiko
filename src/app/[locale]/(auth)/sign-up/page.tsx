@@ -1,7 +1,8 @@
 "use client";
 
-import { CheckCircle2, Mail, Store } from "lucide-react";
+import { CheckCircle2, Mail } from "lucide-react";
 import { useLocale } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -100,11 +101,20 @@ const SignUpPage = () => {
     <div className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-2 text-center">
-          <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl">
+          <div className="flex h-12 w-12 items-center justify-center">
             {isSubmitted ? (
-              <Mail className="h-6 w-6" />
+              <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl">
+                <Mail className="h-6 w-6" />
+              </div>
             ) : (
-              <Store className="h-6 w-6" />
+              <Image
+                src="/walaa-logo.png"
+                alt="Walaa"
+                width={48}
+                height={48}
+                className="h-12 w-12 rounded-full object-cover shadow-sm"
+                priority
+              />
             )}
           </div>
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
@@ -141,22 +151,6 @@ const SignUpPage = () => {
                     Cliquez sur le lien reçu pour activer votre compte et
                     accéder directement à votre tableau de bord.
                   </p>
-                </div>
-
-                <div className="bg-muted/40 text-muted-foreground space-y-1.5 rounded-lg border p-3 text-xs">
-                  <p className="text-foreground font-medium">
-                    Vous n&apos;avez pas reçu l&apos;email ?
-                  </p>
-                  <ul className="list-inside list-disc space-y-0.5">
-                    <li>
-                      Pensez à vérifier vos courriers indésirables si
-                      l&apos;email tarde à arriver.
-                    </li>
-                    <li>
-                      L&apos;expéditeur officiel est{" "}
-                      <strong>noreply@walaa.tech</strong>.
-                    </li>
-                  </ul>
                 </div>
 
                 {resendStatus && (
