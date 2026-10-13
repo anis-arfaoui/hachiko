@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 
 import { db } from "@/db";
 import { cards, redemptions, transactions } from "@/db/schema/loyalty";
@@ -8,6 +8,7 @@ import { getCardByToken } from "./card";
 const DEFAULT_COOLDOWN_MINUTES = 3;
 
 export interface AddStampOptions {
+  amount?: number;
   clientUuid: string;
   cooldownMinutes?: number;
   organizationId: string;
@@ -26,8 +27,10 @@ export type AddStampResult =
       success: false;
     }
   | {
+      addedAmount: number;
       balance: number;
       isDuplicate: boolean;
+      programType: "stamps" | "points";
       rewardReady: boolean;
       stampsRequired: number;
       success: true;
@@ -46,6 +49,11 @@ export const addStampToCard = async (
     return { error: "UNAUTHORIZED_ORGANIZATION", success: false };
   }
 
+  const isPoints = card.programType === "points";
+  const defaultIncrement = isPoints ? 10 : 1;
+  const increment = options.amount ?? defaultIncrement;
+  const txType = isPoints ? "points" : "stamp";
+
   // Idempotency check: prevent duplicate transactions if the same clientUuid is submitted
   const existingTx = await db
     .select()
@@ -55,8 +63,10 @@ export const addStampToCard = async (
 
   if (existingTx[0]) {
     return {
+      addedAmount: existingTx[0].amount,
       balance: card.balance,
       isDuplicate: true,
+      programType: card.programType === "points" ? "points" : "stamps",
       rewardReady: card.balance >= card.stampsRequired,
       stampsRequired: card.stampsRequired,
       success: true,
@@ -65,17 +75,20 @@ export const addStampToCard = async (
 
   // Cooldown check: prevent accidental double-scans of the same card within the cooldown window
   const cooldownMin = options.cooldownMinutes ?? DEFAULT_COOLDOWN_MINUTES;
-  const recentStamps = await db
+  const recentTx = await db
     .select()
     .from(transactions)
     .where(
-      and(eq(transactions.cardId, card.cardId), eq(transactions.type, "stamp"))
+      and(
+        eq(transactions.cardId, card.cardId),
+        or(eq(transactions.type, "stamp"), eq(transactions.type, "points"))
+      )
     )
     .orderBy(desc(transactions.createdAt))
     .limit(1);
 
-  if (recentStamps[0]) {
-    const elapsedMs = Date.now() - recentStamps[0].createdAt.getTime();
+  if (recentTx[0]) {
+    const elapsedMs = Date.now() - recentTx[0].createdAt.getTime();
     const cooldownMs = cooldownMin * 60 * 1000;
 
     if (elapsedMs < cooldownMs) {
@@ -88,7 +101,7 @@ export const addStampToCard = async (
     }
   }
 
-  const newBalance = card.balance + 1;
+  const newBalance = card.balance + increment;
 
   // Atomic database update
   await db.transaction(async (tx) => {
@@ -101,18 +114,20 @@ export const addStampToCard = async (
       .where(eq(cards.id, card.cardId));
 
     await tx.insert(transactions).values({
-      amount: 1,
+      amount: increment,
       cardId: card.cardId,
       clientUuid: options.clientUuid,
       id: crypto.randomUUID(),
       staffUserId: options.staffUserId,
-      type: "stamp",
+      type: txType,
     });
   });
 
   return {
+    addedAmount: increment,
     balance: newBalance,
     isDuplicate: false,
+    programType: card.programType === "points" ? "points" : "stamps",
     rewardReady: newBalance >= card.stampsRequired,
     stampsRequired: card.stampsRequired,
     success: true,
@@ -156,11 +171,16 @@ export const redeemCardReward = async (
     return { error: "INSUFFICIENT_STAMPS", success: false };
   }
 
+  const isPoints = card.programType === "points";
+  const newBalance = isPoints
+    ? Math.max(0, card.balance - card.stampsRequired)
+    : 0;
+
   await db.transaction(async (tx) => {
     await tx
       .update(cards)
       .set({
-        balance: 0,
+        balance: newBalance,
         updatedAt: new Date(),
       })
       .where(eq(cards.id, card.cardId));
@@ -182,7 +202,7 @@ export const redeemCardReward = async (
   });
 
   return {
-    balance: 0,
+    balance: newBalance,
     rewardLabel: card.rewardLabel,
     success: true,
   };

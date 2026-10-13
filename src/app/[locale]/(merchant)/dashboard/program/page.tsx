@@ -1,7 +1,8 @@
 "use client";
 
-import { Check, Gift, Sparkles, Store } from "lucide-react";
+import { Check, Gift, Sparkles, Stamp, Store, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 
 import { getMyProgramAction, saveProgramAction } from "@/app/actions/program";
 import { Button } from "@/components/ui/button";
@@ -18,29 +19,28 @@ import { useActiveOrganization } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const COLOR_PRESETS = [
-  { bgClass: "bg-zinc-900", label: "Noir Élégant", value: "#18181b" },
-  { bgClass: "bg-amber-700", label: "Ambre Café", value: "#b45309" },
-  { bgClass: "bg-emerald-600", label: "Émeraude", value: "#059669" },
-  { bgClass: "bg-blue-600", label: "Bleu Royal", value: "#2563eb" },
-  { bgClass: "bg-rose-900", label: "Bordeaux", value: "#881337" },
-  { bgClass: "bg-indigo-700", label: "Indigo", value: "#4338ca" },
+  { label: "Noir Élégant", value: "#1a1a1a" },
+  { label: "Corail Walaa", value: "#f95738" },
+  { label: "Bleu Royal", value: "#1d4ed8" },
+  { label: "Violet", value: "#7c3aed" },
+  { label: "Émeraude", value: "#059669" },
+  { label: "Vert Forêt", value: "#166534" },
+  { label: "Terre cuite", value: "#c2410c" },
+  { label: "Bordeaux", value: "#831843" },
 ] as const;
 
-const getPresetBgClass = (colorValue: string): string => {
-  const match = COLOR_PRESETS.find((p) => p.value === colorValue);
-  return match?.bgClass ?? "bg-zinc-900";
-};
-
 const STAMP_PRESETS = [6, 8, 10, 12];
+const POINT_PRESETS = [50, 100, 200, 500];
 
 const countKey = (idx: number): string => `stamp-key-${idx}`;
 
 const ProgramBuilderPage = () => {
   const { data: activeOrg } = useActiveOrganization();
 
+  const [programType, setProgramType] = useState<"stamps" | "points">("stamps");
   const [stampsRequired, setStampsRequired] = useState(10);
   const [rewardLabel, setRewardLabel] = useState("1 Récompense offerte");
-  const [brandColor, setBrandColor] = useState("#18181b");
+  const [brandColor, setBrandColor] = useState("#1a1a1a");
   const [logoUrl, setLogoUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -49,6 +49,7 @@ const ProgramBuilderPage = () => {
     const loadProgram = async () => {
       const existing = await getMyProgramAction();
       if (existing) {
+        setProgramType(existing.type === "points" ? "points" : "stamps");
         setStampsRequired(existing.stampsRequired);
         setRewardLabel(existing.rewardLabel);
         setBrandColor(existing.brandColor);
@@ -57,6 +58,15 @@ const ProgramBuilderPage = () => {
     };
     loadProgram();
   }, []);
+
+  const handleSelectProgramType = (type: "stamps" | "points") => {
+    setProgramType(type);
+    if (type === "stamps" && stampsRequired > 30) {
+      setStampsRequired(10);
+    } else if (type === "points" && stampsRequired < 30) {
+      setStampsRequired(100);
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -67,6 +77,7 @@ const ProgramBuilderPage = () => {
       logoUrl: logoUrl || undefined,
       rewardLabel,
       stampsRequired,
+      type: programType,
     });
 
     if (res.success) {
@@ -84,8 +95,8 @@ const ProgramBuilderPage = () => {
           Programme de Fidélité
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Personnalisez la carte à tampons numérique qui sera affichée à vos
-          clients.
+          Personnalisez le fonctionnement et le visuel de la carte de fidélité
+          numérique de vos clients.
         </p>
       </div>
 
@@ -96,8 +107,8 @@ const ProgramBuilderPage = () => {
             <CardHeader>
               <CardTitle>Règles & Récompense</CardTitle>
               <CardDescription>
-                Définissez le nombre de visites nécessaires pour débloquer le
-                cadeau
+                Définissez le type de programme et l&apos;objectif nécessaire
+                pour débloquer le cadeau
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -115,27 +126,94 @@ const ProgramBuilderPage = () => {
                   </div>
                 )}
 
-                {/* Number of stamps */}
-                <div className="space-y-3">
-                  <Label>
-                    Nombre de tampons requis ({stampsRequired} visites)
-                  </Label>
-                  <div className="flex gap-2">
-                    {STAMP_PRESETS.map((count) => (
-                      <Button
-                        key={count}
-                        type="button"
-                        variant={
-                          stampsRequired === count ? "default" : "outline"
-                        }
-                        onClick={() => setStampsRequired(count)}
-                        className="flex-1"
-                      >
-                        {count}
-                      </Button>
-                    ))}
+                {/* Program Type Selection */}
+                <div className="space-y-2.5">
+                  <Label>Type de programme</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectProgramType("stamps")}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2.5 rounded-xl border p-3 text-left transition-colors",
+                        programType === "stamps"
+                          ? "border-primary bg-primary/5 text-foreground font-semibold shadow-xs"
+                          : "border-border bg-card text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      <Stamp className="text-primary h-4 w-4 shrink-0" />
+                      <div>
+                        <div className="text-sm">Carte à tampons</div>
+                        <div className="text-muted-foreground text-xs font-normal">
+                          1 passage = 1 tampon
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectProgramType("points")}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2.5 rounded-xl border p-3 text-left transition-colors",
+                        programType === "points"
+                          ? "border-primary bg-primary/5 text-foreground font-semibold shadow-xs"
+                          : "border-border bg-card text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      <Zap className="text-primary h-4 w-4 shrink-0" />
+                      <div>
+                        <div className="text-sm">Système à points</div>
+                        <div className="text-muted-foreground text-xs font-normal">
+                          Points par achat/visite
+                        </div>
+                      </div>
+                    </button>
                   </div>
                 </div>
+
+                {/* Target required */}
+                {programType === "stamps" ? (
+                  <div className="space-y-3">
+                    <Label>
+                      Nombre de tampons requis ({stampsRequired} visites)
+                    </Label>
+                    <div className="flex gap-2">
+                      {STAMP_PRESETS.map((count) => (
+                        <Button
+                          key={count}
+                          type="button"
+                          variant={
+                            stampsRequired === count ? "default" : "outline"
+                          }
+                          onClick={() => setStampsRequired(count)}
+                          className="flex-1"
+                        >
+                          {count}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Label>
+                      Objectif de points requis ({stampsRequired} points)
+                    </Label>
+                    <div className="flex gap-2">
+                      {POINT_PRESETS.map((count) => (
+                        <Button
+                          key={count}
+                          type="button"
+                          variant={
+                            stampsRequired === count ? "default" : "outline"
+                          }
+                          onClick={() => setStampsRequired(count)}
+                          className="flex-1"
+                        >
+                          {count}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Reward description */}
                 <div className="space-y-2">
@@ -144,12 +222,12 @@ const ProgramBuilderPage = () => {
                     id="rewardLabel"
                     value={rewardLabel}
                     onChange={(e) => setRewardLabel(e.target.value)}
-                    placeholder="Ex: 1 Café offert, 1 Coupe gratuite..."
+                    placeholder="Ex: 1 Café offert, 1 Plat du jour..."
                     required
                   />
                   <p className="text-muted-foreground text-xs">
                     Ce texte apparaîtra sur la carte du client lorsqu&apos;il
-                    aura rempli ses tampons.
+                    aura débloqué sa récompense.
                   </p>
                 </div>
 
@@ -165,19 +243,39 @@ const ProgramBuilderPage = () => {
                         className={cn(
                           "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
                           brandColor === preset.value
-                            ? "border-primary bg-secondary text-foreground shadow-sm"
+                            ? "border-primary bg-secondary text-foreground shadow-xs"
                             : "border-border bg-card text-muted-foreground hover:bg-muted"
                         )}
                       >
                         <span
-                          className={cn(
-                            "h-4 w-4 rounded-full border border-black/20",
-                            preset.bgClass
-                          )}
+                          className="h-4 w-4 rounded-full border border-black/20 [background-color:var(--preset-bg)]"
+                          style={
+                            {
+                              "--preset-bg": preset.value,
+                            } as CSSProperties
+                          }
                         />
                         <span>{preset.label}</span>
                       </button>
                     ))}
+                  </div>
+
+                  {/* Custom Hex Color Picker */}
+                  <div className="border-border bg-background flex max-w-[200px] items-center gap-2 rounded-xl border p-1.5">
+                    <input
+                      type="color"
+                      value={brandColor}
+                      onChange={(e) => setBrandColor(e.target.value)}
+                      className="h-7 w-7 cursor-pointer rounded-lg border-0 bg-transparent p-0"
+                    />
+                    <input
+                      type="text"
+                      value={brandColor}
+                      onChange={(e) => setBrandColor(e.target.value)}
+                      placeholder="#1a1a1a"
+                      className="text-foreground h-7 flex-1 border-0 bg-transparent p-0 font-mono text-xs font-medium outline-hidden"
+                      maxLength={7}
+                    />
                   </div>
                 </div>
 
@@ -213,10 +311,12 @@ const ProgramBuilderPage = () => {
 
             {/* Loyalty Card UI */}
             <div
-              className={cn(
-                "overflow-hidden rounded-2xl p-5 text-white shadow-lg transition-colors",
-                getPresetBgClass(brandColor)
-              )}
+              className="overflow-hidden rounded-2xl [background-color:var(--live-brand)] p-5 text-white shadow-lg transition-colors"
+              style={
+                {
+                  "--live-brand": brandColor,
+                } as CSSProperties
+              }
             >
               <div className="flex items-center justify-between border-b border-white/20 pb-3">
                 <div className="flex items-center gap-2">
@@ -228,7 +328,9 @@ const ProgramBuilderPage = () => {
                       {activeOrg?.name || "Mon Commerce"}
                     </h4>
                     <span className="text-xs text-white/80">
-                      Carte Fidélité
+                      {programType === "points"
+                        ? "Système à points"
+                        : "Carte à tampons"}
                     </span>
                   </div>
                 </div>
@@ -236,41 +338,64 @@ const ProgramBuilderPage = () => {
               </div>
 
               {/* Progress */}
-              <div className="my-4">
-                <div className="mb-1.5 flex justify-between text-xs text-white/90">
-                  <span>Tampons collectés</span>
-                  <span className="font-bold">4 / {stampsRequired}</span>
-                </div>
+              {programType === "points" ? (
+                <div className="my-4 space-y-2">
+                  <div className="flex justify-between text-xs text-white/90">
+                    <span>Progression des points</span>
+                    <span className="font-bold">
+                      {Math.round(stampsRequired * 0.4)} / {stampsRequired} pts
+                    </span>
+                  </div>
 
-                {/* Stamp grid */}
-                <div className="grid grid-cols-5 gap-2 pt-2">
-                  {Array.from({ length: stampsRequired }).map((_, idx) => {
-                    const isCollected = idx < 4;
-                    return (
-                      <div
-                        key={countKey(idx)}
-                        className={cn(
-                          "flex aspect-square items-center justify-center rounded-full text-xs font-bold transition-colors",
-                          isCollected
-                            ? "bg-white text-black shadow-sm"
-                            : "border-2 border-dashed border-white/40 text-white/60"
-                        )}
-                      >
-                        {isCollected ? (
-                          <Check className="h-3.5 w-3.5 stroke-2" />
-                        ) : (
-                          idx + 1
-                        )}
-                      </div>
-                    );
-                  })}
+                  <div className="h-3 w-full overflow-hidden rounded-full bg-white/20">
+                    <div className="h-full [width:40%] rounded-full bg-white" />
+                  </div>
+
+                  <div className="flex justify-between text-xs text-white/70">
+                    <span>0 pt</span>
+                    <span>40%</span>
+                    <span>{stampsRequired} pts</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="my-4">
+                  <div className="mb-1.5 flex justify-between text-xs text-white/90">
+                    <span>Tampons collectés</span>
+                    <span className="font-bold">4 / {stampsRequired}</span>
+                  </div>
+
+                  {/* Stamp grid */}
+                  <div className="grid grid-cols-5 gap-2 pt-2">
+                    {Array.from({ length: stampsRequired }).map((_, idx) => {
+                      const isCollected = idx < 4;
+                      return (
+                        <div
+                          key={countKey(idx)}
+                          className={cn(
+                            "flex aspect-square items-center justify-center rounded-full text-xs font-bold transition-colors",
+                            isCollected
+                              ? "bg-white text-black shadow-xs"
+                              : "border-2 border-dashed border-white/40 text-white/60"
+                          )}
+                        >
+                          {isCollected ? (
+                            <Check className="h-3.5 w-3.5 stroke-2" />
+                          ) : (
+                            idx + 1
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Reward preview banner */}
               <div className="mt-4 rounded-xl bg-white/15 p-2.5 text-center">
                 <p className="text-xs tracking-wider text-white/80 uppercase">
-                  Cadeau au {stampsRequired}ème tampon
+                  {programType === "points"
+                    ? `Cadeau à ${stampsRequired} points`
+                    : `Cadeau au ${stampsRequired}ème tampon`}
                 </p>
                 <p className="mt-0.5 text-xs font-semibold text-white">
                   {rewardLabel || "Récompense offerte"}

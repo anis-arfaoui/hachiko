@@ -8,6 +8,7 @@ export interface ProgramInput {
   logoUrl?: string;
   rewardLabel: string;
   stampsRequired: number;
+  type?: "stamps" | "points";
 }
 
 export const getProgramByOrganization = async (organizationId: string) => {
@@ -34,6 +35,7 @@ export const upsertProgram = async (
         logoUrl: input.logoUrl ?? existing.logoUrl,
         rewardLabel: input.rewardLabel,
         stampsRequired: input.stampsRequired,
+        type: input.type ?? existing.type,
         updatedAt: new Date(),
       })
       .where(
@@ -56,7 +58,7 @@ export const upsertProgram = async (
       organizationId,
       rewardLabel: input.rewardLabel,
       stampsRequired: input.stampsRequired,
-      type: "stamps",
+      type: input.type ?? "stamps",
     })
     .returning();
 

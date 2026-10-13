@@ -91,8 +91,10 @@ const TillScannerPage = () => {
       triggerHaptic();
 
       setScanState({
+        addedAmount: res.addedAmount,
         balance: res.balance,
         isDuplicate: res.isDuplicate,
+        programType: res.programType,
         rewardReady: res.rewardReady,
         stampsRequired: res.stampsRequired,
         status: "success",
@@ -115,6 +117,7 @@ const TillScannerPage = () => {
         playSuccessBeep();
         triggerHaptic();
         setScanState({
+          balance: res.balance,
           rewardLabel: res.rewardLabel,
           status: "redeemed",
         });

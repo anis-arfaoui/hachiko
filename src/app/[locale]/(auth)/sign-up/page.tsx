@@ -45,7 +45,7 @@ const SignUpPage = () => {
       // SAFETY: Better Auth dynamically accepts custom request fields like businessName
       const payload = {
         businessName: businessName.trim(),
-        callbackURL: `/${locale}/dashboard`,
+        callbackURL: `/${locale}/onboarding`,
         email: email.trim().toLowerCase(),
         name: name.trim(),
         password,
@@ -77,7 +77,7 @@ const SignUpPage = () => {
 
     try {
       const res = await sendVerificationEmail({
-        callbackURL: `/${locale}/dashboard`,
+        callbackURL: `/${locale}/onboarding`,
         email: submittedEmail,
       });
 
@@ -149,7 +149,7 @@ const SignUpPage = () => {
                   <p className="text-muted-foreground text-xs leading-relaxed">
                     Un email a été envoyé à <strong>{submittedEmail}</strong>.
                     Cliquez sur le lien reçu pour activer votre compte et
-                    accéder directement à votre tableau de bord.
+                    configurer votre programme de fidélité.
                   </p>
                 </div>
 

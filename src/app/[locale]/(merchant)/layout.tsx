@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { MerchantNav } from "@/components/dashboard/merchant-nav";
 import { getMerchantSession } from "@/dal/merchant";
+import { getProgramByOrganization } from "@/dal/program";
 
 interface MerchantLayoutProps {
   children: ReactNode;
@@ -17,6 +18,13 @@ const MerchantLayout = async ({ children, params }: MerchantLayoutProps) => {
 
   if (!merchantSession) {
     redirect(`/${locale}/sign-in`);
+  }
+
+  const program = await getProgramByOrganization(
+    merchantSession.organizationId
+  );
+  if (!program) {
+    redirect(`/${locale}/onboarding`);
   }
 
   return (

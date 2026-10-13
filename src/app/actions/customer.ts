@@ -140,6 +140,7 @@ export const getCardDetailsAction = async (token: string) => {
 };
 
 export interface ScanStampInput {
+  amount?: number;
   clientUuid: string;
   token: string;
 }
@@ -161,6 +162,7 @@ export const scanStampAction = async (
   }
 
   return addStampToCard({
+    amount: input.amount,
     clientUuid: input.clientUuid,
     organizationId: merchantSession.organizationId,
     staffUserId: merchantSession.userId,

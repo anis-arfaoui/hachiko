@@ -32,6 +32,7 @@ interface CardDetailsState {
   businessName: string;
   customerName: string;
   logoUrl: string | null;
+  programType?: string;
   rewardLabel: string;
   stampsRequired: number;
   token: string;
@@ -233,38 +234,74 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
             </p>
           </div>
 
-          {/* Stamp Grid */}
-          <div className="space-y-2 border-t border-white/20 pt-4">
-            <div className="flex items-center justify-between text-xs font-medium text-white/90">
-              <span>Progression des tampons</span>
-              <span className="font-bold">
-                {card.balance} / {card.stampsRequired}
-              </span>
-            </div>
+          {/* Stamps or Points Section */}
+          {card.programType === "points" ? (
+            <div className="space-y-2 border-t border-white/20 pt-4">
+              <div className="flex items-center justify-between text-xs font-medium text-white/90">
+                <span>Progression des points</span>
+                <span className="font-bold">
+                  {card.balance} / {card.stampsRequired} pts
+                </span>
+              </div>
 
-            <div className="grid grid-cols-5 gap-2 pt-1">
-              {Array.from({ length: card.stampsRequired }).map((_, idx) => {
-                const isCollected = idx < card.balance;
-                return (
-                  <div
-                    key={stampKey(idx)}
-                    className={cn(
-                      "flex aspect-square items-center justify-center rounded-full text-xs font-bold transition-colors",
-                      isCollected
-                        ? "scale-105 bg-white text-black shadow-md"
-                        : "border-2 border-dashed border-white/40 text-white/60"
-                    )}
-                  >
-                    {isCollected ? (
-                      <Check className="h-4 w-4 stroke-2" />
-                    ) : (
-                      idx + 1
-                    )}
-                  </div>
-                );
-              })}
+              {/* Points Progress Bar */}
+              <div className="h-3.5 w-full overflow-hidden rounded-full bg-white/20 p-0.5">
+                <div
+                  className="h-full rounded-full bg-white shadow-xs"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      Math.round((card.balance / card.stampsRequired) * 100)
+                    )}%`,
+                  }}
+                />
+              </div>
+
+              <div className="flex justify-between text-xs font-medium text-white/75">
+                <span>0 pt</span>
+                <span>
+                  {Math.min(
+                    100,
+                    Math.round((card.balance / card.stampsRequired) * 100)
+                  )}
+                  %
+                </span>
+                <span>{card.stampsRequired} pts</span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-2 border-t border-white/20 pt-4">
+              <div className="flex items-center justify-between text-xs font-medium text-white/90">
+                <span>Progression des tampons</span>
+                <span className="font-bold">
+                  {card.balance} / {card.stampsRequired}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-5 gap-2 pt-1">
+                {Array.from({ length: card.stampsRequired }).map((_, idx) => {
+                  const isCollected = idx < card.balance;
+                  return (
+                    <div
+                      key={stampKey(idx)}
+                      className={cn(
+                        "flex aspect-square items-center justify-center rounded-full text-xs font-bold transition-colors",
+                        isCollected
+                          ? "scale-105 bg-white text-black shadow-md"
+                          : "border-2 border-dashed border-white/40 text-white/60"
+                      )}
+                    >
+                      {isCollected ? (
+                        <Check className="h-4 w-4 stroke-2" />
+                      ) : (
+                        idx + 1
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Reward Ready Celebration */}
           {isRewardReady ? (
@@ -283,7 +320,9 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
           ) : (
             <div className="mt-4 rounded-xl bg-white/15 p-2.5 text-center">
               <p className="text-xs font-medium tracking-wider text-white/80 uppercase">
-                À débloquer au {card.stampsRequired}ème tampon :
+                {card.programType === "points"
+                  ? `À débloquer à ${card.stampsRequired} points :`
+                  : `À débloquer au ${card.stampsRequired}ème tampon :`}
               </p>
               <p className="mt-0.5 text-xs font-semibold text-white">
                 {card.rewardLabel}

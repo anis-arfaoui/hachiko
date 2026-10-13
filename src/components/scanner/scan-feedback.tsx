@@ -14,8 +14,10 @@ export type ScanState =
   | { status: "scanning" }
   | { status: "processing" }
   | {
+      addedAmount?: number;
       balance: number;
       isDuplicate: boolean;
+      programType?: "stamps" | "points";
       rewardReady: boolean;
       stampsRequired: number;
       status: "success";
@@ -30,6 +32,8 @@ export type ScanState =
       status: "error";
     }
   | {
+      balance?: number;
+      programType?: "stamps" | "points";
       rewardLabel: string;
       status: "redeemed";
     };
@@ -46,22 +50,29 @@ export const ScanFeedback = ({
   scanState,
 }: ScanFeedbackProps) => {
   if (scanState.status === "success") {
+    const isPoints = scanState.programType === "points";
+    const unitName = isPoints ? "points" : "tampons";
+
     return (
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="text-primary h-5 w-5" />
-            <CardTitle>Tampon validé avec succès !</CardTitle>
+            <CardTitle>
+              {isPoints
+                ? `+${scanState.addedAmount ?? 10} Points ajoutés avec succès !`
+                : "Tampon validé avec succès !"}
+            </CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="bg-card border-border flex items-center justify-between rounded-xl border p-3">
               <span className="text-muted-foreground text-sm">
-                Solde actuel de la carte :
+                Solde actuel du client :
               </span>
               <span className="text-primary text-lg font-extrabold">
-                {scanState.balance} / {scanState.stampsRequired}
+                {scanState.balance} / {scanState.stampsRequired} {unitName}
               </span>
             </div>
 
@@ -69,11 +80,16 @@ export const ScanFeedback = ({
               <div className="bg-primary text-primary-foreground space-y-3 rounded-xl p-4">
                 <div className="flex items-center gap-2 text-sm font-bold">
                   <Sparkles className="h-4 w-4" />
-                  <span>Carte complète ! Récompense prête</span>
+                  <span>
+                    {isPoints
+                      ? "Objectif de points atteint ! Récompense prête"
+                      : "Carte complète ! Récompense prête"}
+                  </span>
                 </div>
                 <p className="text-xs leading-relaxed opacity-90">
-                  Le client a complété ses {scanState.stampsRequired} tampons.
-                  Donnez-lui sa récompense puis validez ci-dessous.
+                  {isPoints
+                    ? `Le client a accumulé au moins ${scanState.stampsRequired} points. Vous pouvez lui délivrer sa récompense.`
+                    : `Le client a complété ses ${scanState.stampsRequired} tampons. Donnez-lui sa récompense puis validez ci-dessous.`}
                 </p>
                 <Button
                   variant="secondary"
@@ -81,7 +97,11 @@ export const ScanFeedback = ({
                   onClick={() => onRedeem(scanState.token)}
                 >
                   <Gift className="mr-2 h-4 w-4" />
-                  <span>Donner la récompense & Réinitialiser</span>
+                  <span>
+                    {isPoints
+                      ? `Utiliser ${scanState.stampsRequired} points & Récompenser`
+                      : "Donner la récompense & Réinitialiser"}
+                  </span>
                 </Button>
               </div>
             ) : (
@@ -107,7 +127,7 @@ export const ScanFeedback = ({
         <CardContent>
           <div className="space-y-4">
             <p className="text-muted-foreground text-xs leading-relaxed">
-              Pour éviter les doubles-tampons accidentels, un délai de sécurité
+              Pour éviter les doubles ajouts accidentels, un délai de sécurité
               est actif. Veuillez patienter environ{" "}
               <strong>{scanState.remainingSeconds} secondes</strong> avant de
               scanner à nouveau cette carte.
@@ -134,9 +154,10 @@ export const ScanFeedback = ({
         <CardContent>
           <div className="space-y-4">
             <p className="text-muted-foreground text-xs leading-relaxed">
-              Cadeau validé : <strong>{scanState.rewardLabel}</strong>. La carte
-              du client a été réinitialisée à 0 tampon pour son prochain cycle
-              de fidélité.
+              Cadeau validé : <strong>{scanState.rewardLabel}</strong>.
+              {scanState.programType === "points"
+                ? ` Les points requis ont été déduits (solde restant : ${scanState.balance ?? 0} pts).`
+                : " La carte du client a été réinitialisée à 0 tampon pour son prochain cycle."}
             </p>
             <Button className="w-full" onClick={onScanNext}>
               <span>Prêt pour le client suivant</span>

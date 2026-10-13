@@ -54,6 +54,7 @@ export const getCardByToken = async (token: string) => {
       customerPhone: customers.phone,
       logoUrl: programs.logoUrl,
       programId: programs.id,
+      programType: programs.type,
       rewardLabel: programs.rewardLabel,
       stampsRequired: programs.stampsRequired,
       token: cards.token,
