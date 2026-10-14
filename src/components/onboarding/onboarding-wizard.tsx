@@ -24,16 +24,54 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 const ESTABLISHMENT_CATEGORIES = [
-  { icon: "🍽️", id: "restaurant", label: "Restaurant" },
-  { icon: "☕", id: "cafe", label: "Café" },
-  { icon: "✂️", id: "coiffure", label: "Coiffure" },
-  { icon: "💈", id: "barbershop", label: "Barbershop" },
-  { icon: "👔", id: "pressing", label: "Pressing" },
-  { icon: "🧵", id: "retoucherie", label: "Retoucherie" },
-  { icon: "🥩", id: "boucherie", label: "Boucherie" },
-  { icon: "🥐", id: "patisserie", label: "Pâtisserie" },
-  { icon: "📚", id: "librairie", label: "Librairie" },
-  { icon: "🏪", id: "autre", label: "Autre" },
+  {
+    icon: "🍽️",
+    id: "restaurant",
+    label: "Restaurant",
+    namePrompt: "Nom du Restaurant",
+  },
+  {
+    icon: "☕",
+    id: "cafe",
+    label: "Café",
+    namePrompt: "Nom du Café",
+  },
+  {
+    icon: "✂️",
+    id: "coiffure",
+    label: "Coiffure",
+    namePrompt: "Nom du Salon de coiffure",
+  },
+  {
+    icon: "💈",
+    id: "barbershop",
+    label: "Barbershop",
+    namePrompt: "Nom du Barbershop",
+  },
+  {
+    icon: "👕",
+    id: "vetements",
+    label: "Mode & Vêtements",
+    namePrompt: "Nom de la Boutique",
+  },
+  {
+    icon: "🥐",
+    id: "patisserie",
+    label: "Pâtisserie",
+    namePrompt: "Nom de la Pâtisserie",
+  },
+  {
+    icon: "📚",
+    id: "librairie",
+    label: "Librairie",
+    namePrompt: "Nom de la Librairie",
+  },
+  {
+    icon: "🏪",
+    id: "autre",
+    label: "Autre",
+    namePrompt: "Nom de l'établissement",
+  },
 ] as const;
 
 const COLOR_SWATCHES = [
@@ -311,7 +349,7 @@ export const OnboardingWizard = ({
       </div>
 
       {/* Main Wizard Card */}
-      <div className="border-border bg-card w-full max-w-xl rounded-2xl border p-6 shadow-xs sm:p-8">
+      <div className="border-border bg-card w-full max-w-xl rounded-2xl border p-4 shadow-xs sm:p-8">
         {errorMessage && (
           <div className="border-destructive/20 bg-destructive/10 text-destructive mb-5 rounded-xl border p-3.5 text-xs font-medium">
             {errorMessage}
@@ -338,7 +376,7 @@ export const OnboardingWizard = ({
                 Type d&apos;établissement{" "}
                 <span className="text-destructive">*</span>
               </Label>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
                 {ESTABLISHMENT_CATEGORIES.map((cat) => {
                   const isSelected = category === cat.id;
                   return (
@@ -347,14 +385,16 @@ export const OnboardingWizard = ({
                       type="button"
                       onClick={() => setCategory(cat.id)}
                       className={cn(
-                        "flex cursor-pointer flex-col items-center justify-center rounded-xl border p-2.5 text-center transition-colors",
+                        "flex cursor-pointer items-center gap-2.5 rounded-xl border p-2.5 text-left transition-colors sm:flex-col sm:items-center sm:justify-center sm:p-3 sm:text-center",
                         isSelected
-                          ? "border-primary bg-primary/10 text-primary"
+                          ? "border-primary bg-primary/10 text-primary ring-primary/30 font-semibold shadow-xs ring-1"
                           : "border-border bg-card text-muted-foreground hover:bg-muted"
                       )}
                     >
-                      <span className="text-xl leading-none">{cat.icon}</span>
-                      <span className="mt-1.5 text-xs leading-tight font-medium">
+                      <span className="shrink-0 text-xl leading-none sm:text-2xl">
+                        {cat.icon}
+                      </span>
+                      <span className="truncate text-xs leading-tight font-medium sm:whitespace-normal">
                         {cat.label}
                       </span>
                     </button>
@@ -369,7 +409,7 @@ export const OnboardingWizard = ({
                 htmlFor="businessName"
                 className="text-foreground text-xs font-semibold"
               >
-                Nom du {selectedCategoryObj.label}{" "}
+                {selectedCategoryObj.namePrompt}{" "}
                 <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -377,6 +417,7 @@ export const OnboardingWizard = ({
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 required
+                className="h-11 text-sm sm:h-10"
               />
             </div>
 
@@ -435,12 +476,12 @@ export const OnboardingWizard = ({
             </div>
 
             {/* Card Main Color */}
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <Label className="text-foreground text-xs font-semibold">
                 Couleur principale de la carte{" "}
                 <span className="text-destructive">*</span>
               </Label>
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 {COLOR_SWATCHES.map((swatch) => {
                   const isSelected =
                     brandColor.toLowerCase() === swatch.value.toLowerCase();
@@ -452,37 +493,69 @@ export const OnboardingWizard = ({
                       title={swatch.label}
                       aria-label={swatch.label}
                       className={cn(
-                        "h-8 w-8 cursor-pointer rounded-full border [background-color:var(--swatch-color)] transition-transform",
+                        "flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border [background-color:var(--swatch-color)] transition-transform sm:h-10 sm:w-10",
                         isSelected
-                          ? "ring-foreground ring-2 ring-offset-2"
-                          : "border-black/10 hover:scale-105"
+                          ? "ring-foreground scale-105 ring-2 ring-offset-2"
+                          : "border-black/10 hover:scale-105 active:scale-95"
                       )}
                       style={
                         {
                           "--swatch-color": swatch.value,
                         } as CSSProperties
                       }
-                    />
+                    >
+                      {isSelected ? (
+                        <Check className="h-4 w-4 stroke-[3] text-white drop-shadow-xs" />
+                      ) : null}
+                    </button>
                   );
                 })}
               </div>
 
-              {/* Hex Input */}
-              <div className="border-border bg-background flex max-w-[200px] items-center gap-2 rounded-xl border p-1.5">
-                <input
-                  type="color"
-                  value={brandColor}
-                  onChange={(e) => setBrandColor(e.target.value)}
-                  className="h-7 w-7 cursor-pointer rounded-lg border-0 bg-transparent p-0"
-                />
-                <input
-                  type="text"
-                  value={brandColor}
-                  onChange={(e) => setBrandColor(e.target.value)}
-                  placeholder="#1a1a1a"
-                  className="text-foreground h-7 flex-1 border-0 bg-transparent p-0 font-mono text-xs font-medium outline-hidden"
-                  maxLength={7}
-                />
+              {/* Custom Color Selector Bar / Rectangle */}
+              <div className="border-border bg-muted/30 hover:bg-muted/50 flex w-full items-center gap-3 rounded-2xl border p-2.5 transition-colors sm:max-w-sm">
+                <label
+                  htmlFor="brandColorInput"
+                  className="group relative flex h-12 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-black/10 shadow-xs transition-transform active:scale-95"
+                  style={{ backgroundColor: brandColor }}
+                  title="Cliquez pour choisir n'importe quelle couleur"
+                >
+                  <input
+                    id="brandColorInput"
+                    type="color"
+                    value={brandColor}
+                    onChange={(e) => setBrandColor(e.target.value)}
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  />
+                  <span className="pointer-events-none rounded-md bg-black/50 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-xs backdrop-blur-xs">
+                    🎨 Palette
+                  </span>
+                </label>
+
+                <div className="flex flex-1 flex-col justify-center">
+                  <span className="text-muted-foreground text-[11px] font-medium">
+                    Couleur personnalisée (cliquez pour choisir)
+                  </span>
+                  <div className="flex items-center gap-1.5 pt-0.5">
+                    <span className="text-muted-foreground font-mono text-sm font-bold">
+                      #
+                    </span>
+                    <input
+                      type="text"
+                      value={brandColor.replace(/^#/u, "")}
+                      onChange={(e) => {
+                        const raw = e.target.value.replaceAll(
+                          /[^0-9A-Fa-f]/gu,
+                          ""
+                        );
+                        setBrandColor(`#${raw}`);
+                      }}
+                      placeholder="1a1a1a"
+                      className="text-foreground h-7 w-full border-0 bg-transparent p-0 font-mono text-sm font-bold tracking-wider outline-hidden"
+                      maxLength={6}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -492,7 +565,7 @@ export const OnboardingWizard = ({
                 Aperçu de votre carte
               </Label>
               <div
-                className="relative overflow-hidden rounded-2xl [background-color:var(--card-brand)] p-5 text-white shadow-md transition-colors"
+                className="relative overflow-hidden rounded-2xl [background-color:var(--card-brand)] p-4 text-white shadow-md transition-colors sm:p-5"
                 style={
                   {
                     "--card-brand": brandColor,
@@ -552,8 +625,7 @@ export const OnboardingWizard = ({
               <Button
                 type="button"
                 onClick={handleContinueToStep2}
-                className="w-full"
-                size="lg"
+                className="h-12 w-full text-sm font-semibold sm:text-base"
               >
                 Continuer <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
@@ -913,21 +985,20 @@ export const OnboardingWizard = ({
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-2.5 pt-3 sm:gap-3">
               <Button
                 type="button"
                 variant="outline"
-                size="lg"
                 onClick={handleBackToStep1}
                 disabled={isSubmitting}
+                className="h-12 shrink-0 px-3 text-xs font-medium sm:px-5 sm:text-sm"
               >
-                <ChevronLeft className="mr-1 h-4 w-4" />
+                <ChevronLeft className="mr-1 h-4 w-4 shrink-0" />
                 Retour
               </Button>
 
               <Button
                 type="button"
-                size="lg"
                 onClick={handleFinalSubmit}
                 disabled={
                   isSubmitting ||
@@ -936,15 +1007,15 @@ export const OnboardingWizard = ({
                     : !isPointsValid) ||
                   !rewardLabel.trim()
                 }
-                className="flex-1"
+                className="h-12 flex-1 px-3 text-xs font-semibold shadow-xs sm:px-6 sm:text-sm"
               >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Création en cours...
-                  </>
+                  <span className="flex items-center justify-center gap-2 whitespace-nowrap">
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                    <span>Création en cours...</span>
+                  </span>
                 ) : (
-                  <>Créer mon espace 🎁</>
+                  <span className="whitespace-nowrap">Créer mon espace 🎁</span>
                 )}
               </Button>
             </div>
