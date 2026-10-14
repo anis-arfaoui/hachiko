@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { LandingFeatures } from "@/components/landing/features";
 import { LandingFooter } from "@/components/landing/footer";
 import { LandingHeader } from "@/components/landing/header";
@@ -7,13 +9,28 @@ import { LandingPricing } from "@/components/landing/pricing";
 import { WalaaRoiCalculator } from "@/components/landing/roi-calculator";
 import { LandingSteps } from "@/components/landing/steps";
 import { LandingTestimonials } from "@/components/landing/testimonials";
+import { getMerchantSession } from "@/dal/merchant";
+import { getProgramByOrganization } from "@/dal/program";
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
 }
 
 const HomePage = async ({ params }: HomePageProps) => {
-  const { locale } = await params;
+  const [{ locale }, merchantSession] = await Promise.all([
+    params,
+    getMerchantSession(),
+  ]);
+
+  if (merchantSession) {
+    const program = await getProgramByOrganization(
+      merchantSession.organizationId
+    );
+    if (!program) {
+      redirect(`/${locale}/onboarding`);
+    }
+    redirect(`/${locale}/dashboard`);
+  }
 
   return (
     <div className="bg-background text-foreground selection:bg-primary selection:text-primary-foreground font-sans antialiased">

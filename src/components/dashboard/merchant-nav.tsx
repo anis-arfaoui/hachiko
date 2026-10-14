@@ -1,12 +1,21 @@
 "use client";
 
-import { BarChart3, LogOut, QrCode, Settings, Store } from "lucide-react";
+import {
+  BarChart3,
+  LogOut,
+  Menu,
+  QrCode,
+  Settings,
+  Store,
+  X,
+} from "lucide-react";
 import { useLocale } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { signOut, useActiveOrganization } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +31,7 @@ export const MerchantNav = ({
   const pathname = usePathname();
   const router = useRouter();
   const locale = useLocale();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: activeOrg } = useActiveOrganization();
 
@@ -48,79 +58,200 @@ export const MerchantNav = ({
     },
   ];
 
+  const orgName = activeOrg?.name || initialOrgName;
+
   return (
-    <div className="bg-background text-foreground flex min-h-screen flex-col">
-      {/* Top Navigation */}
-      <header className="border-border bg-card/90 sticky top-0 z-40 border-b backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
-          <div className="flex items-center gap-6">
-            <Link
-              href={`/${locale}/dashboard`}
-              className="text-foreground flex items-center gap-2.5 text-lg font-bold transition-opacity hover:opacity-90"
-            >
-              <div className="bg-primary text-primary-foreground flex h-9 w-9 items-center justify-center rounded-lg shadow-sm">
-                <Store className="h-5 w-5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="leading-tight">
-                  {activeOrg?.name || initialOrgName}
-                </span>
-                <span className="text-muted-foreground text-xs font-normal">
-                  Walaa • Fidélité Digitale
-                </span>
-              </div>
-            </Link>
+    <div className="bg-background text-foreground flex min-h-screen">
+      {/* 1. Desktop Left Sidebar */}
+      <aside className="border-border bg-card sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r p-5 md:flex">
+        {/* Top Section: Logo & Navigation */}
+        <div className="space-y-6">
+          {/* Brand header */}
+          <Link
+            href={`/${locale}/dashboard`}
+            className="flex items-center gap-3 transition-opacity hover:opacity-90"
+          >
+            <Image
+              src="/walaa-logo.png"
+              alt="Walaa"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-full object-cover shadow-xs"
+            />
+            <div className="flex flex-col">
+              <span className="text-foreground text-lg leading-none font-black tracking-tight">
+                Walaa
+              </span>
+              <span className="text-muted-foreground mt-0.5 text-[11px] font-medium">
+                Fidélité Digitale
+              </span>
+            </div>
+          </Link>
 
-            {/* Nav items */}
-            <nav className="hidden items-center gap-1 md:flex">
-              {navLinks.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-secondary text-foreground font-semibold"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
+          {/* Commerce Badge */}
+          <div className="border-border bg-muted/40 flex items-center gap-2.5 rounded-xl border p-2.5">
+            <div className="bg-primary/10 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+              <Store className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-foreground truncate text-xs font-bold">
+                {orgName}
+              </div>
+              <div className="text-muted-foreground text-[10px]">
+                Espace Commerçant
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/${locale}/till`}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 hidden items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-medium shadow-sm transition-colors sm:inline-flex"
-            >
-              <QrCode className="h-3.5 w-3.5" />
-              <span>Ouvrir Scanner</span>
-            </Link>
+          {/* Navigation Links */}
+          <nav className="space-y-1">
+            {navLinks.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              title="Se déconnecter"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="ml-1.5 hidden sm:inline">Déconnexion</span>
-            </Button>
-          </div>
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
-      </header>
 
-      {/* Main Content Area */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
-        {children}
-      </main>
+        {/* Bottom Section: Déconnexion */}
+        <div className="border-border border-t pt-4">
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-colors"
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* 2. Mobile Header & Drawer */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="border-border bg-card/90 sticky top-0 z-30 flex items-center justify-between border-b px-4 py-3 backdrop-blur-xs md:hidden">
+          <Link
+            href={`/${locale}/dashboard`}
+            className="flex items-center gap-2.5"
+          >
+            <Image
+              src="/walaa-logo.png"
+              alt="Walaa"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-full object-cover"
+            />
+            <span className="text-foreground max-w-[160px] truncate text-sm font-bold">
+              {orgName}
+            </span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Ouvrir le menu"
+            className="hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg p-2 transition-colors"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </header>
+
+        {/* Mobile slide-over drawer */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 flex md:hidden">
+            <button
+              type="button"
+              aria-label="Fermer le menu"
+              onClick={() => setMobileMenuOpen(false)}
+              className="bg-background/80 fixed inset-0 backdrop-blur-xs transition-opacity"
+            />
+
+            <div className="border-border bg-card relative z-10 flex h-full w-4/5 max-w-xs flex-col justify-between border-r p-5 shadow-2xl">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <Image
+                      src="/walaa-logo.png"
+                      alt="Walaa"
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                    <span className="text-foreground text-base font-bold">
+                      Walaa
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setMobileMenuOpen(false)}
+                    aria-label="Fermer"
+                    className="text-muted-foreground hover:text-foreground rounded-lg p-1.5"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="border-border bg-muted/40 rounded-xl border p-2.5 text-xs font-semibold">
+                  <div className="text-foreground truncate">{orgName}</div>
+                </div>
+
+                <nav className="space-y-1">
+                  {navLinks.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all",
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-xs"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div className="border-border border-t pt-4">
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-colors"
+                >
+                  <LogOut className="h-4 w-4 shrink-0" />
+                  <span>Déconnexion</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+      </div>
     </div>
   );
 };
