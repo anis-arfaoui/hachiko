@@ -173,44 +173,89 @@ const ProgramBuilderPage = () => {
                 {/* Target required */}
                 {programType === "stamps" ? (
                   <div className="space-y-3">
-                    <Label>
-                      Nombre de tampons requis ({stampsRequired} visites)
-                    </Label>
-                    <div className="flex gap-2">
-                      {STAMP_PRESETS.map((count) => (
-                        <Button
-                          key={count}
-                          type="button"
-                          variant={
-                            stampsRequired === count ? "default" : "outline"
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="stampsRequired">
+                        Nombre de tampons requis
+                      </Label>
+                      <span className="text-muted-foreground text-xs font-semibold">
+                        {stampsRequired} tampons
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="stampsRequired"
+                        type="number"
+                        min={2}
+                        max={30}
+                        value={stampsRequired}
+                        onChange={(e) => {
+                          const val = Math.trunc(Number(e.target.value));
+                          if (!Number.isNaN(val)) {
+                            setStampsRequired(Math.max(2, Math.min(30, val)));
                           }
-                          onClick={() => setStampsRequired(count)}
-                          className="flex-1"
-                        >
-                          {count}
-                        </Button>
-                      ))}
+                        }}
+                        className="w-24 text-center font-bold"
+                      />
+                      <div className="flex flex-1 gap-1.5">
+                        {STAMP_PRESETS.map((count) => (
+                          <Button
+                            key={count}
+                            type="button"
+                            size="sm"
+                            variant={
+                              stampsRequired === count ? "default" : "outline"
+                            }
+                            onClick={() => setStampsRequired(count)}
+                            className="flex-1"
+                          >
+                            {count}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <Label>
-                      Objectif de points requis ({stampsRequired} points)
-                    </Label>
-                    <div className="flex gap-2">
-                      {POINT_PRESETS.map((count) => (
-                        <Button
-                          key={count}
-                          type="button"
-                          variant={
-                            stampsRequired === count ? "default" : "outline"
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="pointsRequired">
+                        Objectif de points requis
+                      </Label>
+                      <span className="text-muted-foreground text-xs font-semibold">
+                        {stampsRequired} points
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="pointsRequired"
+                        type="number"
+                        min={5}
+                        max={5000}
+                        step={10}
+                        value={stampsRequired}
+                        onChange={(e) => {
+                          const val = Math.trunc(Number(e.target.value));
+                          if (!Number.isNaN(val)) {
+                            setStampsRequired(Math.max(5, Math.min(5000, val)));
                           }
-                          onClick={() => setStampsRequired(count)}
-                          className="flex-1"
-                        >
-                          {count}
-                        </Button>
-                      ))}
+                        }}
+                        className="w-28 text-center font-bold"
+                      />
+                      <div className="flex flex-1 gap-1.5">
+                        {POINT_PRESETS.map((count) => (
+                          <Button
+                            key={count}
+                            type="button"
+                            size="sm"
+                            variant={
+                              stampsRequired === count ? "default" : "outline"
+                            }
+                            onClick={() => setStampsRequired(count)}
+                            className="flex-1"
+                          >
+                            {count}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}

@@ -13,6 +13,8 @@ import { generateUniqueSlug } from "@/lib/slug";
 interface SignUpContext {
   body?: {
     businessName?: string;
+    phone?: string;
+    phoneNumber?: string;
   };
 }
 
@@ -100,9 +102,15 @@ export const auth = betterAuth({
             const orgId = crypto.randomUUID();
             const now = new Date();
 
+            const userPhone =
+              ctx?.body?.phoneNumber?.trim() || ctx?.body?.phone?.trim();
+
             await db.insert(orgTable).values({
               createdAt: now,
               id: orgId,
+              metadata: userPhone
+                ? JSON.stringify({ phone: userPhone })
+                : undefined,
               name: businessName,
               slug,
             });

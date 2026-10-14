@@ -58,9 +58,18 @@ export interface CompleteOnboardingInput {
   businessName: string;
   category?: string;
   logoUrl?: string;
+  minSpend?: number;
+  pointsPerSpend?: number;
   programType: "stamps" | "points";
   rewardLabel: string;
   targetRequired: number;
+}
+
+interface OrganizationMetadata {
+  category?: string;
+  minSpend?: number;
+  phone?: string;
+  pointsPerSpend?: number;
 }
 
 export const completeOnboardingAction = async (
@@ -74,17 +83,41 @@ export const completeOnboardingAction = async (
 
   // Update business name and category metadata
   const trimmedName = input.businessName.trim();
-  if (trimmedName) {
-    await db
-      .update(organization)
-      .set({
-        metadata: input.category
-          ? JSON.stringify({ category: input.category })
-          : undefined,
-        name: trimmedName,
-      })
-      .where(eq(organization.id, merchantSession.organizationId));
+  const [existingOrg] = await db
+    .select({ metadata: organization.metadata })
+    .from(organization)
+    .where(eq(organization.id, merchantSession.organizationId))
+    .limit(1);
+
+  let metadataObj: OrganizationMetadata = {};
+  if (existingOrg?.metadata) {
+    try {
+      metadataObj = JSON.parse(existingOrg.metadata) as OrganizationMetadata;
+    } catch {
+      metadataObj = {};
+    }
   }
+
+  if (input.category) {
+    metadataObj.category = input.category;
+  }
+  if (input.pointsPerSpend) {
+    metadataObj.pointsPerSpend = input.pointsPerSpend;
+  }
+  if (input.minSpend) {
+    metadataObj.minSpend = input.minSpend;
+  }
+
+  await db
+    .update(organization)
+    .set({
+      metadata:
+        Object.keys(metadataObj).length > 0
+          ? JSON.stringify(metadataObj)
+          : undefined,
+      name: trimmedName || merchantSession.organization.name,
+    })
+    .where(eq(organization.id, merchantSession.organizationId));
 
   const target =
     input.programType === "points"

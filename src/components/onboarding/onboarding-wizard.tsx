@@ -71,11 +71,31 @@ export const OnboardingWizard = ({
 
   // Step 2: Mécanique de fidélité
   const [programType, setProgramType] = useState<"stamps" | "points">("stamps");
-  const [stampsCount, setStampsCount] = useState<number>(10);
-  const [pointsCount, setPointsCount] = useState<number>(100);
+  const [stampsInput, setStampsInput] = useState<string>("10");
+  const [pointsPerSpendInput, setPointsPerSpendInput] = useState<string>("1");
+  const [minSpendInput, setMinSpendInput] = useState<string>("200");
+  const [pointsRequiredInput, setPointsRequiredInput] = useState<string>("100");
   const [rewardLabel, setRewardLabel] = useState<string>(
     "1 café ou thé offert"
   );
+
+  // Validation logic
+  const parsedStamps = Math.trunc(Number(stampsInput.trim()));
+  const isStampsValid =
+    !Number.isNaN(parsedStamps) && parsedStamps >= 2 && parsedStamps <= 30;
+
+  const parsedPointsPerSpend = Math.trunc(Number(pointsPerSpendInput.trim()));
+  const parsedMinSpend = Math.trunc(Number(minSpendInput.trim()));
+  const parsedPointsRequired = Math.trunc(Number(pointsRequiredInput.trim()));
+
+  const isPointsValid =
+    !Number.isNaN(parsedPointsRequired) &&
+    parsedPointsRequired >= 5 &&
+    parsedPointsRequired <= 5000 &&
+    !Number.isNaN(parsedPointsPerSpend) &&
+    parsedPointsPerSpend >= 1 &&
+    !Number.isNaN(parsedMinSpend) &&
+    parsedMinSpend >= 0;
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -167,10 +187,25 @@ export const OnboardingWizard = ({
       return;
     }
 
+    if (programType === "stamps" && !isStampsValid) {
+      setErrorMessage(
+        "Le nombre de tampons doit être un nombre valide compris entre 2 et 30."
+      );
+      return;
+    }
+
+    if (programType === "points" && !isPointsValid) {
+      setErrorMessage(
+        "Veuillez vérifier les paramètres du programme à points (au moins 5 points requis)."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const targetRequired = programType === "points" ? pointsCount : stampsCount;
+    const targetRequired =
+      programType === "points" ? parsedPointsRequired : parsedStamps;
 
     try {
       const res = await completeOnboardingAction({
@@ -178,6 +213,9 @@ export const OnboardingWizard = ({
         businessName: businessName.trim(),
         category,
         logoUrl: logoUrl || undefined,
+        minSpend: programType === "points" ? parsedMinSpend : undefined,
+        pointsPerSpend:
+          programType === "points" ? parsedPointsPerSpend : undefined,
         programType,
         rewardLabel: rewardLabel.trim(),
         targetRequired,
@@ -338,7 +376,6 @@ export const OnboardingWizard = ({
                 id="businessName"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Ex : Le Riad Gourmand"
                 required
               />
             </div>
@@ -606,174 +643,246 @@ export const OnboardingWizard = ({
             </div>
 
             {/* Informational Tip Banner */}
-            <div className="border-border bg-muted/50 text-foreground flex items-center gap-2 rounded-xl border p-3 text-xs">
+            <div className="border-border bg-primary/5 text-foreground border-primary/20 flex items-center gap-2.5 rounded-xl border p-3.5 text-xs">
               <HelpCircle className="text-primary h-4 w-4 shrink-0" />
               <span>
                 {programType === "stamps"
-                  ? "Ex : 10 tampons = 1 café ou dessert offert"
-                  : "Ex : 100 points = 1 plat offert ou 1000 DA de remise"}
+                  ? `Ex : ${isStampsValid ? parsedStamps : 10} tampons = ${rewardLabel.trim() || "1 café ou thé offert"}`
+                  : `Ex : ${isPointsValid ? parsedPointsPerSpend : 1} point${(isPointsValid ? parsedPointsPerSpend : 1) > 1 ? "s" : ""} par 100 DA dépensé → ${isPointsValid ? parsedPointsRequired : 100} points = ${rewardLabel.trim() || "1 plat offert"}`}
               </span>
             </div>
 
             {/* Stamps Mechanic Config */}
             {programType === "stamps" && (
               <div className="space-y-4">
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <Label
-                      htmlFor="stampsCount"
+                      htmlFor="stampsInput"
                       className="text-foreground text-xs font-semibold"
                     >
                       Nombre de tampons par carte
                     </Label>
                     <span className="text-muted-foreground text-xs font-semibold">
-                      {stampsCount} tampons
+                      {isStampsValid
+                        ? `${parsedStamps} tampons`
+                        : "2 à 30 tampons"}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="relative">
                     <Input
-                      id="stampsCount"
+                      id="stampsInput"
                       type="number"
                       min={2}
                       max={30}
-                      value={stampsCount}
-                      onChange={(e) =>
-                        setStampsCount(
-                          Math.max(2, Math.min(30, Number(e.target.value) || 2))
-                        )
-                      }
+                      value={stampsInput}
+                      onChange={(e) => setStampsInput(e.target.value)}
+                      placeholder="10"
+                      className="pr-20 text-sm font-medium"
                     />
-                    <div className="flex gap-1.5">
-                      {STAMP_PRESETS.map((preset) => (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => setStampsCount(preset)}
-                          className={cn(
-                            "h-10 cursor-pointer rounded-xl border px-3 text-xs font-semibold transition-colors",
-                            stampsCount === preset
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "border-border bg-muted text-foreground hover:bg-muted/80"
-                          )}
-                        >
-                          {preset}
-                        </button>
-                      ))}
-                    </div>
+                    <span className="text-muted-foreground pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-xs font-medium">
+                      tampons
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 pt-1">
+                    <span className="text-muted-foreground text-xs">
+                      Suggestions :
+                    </span>
+                    {STAMP_PRESETS.map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setStampsInput(String(preset))}
+                        className={cn(
+                          "h-7 cursor-pointer rounded-lg border px-2.5 text-xs font-medium transition-colors",
+                          parsedStamps === preset
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "border-border bg-muted/60 text-foreground hover:bg-muted"
+                        )}
+                      >
+                        {preset}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
                 {/* Stamp Circles Preview */}
-                <div className="border-border bg-muted/20 rounded-xl border p-4">
-                  <span className="text-muted-foreground block text-xs font-medium">
-                    Aperçu de la carte
-                  </span>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {Array.from({ length: stampsCount }).map((_, idx) => (
-                      <div
-                        key={`preview-stamp-${idx}`}
-                        className={cn(
-                          "flex h-9 w-9 items-center justify-center rounded-full [border-color:var(--brand-border)] [background-color:var(--brand-circle)] text-xs",
-                          idx === 0
-                            ? "text-white shadow-xs"
-                            : "text-muted-foreground border-2"
-                        )}
-                        style={
-                          {
-                            "--brand-border": `${brandColor}80`,
-                            "--brand-circle":
-                              idx === 0 ? brandColor : "transparent",
-                          } as CSSProperties
-                        }
-                      >
-                        {idx === 0 ? <Stamp className="h-4 w-4" /> : null}
-                      </div>
-                    ))}
+                {isStampsValid ? (
+                  <div className="border-border bg-muted/20 rounded-xl border p-4">
+                    <span className="text-muted-foreground block text-xs font-medium">
+                      Aperçu de la carte
+                    </span>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {Array.from({ length: parsedStamps }).map((_, idx) => (
+                        <div
+                          key={`preview-stamp-${idx}`}
+                          className={cn(
+                            "flex h-9 w-9 items-center justify-center rounded-full [border-color:var(--brand-border)] [background-color:var(--brand-circle)] text-xs",
+                            idx === 0
+                              ? "text-white shadow-xs"
+                              : "text-muted-foreground border-2"
+                          )}
+                          style={
+                            {
+                              "--brand-border": `${brandColor}80`,
+                              "--brand-circle":
+                                idx === 0 ? brandColor : "transparent",
+                            } as CSSProperties
+                          }
+                        >
+                          {idx === 0 ? <Stamp className="h-4 w-4" /> : null}
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-muted-foreground mt-3 text-xs">
+                      {parsedStamps} tampons &rarr; récompense débloquée
+                    </p>
                   </div>
-                  <p className="text-muted-foreground mt-3 text-xs">
-                    {stampsCount} tampons &rarr; récompense débloquée
-                  </p>
-                </div>
+                ) : (
+                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-700 dark:text-amber-300">
+                    <p className="font-semibold">
+                      ⚠️ Nombre de tampons invalide ({stampsInput || "vide"})
+                    </p>
+                    <p className="text-muted-foreground mt-1">
+                      Le nombre de tampons doit être compris entre 2 et 30 pour
+                      afficher l&apos;aperçu de la carte et créer votre espace.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Points Mechanic Config */}
             {programType === "points" && (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                {/* 2 columns: Points par 100 DA & Achat minimum (DA) */}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
                     <Label
-                      htmlFor="pointsCount"
+                      htmlFor="pointsPerSpendInput"
                       className="text-foreground text-xs font-semibold"
                     >
-                      Objectif de points pour une récompense
+                      Points par 100 DA
                     </Label>
-                    <span className="text-muted-foreground text-xs font-semibold">
-                      {pointsCount} points
+                    <Input
+                      id="pointsPerSpendInput"
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={pointsPerSpendInput}
+                      onChange={(e) => setPointsPerSpendInput(e.target.value)}
+                      placeholder="1"
+                      className="text-sm font-medium"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="minSpendInput"
+                      className="text-foreground text-xs font-semibold"
+                    >
+                      Achat minimum (DA)
+                    </Label>
+                    <Input
+                      id="minSpendInput"
+                      type="number"
+                      min={0}
+                      step={50}
+                      value={minSpendInput}
+                      onChange={(e) => setMinSpendInput(e.target.value)}
+                      placeholder="200"
+                      className="text-sm font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* Points required for reward */}
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="pointsRequiredInput"
+                    className="text-foreground text-xs font-semibold"
+                  >
+                    Points pour la récompense
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="pointsRequiredInput"
+                      type="number"
+                      min={5}
+                      max={5000}
+                      step={10}
+                      value={pointsRequiredInput}
+                      onChange={(e) => setPointsRequiredInput(e.target.value)}
+                      placeholder="100"
+                      className="pr-16 text-sm font-medium"
+                    />
+                    <span className="text-muted-foreground pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-xs font-medium">
+                      points
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="pointsCount"
-                      type="number"
-                      min={10}
-                      max={2000}
-                      step={10}
-                      value={pointsCount}
-                      onChange={(e) =>
-                        setPointsCount(
-                          Math.max(
-                            10,
-                            Math.min(2000, Number(e.target.value) || 10)
-                          )
-                        )
-                      }
-                    />
-                    <div className="flex gap-1.5">
-                      {POINT_PRESETS.map((preset) => (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => setPointsCount(preset)}
-                          className={cn(
-                            "h-10 cursor-pointer rounded-xl border px-2.5 text-xs font-semibold transition-colors",
-                            pointsCount === preset
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "border-border bg-muted text-foreground hover:bg-muted/80"
-                          )}
-                        >
-                          {preset}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="flex items-center gap-1.5 pt-1">
+                    <span className="text-muted-foreground text-xs">
+                      Suggestions :
+                    </span>
+                    {POINT_PRESETS.map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setPointsRequiredInput(String(preset))}
+                        className={cn(
+                          "h-7 cursor-pointer rounded-lg border px-2.5 text-xs font-medium transition-colors",
+                          parsedPointsRequired === preset
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "border-border bg-muted/60 text-foreground hover:bg-muted"
+                        )}
+                      >
+                        {preset}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
                 {/* Points Progress Preview */}
-                <div className="border-border bg-muted/20 rounded-xl border p-4">
-                  <div className="text-muted-foreground flex items-center justify-between text-xs">
-                    <span className="font-medium">Aperçu de la carte</span>
-                    <span className="font-bold">0 / {pointsCount} pts</span>
-                  </div>
+                {isPointsValid ? (
+                  <div className="border-border bg-muted/20 rounded-xl border p-4">
+                    <div className="text-muted-foreground flex items-center justify-between text-xs">
+                      <span className="font-medium">Aperçu de la carte</span>
+                      <span className="font-bold">
+                        0 / {parsedPointsRequired} pts
+                      </span>
+                    </div>
 
-                  <div className="bg-muted mt-2.5 h-3 w-full overflow-hidden rounded-full">
-                    <div
-                      className="h-full rounded-full [background-color:var(--brand-progress)] transition-[width]"
-                      style={
-                        {
-                          "--brand-progress": brandColor,
-                          width: "35%",
-                        } as CSSProperties
-                      }
-                    />
-                  </div>
+                    <div className="bg-muted mt-2.5 h-3 w-full overflow-hidden rounded-full">
+                      <div
+                        className="h-full rounded-full [background-color:var(--brand-progress)] transition-[width]"
+                        style={
+                          {
+                            "--brand-progress": brandColor,
+                            width: "35%",
+                          } as CSSProperties
+                        }
+                      />
+                    </div>
 
-                  <p className="text-muted-foreground mt-3 text-xs">
-                    {pointsCount} points &rarr; récompense débloquée 🎁
-                  </p>
-                </div>
+                    <p className="text-muted-foreground mt-3 text-xs">
+                      {parsedPointsRequired} points &rarr; récompense débloquée
+                      🎁
+                    </p>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-700 dark:text-amber-300">
+                    <p className="font-semibold">
+                      ⚠️ Configuration des points invalide
+                    </p>
+                    <p className="text-muted-foreground mt-1">
+                      Veuillez renseigner un barème de points valide (au moins 5
+                      points requis) pour afficher la carte et continuer.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -781,9 +890,9 @@ export const OnboardingWizard = ({
             <div className="space-y-1.5">
               <Label
                 htmlFor="rewardLabel"
-                className="text-foreground text-xs font-semibold"
+                className="text-foreground flex items-center gap-1.5 text-xs font-semibold"
               >
-                🎁 Description de la récompense{" "}
+                <span>🎁</span> Description de la récompense{" "}
                 <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -793,7 +902,7 @@ export const OnboardingWizard = ({
                 placeholder={
                   programType === "stamps"
                     ? "Ex : 1 café ou thé offert"
-                    : "Ex : 1 plat offert ou 500 DA de remise"
+                    : "Ex : Réduction de 500 DA sur votre prochain repas"
                 }
                 required
               />
@@ -820,7 +929,13 @@ export const OnboardingWizard = ({
                 type="button"
                 size="lg"
                 onClick={handleFinalSubmit}
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting ||
+                  (programType === "stamps"
+                    ? !isStampsValid
+                    : !isPointsValid) ||
+                  !rewardLabel.trim()
+                }
                 className="flex-1"
               >
                 {isSubmitting ? (
