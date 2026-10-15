@@ -46,6 +46,7 @@ export const rewards = pgTable("rewards", {
 export const customers = pgTable(
   "customers",
   {
+    code: text("code"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     id: text("id").primaryKey(),
     name: text("name").notNull(),
@@ -59,6 +60,7 @@ export const customers = pgTable(
       table.organizationId,
       table.phone
     ),
+    uniqueIndex("customers_org_code_idx").on(table.organizationId, table.code),
   ]
 );
 
@@ -97,6 +99,7 @@ export const transactions = pgTable(
     clientUuid: text("client_uuid").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     id: text("id").primaryKey(),
+    spendAmount: integer("spend_amount"),
     staffUserId: text("staff_user_id").references(() => user.id, {
       onDelete: "set null",
     }),

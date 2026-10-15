@@ -3,12 +3,25 @@
 import { eq, or } from "drizzle-orm";
 import { headers } from "next/headers";
 
-import { findOrCreateCard, getCardByToken } from "@/dal/card";
+import {
+  findCardByIdentifier,
+  findOrCreateCard,
+  getCardByToken,
+} from "@/dal/card";
+import type { CardDetailsWithCooldown } from "@/dal/card";
 import { findOrCreateCustomer } from "@/dal/customer";
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization, upsertProgram } from "@/dal/program";
-import { addStampToCard, redeemCardReward } from "@/dal/transaction";
-import type { AddStampResult, RedeemRewardResult } from "@/dal/transaction";
+import {
+  addStampToCard,
+  cancelTransaction,
+  redeemCardReward,
+} from "@/dal/transaction";
+import type {
+  AddStampResult,
+  CancelTransactionResult,
+  RedeemRewardResult,
+} from "@/dal/transaction";
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
 import { isValidAlgerianPhone } from "@/lib/phone";
@@ -139,9 +152,45 @@ export const getCardDetailsAction = async (token: string) => {
   return card;
 };
 
+export type LookupCustomerActionResult =
+  | {
+      card: CardDetailsWithCooldown;
+      success: true;
+    }
+  | {
+      error: "CUSTOMER_NOT_FOUND" | "UNAUTHORIZED";
+      success: false;
+    };
+
+export const lookupCustomerAction = async (
+  identifier: string
+): Promise<LookupCustomerActionResult> => {
+  const merchantSession = await getMerchantSession();
+
+  if (!merchantSession) {
+    return { error: "UNAUTHORIZED", success: false };
+  }
+
+  const card = await findCardByIdentifier(
+    merchantSession.organizationId,
+    identifier
+  );
+
+  if (!card) {
+    return { error: "CUSTOMER_NOT_FOUND", success: false };
+  }
+
+  return {
+    card,
+    success: true,
+  };
+};
+
 export interface ScanStampInput {
   amount?: number;
   clientUuid: string;
+  ignoreCooldown?: boolean;
+  spendAmount?: number;
   token: string;
 }
 
@@ -164,7 +213,9 @@ export const scanStampAction = async (
   return addStampToCard({
     amount: input.amount,
     clientUuid: input.clientUuid,
+    ignoreCooldown: input.ignoreCooldown,
     organizationId: merchantSession.organizationId,
+    spendAmount: input.spendAmount,
     staffUserId: merchantSession.userId,
     token: input.token,
   });
@@ -190,5 +241,28 @@ export const scanRedeemAction = async (
     organizationId: merchantSession.organizationId,
     staffUserId: merchantSession.userId,
     token,
+  });
+};
+
+export type CancelTransactionActionResult =
+  | CancelTransactionResult
+  | {
+      error: "UNAUTHORIZED";
+      success: false;
+    };
+
+export const cancelTransactionAction = async (
+  transactionId: string
+): Promise<CancelTransactionActionResult> => {
+  const merchantSession = await getMerchantSession();
+
+  if (!merchantSession) {
+    return { error: "UNAUTHORIZED", success: false };
+  }
+
+  return cancelTransaction({
+    organizationId: merchantSession.organizationId,
+    staffUserId: merchantSession.userId,
+    transactionId,
   });
 };

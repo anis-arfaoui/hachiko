@@ -30,6 +30,7 @@ interface CardDetailsState {
   balance: number;
   brandColor: string;
   businessName: string;
+  customerCode?: string | null;
   customerName: string;
   logoUrl: string | null;
   programType?: string;
@@ -232,6 +233,16 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
             <p className="mt-2.5 text-center text-xs font-medium text-white/80">
               Présentez ce QR code à la caisse
             </p>
+            {card.customerCode && (
+              <div className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-white/20 px-3 py-1 backdrop-blur-xs">
+                <span className="text-[11px] font-medium text-white/80">
+                  N° Client :
+                </span>
+                <span className="font-mono text-xs font-extrabold tracking-wider text-white">
+                  {card.customerCode}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Stamps or Points Section */}

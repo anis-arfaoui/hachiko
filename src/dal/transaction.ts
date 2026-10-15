@@ -1,7 +1,12 @@
 import { and, desc, eq, or } from "drizzle-orm";
 
 import { db } from "@/db";
-import { cards, redemptions, transactions } from "@/db/schema/loyalty";
+import {
+  cards,
+  programs,
+  redemptions,
+  transactions,
+} from "@/db/schema/loyalty";
 
 import { getCardByToken } from "./card";
 
@@ -11,7 +16,9 @@ export interface AddStampOptions {
   amount?: number;
   clientUuid: string;
   cooldownMinutes?: number;
+  ignoreCooldown?: boolean;
   organizationId: string;
+  spendAmount?: number;
   staffUserId?: string;
   token: string;
 }
@@ -29,11 +36,13 @@ export type AddStampResult =
   | {
       addedAmount: number;
       balance: number;
+      customerCode?: string;
       isDuplicate: boolean;
       programType: "stamps" | "points";
       rewardReady: boolean;
       stampsRequired: number;
       success: true;
+      transactionId: string;
     };
 
 export const addStampToCard = async (
@@ -65,43 +74,48 @@ export const addStampToCard = async (
     return {
       addedAmount: existingTx[0].amount,
       balance: card.balance,
+      customerCode: card.customerCode ?? undefined,
       isDuplicate: true,
       programType: card.programType === "points" ? "points" : "stamps",
       rewardReady: card.balance >= card.stampsRequired,
       stampsRequired: card.stampsRequired,
       success: true,
+      transactionId: existingTx[0].id,
     };
   }
 
-  // Cooldown check: prevent accidental double-scans of the same card within the cooldown window
-  const cooldownMin = options.cooldownMinutes ?? DEFAULT_COOLDOWN_MINUTES;
-  const recentTx = await db
-    .select()
-    .from(transactions)
-    .where(
-      and(
-        eq(transactions.cardId, card.cardId),
-        or(eq(transactions.type, "stamp"), eq(transactions.type, "points"))
+  // Cooldown check: prevent accidental double-scans of the same card within the cooldown window (unless bypassed)
+  if (!options.ignoreCooldown) {
+    const cooldownMin = options.cooldownMinutes ?? DEFAULT_COOLDOWN_MINUTES;
+    const recentTx = await db
+      .select()
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.cardId, card.cardId),
+          or(eq(transactions.type, "stamp"), eq(transactions.type, "points"))
+        )
       )
-    )
-    .orderBy(desc(transactions.createdAt))
-    .limit(1);
+      .orderBy(desc(transactions.createdAt))
+      .limit(1);
 
-  if (recentTx[0]) {
-    const elapsedMs = Date.now() - recentTx[0].createdAt.getTime();
-    const cooldownMs = cooldownMin * 60 * 1000;
+    if (recentTx[0]) {
+      const elapsedMs = Date.now() - recentTx[0].createdAt.getTime();
+      const cooldownMs = cooldownMin * 60 * 1000;
 
-    if (elapsedMs < cooldownMs) {
-      const remainingSeconds = Math.ceil((cooldownMs - elapsedMs) / 1000);
-      return {
-        error: "COOLDOWN_ACTIVE",
-        remainingSeconds,
-        success: false,
-      };
+      if (elapsedMs < cooldownMs) {
+        const remainingSeconds = Math.ceil((cooldownMs - elapsedMs) / 1000);
+        return {
+          error: "COOLDOWN_ACTIVE",
+          remainingSeconds,
+          success: false,
+        };
+      }
     }
   }
 
   const newBalance = card.balance + increment;
+  const transactionId = crypto.randomUUID();
 
   // Atomic database update
   await db.transaction(async (tx) => {
@@ -117,7 +131,8 @@ export const addStampToCard = async (
       amount: increment,
       cardId: card.cardId,
       clientUuid: options.clientUuid,
-      id: crypto.randomUUID(),
+      id: transactionId,
+      spendAmount: options.spendAmount ?? null,
       staffUserId: options.staffUserId,
       type: txType,
     });
@@ -126,10 +141,75 @@ export const addStampToCard = async (
   return {
     addedAmount: increment,
     balance: newBalance,
+    customerCode: card.customerCode ?? undefined,
     isDuplicate: false,
     programType: card.programType === "points" ? "points" : "stamps",
     rewardReady: newBalance >= card.stampsRequired,
     stampsRequired: card.stampsRequired,
+    success: true,
+    transactionId,
+  };
+};
+
+export interface CancelTransactionOptions {
+  organizationId: string;
+  staffUserId?: string;
+  transactionId: string;
+}
+
+export type CancelTransactionResult =
+  | {
+      error: "TRANSACTION_NOT_FOUND" | "UNAUTHORIZED_ORGANIZATION";
+      success: false;
+    }
+  | {
+      newBalance: number;
+      success: true;
+    };
+
+export const cancelTransaction = async (
+  options: CancelTransactionOptions
+): Promise<CancelTransactionResult> => {
+  const rows = await db
+    .select({
+      amount: transactions.amount,
+      balance: cards.balance,
+      cardId: cards.id,
+      organizationId: programs.organizationId,
+      txId: transactions.id,
+      type: transactions.type,
+    })
+    .from(transactions)
+    .innerJoin(cards, eq(transactions.cardId, cards.id))
+    .innerJoin(programs, eq(cards.programId, programs.id))
+    .where(eq(transactions.id, options.transactionId))
+    .limit(1);
+
+  const [txRecord] = rows;
+  if (!txRecord) {
+    return { error: "TRANSACTION_NOT_FOUND", success: false };
+  }
+
+  if (txRecord.organizationId !== options.organizationId) {
+    return { error: "UNAUTHORIZED_ORGANIZATION", success: false };
+  }
+
+  const revertedBalance = Math.max(0, txRecord.balance - txRecord.amount);
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(cards)
+      .set({
+        balance: revertedBalance,
+        updatedAt: new Date(),
+      })
+      .where(eq(cards.id, txRecord.cardId));
+
+    await tx.delete(transactions).where(eq(transactions.id, txRecord.txId));
+  });
+
+  return {
+    newBalance: revertedBalance,
     success: true,
   };
 };

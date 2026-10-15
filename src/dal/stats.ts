@@ -81,6 +81,22 @@ const getInitials = (name: string): string => {
 
 const formatDayKey = (d: Date): string => d.toISOString().slice(0, 10);
 
+const calculateTxSpend = (
+  spendAmount: number | null | undefined,
+  amount: number,
+  programType: "stamps" | "points",
+  pointsPerSpend: number,
+  minSpendDA: number
+): number => {
+  if (spendAmount && spendAmount > 0) {
+    return spendAmount;
+  }
+  if (programType === "points") {
+    return Math.round((amount * 100) / pointsPerSpend);
+  }
+  return minSpendDA;
+};
+
 export const getMerchantStats = async (
   organizationId: string
 ): Promise<MerchantStats> => {
@@ -171,6 +187,7 @@ export const getMerchantStats = async (
         customerName: customers.name,
         customerPhone: customers.phone,
         id: transactions.id,
+        spendAmount: transactions.spendAmount,
         type: transactions.type,
       })
       .from(transactions)
@@ -219,10 +236,13 @@ export const getMerchantStats = async (
     const isWithin30Days = txDate >= thirtyDaysAgo;
 
     // Revenue calculation
-    const txSpendDA =
-      programType === "points"
-        ? Math.round((tx.amount * 100) / pointsPerSpend)
-        : minSpendDA;
+    const txSpendDA = calculateTxSpend(
+      tx.spendAmount,
+      tx.amount,
+      programType,
+      pointsPerSpend,
+      minSpendDA
+    );
 
     if (isWithin30Days) {
       totalRevenueDA += txSpendDA;
@@ -264,10 +284,13 @@ export const getMerchantStats = async (
 
   for (const tx of allTransactions) {
     const cId = tx.customerId;
-    const txSpendDA =
-      programType === "points"
-        ? Math.round((tx.amount * 100) / pointsPerSpend)
-        : minSpendDA;
+    const txSpendDA = calculateTxSpend(
+      tx.spendAmount,
+      tx.amount,
+      programType,
+      pointsPerSpend,
+      minSpendDA
+    );
 
     if (visitsPerCustomer[cId]) {
       visitsPerCustomer[cId].visits += 1;
@@ -355,9 +378,13 @@ export const getMerchantStats = async (
 
   for (const tx of allTransactions) {
     const isPoints = programType === "points";
-    const spendDA = isPoints
-      ? Math.round((tx.amount * 100) / pointsPerSpend)
-      : minSpendDA;
+    const spendDA = calculateTxSpend(
+      tx.spendAmount,
+      tx.amount,
+      isPoints ? "points" : "stamps",
+      pointsPerSpend,
+      minSpendDA
+    );
 
     rawActivityFeed.push({
       amount: tx.amount,

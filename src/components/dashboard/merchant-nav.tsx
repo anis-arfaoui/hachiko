@@ -5,6 +5,7 @@ import {
   LogOut,
   Menu,
   QrCode,
+  ScanLine,
   Settings,
   Store,
   X,
@@ -52,8 +53,13 @@ export const MerchantNav = ({
       label: "Programme",
     },
     {
-      href: `/${locale}/till`,
+      href: `/${locale}/dashboard/qrcode`,
       icon: QrCode,
+      label: "QR Code",
+    },
+    {
+      href: `/${locale}/till`,
+      icon: ScanLine,
       label: "Scanner de caisse",
     },
   ];
