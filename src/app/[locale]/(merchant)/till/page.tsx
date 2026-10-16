@@ -153,6 +153,15 @@ const TillScannerPage = () => {
     [handleLookup]
   );
 
+  const handleScanError = useCallback((err: string) => {
+    setCameraError(err);
+  }, []);
+
+  const handleResetCameraError = useCallback(() => {
+    setCameraError(null);
+    setIsCameraActive(true);
+  }, []);
+
   // Manual search submit
   const handleManualSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -326,7 +335,8 @@ const TillScannerPage = () => {
             isProcessing={isSearching}
             isScanning={isCameraActive}
             onScan={handleCameraScan}
-            onScanError={(err) => setCameraError(err)}
+            onScanError={handleScanError}
+            onResetError={handleResetCameraError}
           />
 
           {!isCameraActive && (

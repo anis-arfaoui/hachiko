@@ -9,6 +9,7 @@ import {
   ScanLine,
   Settings,
   Store,
+  Users,
   X,
 } from "lucide-react";
 import { useLocale } from "next-intl";
@@ -47,6 +48,11 @@ export const MerchantNav = ({
       href: `/${locale}/dashboard`,
       icon: BarChart3,
       label: "Tableau de bord",
+    },
+    {
+      href: `/${locale}/dashboard/clients`,
+      icon: Users,
+      label: "Clients",
     },
     {
       href: `/${locale}/dashboard/program`,
