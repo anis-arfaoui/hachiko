@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization, upsertProgram } from "@/dal/program";
+import { syncProgramRewards } from "@/dal/rewards";
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
 
@@ -386,9 +387,21 @@ export const completeOnboardingAction = async (
     type: input.programType,
   });
 
+  if (program && input.rewardLabel.trim()) {
+    await syncProgramRewards(program.id, [
+      {
+        cost: target,
+        description: null,
+        label: input.rewardLabel.trim(),
+      },
+    ]);
+  }
+
   revalidatePath("/dashboard");
   revalidatePath("/program");
   revalidatePath("/dashboard/program");
+  revalidatePath("/rewards");
+  revalidatePath("/reward");
   revalidatePath("/onboarding");
 
   return { program, success: true };

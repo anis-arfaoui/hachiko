@@ -407,62 +407,40 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
         </p>
 
         {/* 🎁 VOS RÉCOMPENSES - CE QUE VOUS POUVEZ GAGNER (matching image 2) */}
-        <div className="space-y-3.5 rounded-3xl bg-zinc-950 p-5 text-white shadow-xl">
-          <div className="flex items-center gap-1.5 text-[11px] font-black tracking-widest text-zinc-400 uppercase">
-            <Gift className="h-3.5 w-3.5" />
-            <span>Vos récompenses</span>
-          </div>
+        {card.rewards && card.rewards.length > 0 && (
+          <div className="space-y-3.5 rounded-3xl bg-zinc-950 p-5 text-white shadow-xl">
+            <div className="flex items-center gap-1.5 text-[11px] font-black tracking-widest text-zinc-400 uppercase">
+              <Gift className="h-3.5 w-3.5" />
+              <span>Vos récompenses</span>
+            </div>
 
-          <div>
-            <h3 className="text-xl font-black tracking-tight uppercase sm:text-2xl">
-              Ce que vous pouvez gagner
-            </h3>
+            <div>
+              <h3 className="text-xl font-black tracking-tight uppercase sm:text-2xl">
+                Ce que vous pouvez gagner
+              </h3>
 
-            {/* Dynamic prompt */}
-            <p className="mt-0.5 text-xs font-semibold text-zinc-300">
-              {(() => {
-                const effectiveRewards =
-                  card.rewards && card.rewards.length > 0
-                    ? card.rewards
-                    : [
-                        {
-                          cost: card.stampsRequired,
-                          description: null,
-                          id: "default",
-                          label: card.rewardLabel,
-                        },
-                      ];
-                const nextLocked = effectiveRewards.find(
-                  (r) => r.cost > card.balance
-                );
-                if (nextLocked) {
-                  const diff = nextLocked.cost - card.balance;
-                  let unit = "points";
-                  if (card.programType !== "points") {
-                    unit = diff > 1 ? "tampons" : "tampon";
+              {/* Dynamic prompt */}
+              <p className="mt-0.5 text-xs font-semibold text-zinc-300">
+                {(() => {
+                  const nextLocked = card.rewards.find(
+                    (r) => r.cost > card.balance
+                  );
+                  if (nextLocked) {
+                    const diff = nextLocked.cost - card.balance;
+                    let unit = "points";
+                    if (card.programType !== "points") {
+                      unit = diff > 1 ? "tampons" : "tampon";
+                    }
+                    return `Plus que ${diff} ${unit} pour ${nextLocked.label}`;
                   }
-                  return `Plus que ${diff} ${unit} pour ${nextLocked.label}`;
-                }
-                return "Vous avez débloqué toutes les récompenses ! 🎉";
-              })()}
-            </p>
-          </div>
+                  return "Vous avez débloqué toutes les récompenses ! 🎉";
+                })()}
+              </p>
+            </div>
 
-          {/* Reward Tiers List */}
-          <div className="space-y-2 pt-1">
-            {(() => {
-              const effectiveRewards =
-                card.rewards && card.rewards.length > 0
-                  ? card.rewards
-                  : [
-                      {
-                        cost: card.stampsRequired,
-                        description: null,
-                        id: "default",
-                        label: card.rewardLabel,
-                      },
-                    ];
-              return effectiveRewards.map((reward) => {
+            {/* Reward Tiers List */}
+            <div className="space-y-2 pt-1">
+              {card.rewards.map((reward) => {
                 const isUnlocked = card.balance >= reward.cost;
                 return (
                   <div
@@ -519,14 +497,14 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
                     </span>
                   </div>
                 );
-              });
-            })()}
-          </div>
+              })}
+            </div>
 
-          <p className="pt-1 text-[11px] font-medium text-zinc-400">
-            Présentez votre carte en caisse pour utiliser une récompense.
-          </p>
-        </div>
+            <p className="pt-1 text-[11px] font-medium text-zinc-400">
+              Présentez votre carte en caisse pour utiliser une récompense.
+            </p>
+          </div>
+        )}
 
         {/* PWA / Home screen tip */}
         <div className="border-border bg-card text-muted-foreground rounded-xl border p-3 text-center text-xs shadow-sm">

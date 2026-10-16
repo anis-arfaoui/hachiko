@@ -35,30 +35,32 @@ export const RewardsMenuView = ({
 }: RewardsMenuViewProps) => {
   const isPoints = program.type === "points";
 
-  const [rewardsList, setRewardsList] = useState<EditableReward[]>(() => {
-    if (initialRewards.length > 0) {
-      return initialRewards.map((r) => ({
-        cost: String(r.cost),
-        description: r.description || "",
-        id: r.id,
-        label: r.label,
-      }));
-    }
-    return [
-      {
-        cost: String(program.stampsRequired || (isPoints ? 100 : 10)),
-        description: "",
-        id: crypto.randomUUID(),
-        label: program.rewardLabel || "1 Récompense offerte",
-      },
-    ];
-  });
+  const [rewardsList, setRewardsList] = useState<EditableReward[]>(() =>
+    initialRewards.map((r) => ({
+      cost: String(r.cost),
+      description: r.description || "",
+      id: r.id,
+      label: r.label,
+    }))
+  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{
     text: string;
     type: "error" | "success";
   } | null>(null);
+
+  const handleImportDefaultReward = () => {
+    setRewardsList([
+      {
+        cost: String(program.stampsRequired || (isPoints ? 100 : 10)),
+        description: "",
+        id: crypto.randomUUID(),
+        label: program.rewardLabel || "1 Récompense offerte",
+      },
+    ]);
+    setSaveMessage(null);
+  };
 
   const handleAddReward = () => {
     let highestCost = 0;
@@ -74,7 +76,8 @@ export const RewardsMenuView = ({
     if (isPoints) {
       baseCost = 30;
     }
-    const nextCost = highestCost > 0 ? highestCost + step : baseCost;
+    const nextCost =
+      highestCost > 0 ? highestCost + step : program.stampsRequired || baseCost;
 
     setRewardsList((prev) => [
       ...prev,
@@ -85,17 +88,12 @@ export const RewardsMenuView = ({
         label: "",
       },
     ]);
+    setSaveMessage(null);
   };
 
   const handleRemoveReward = (index: number) => {
-    if (rewardsList.length <= 1) {
-      setSaveMessage({
-        text: "Vous devez conserver au moins une récompense dans votre menu.",
-        type: "error",
-      });
-      return;
-    }
     setRewardsList((prev) => prev.filter((_, idx) => idx !== index));
+    setSaveMessage(null);
   };
 
   const handleUpdateField = (
@@ -114,7 +112,7 @@ export const RewardsMenuView = ({
   };
 
   const handleSave = async () => {
-    // Validate that all items have a label and a valid cost
+    // Validate that all items (if any) have a label and a valid cost
     for (const item of rewardsList) {
       if (!item.label.trim()) {
         setSaveMessage({
@@ -147,7 +145,10 @@ export const RewardsMenuView = ({
       const res = await saveProgramRewardsAction(payload);
       if (res.success && res.rewards) {
         setSaveMessage({
-          text: "Menu fidélité enregistré avec succès !",
+          text:
+            res.rewards.length === 0
+              ? "Menu fidélité enregistré : aucune récompense active (section masquée sur la carte client)."
+              : "Menu fidélité enregistré avec succès !",
           type: "success",
         });
         setRewardsList(
@@ -230,100 +231,140 @@ export const RewardsMenuView = ({
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
-          {rewardsList.map((reward, index) => (
-            <div
-              key={reward.id}
-              className="border-border bg-muted/20 space-y-3 rounded-2xl border p-4 transition-all"
-            >
-              {/* Top Row: Label + Cost + Delete */}
-              <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-12">
-                <div className="space-y-1.5 sm:col-span-8">
-                  <Label
-                    htmlFor={`reward-label-${index}`}
-                    className="text-foreground text-xs font-bold"
-                  >
-                    Récompense #{index + 1}
-                  </Label>
-                  <Input
-                    id={`reward-label-${index}`}
-                    value={reward.label}
-                    onChange={(e) =>
-                      handleUpdateField(index, "label", e.target.value)
-                    }
-                    placeholder="Ex: Café offert, 15% de remise..."
-                    className="h-11 font-medium"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1.5 sm:col-span-3">
-                  <Label
-                    htmlFor={`reward-cost-${index}`}
-                    className="text-foreground text-xs font-bold"
-                  >
-                    {isPoints ? "Points requis" : "Tampons"}
-                  </Label>
-                  <Input
-                    id={`reward-cost-${index}`}
-                    type="number"
-                    min={1}
-                    max={isPoints ? 10_000 : 50}
-                    value={reward.cost}
-                    onChange={(e) =>
-                      handleUpdateField(index, "cost", e.target.value)
-                    }
-                    className="h-11 text-center font-bold"
-                    required
-                  />
-                </div>
-
-                <div className="flex justify-end sm:col-span-1">
+          {rewardsList.length === 0 ? (
+            <div className="border-border flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-10 text-center">
+              <div className="bg-muted text-muted-foreground mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
+                <Gift className="h-6 w-6" />
+              </div>
+              <h3 className="text-foreground text-sm font-bold">
+                Aucune récompense dans votre menu
+              </h3>
+              <p className="text-muted-foreground mt-1 mb-4 max-w-sm text-xs leading-relaxed">
+                Vous n&apos;avez défini aucune récompense. Le bloc « Vos
+                récompenses » sera automatiquement masqué sur la carte de
+                fidélité de vos clients.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  onClick={handleAddReward}
+                  className="gap-2 font-bold"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Ajouter une récompense</span>
+                </Button>
+                {program.rewardLabel && (
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveReward(index)}
-                    disabled={rewardsList.length <= 1}
-                    title="Supprimer cette récompense"
-                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive h-11 w-11 rounded-xl transition-colors"
-                    aria-label={`Supprimer la récompense ${reward.label || index + 1}`}
+                    variant="outline"
+                    size="sm"
+                    onClick={handleImportDefaultReward}
+                    className="gap-2 text-xs font-semibold"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <span>Importer « {program.rewardLabel} »</span>
                   </Button>
-                </div>
-              </div>
-
-              {/* Bottom Row: Optional precision / description */}
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor={`reward-desc-${index}`}
-                  className="text-muted-foreground text-xs font-semibold"
-                >
-                  Précision (facultatif)
-                </Label>
-                <Input
-                  id={`reward-desc-${index}`}
-                  value={reward.description}
-                  onChange={(e) =>
-                    handleUpdateField(index, "description", e.target.value)
-                  }
-                  placeholder="Ex: Hors formules déjà en promotion, valable du lundi au vendredi..."
-                  className="h-10 text-xs"
-                />
+                )}
               </div>
             </div>
-          ))}
+          ) : (
+            rewardsList.map((reward, index) => (
+              <div
+                key={reward.id}
+                className="border-border bg-muted/20 space-y-3 rounded-2xl border p-4 transition-all"
+              >
+                {/* Top Row: Label + Cost + Delete */}
+                <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-12">
+                  <div className="space-y-1.5 sm:col-span-8">
+                    <Label
+                      htmlFor={`reward-label-${index}`}
+                      className="text-foreground text-xs font-bold"
+                    >
+                      Récompense #{index + 1}
+                    </Label>
+                    <Input
+                      id={`reward-label-${index}`}
+                      value={reward.label}
+                      onChange={(e) =>
+                        handleUpdateField(index, "label", e.target.value)
+                      }
+                      placeholder="Ex: Café offert, 15% de remise..."
+                      className="h-11 font-medium"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-3">
+                    <Label
+                      htmlFor={`reward-cost-${index}`}
+                      className="text-foreground text-xs font-bold"
+                    >
+                      {isPoints ? "Points requis" : "Tampons"}
+                    </Label>
+                    <Input
+                      id={`reward-cost-${index}`}
+                      type="number"
+                      min={1}
+                      max={isPoints ? 10_000 : 50}
+                      value={reward.cost}
+                      onChange={(e) =>
+                        handleUpdateField(index, "cost", e.target.value)
+                      }
+                      className="h-11 text-center font-bold"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex justify-end sm:col-span-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveReward(index)}
+                      title="Supprimer cette récompense"
+                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive h-11 w-11 rounded-xl transition-colors"
+                      aria-label={`Supprimer la récompense ${reward.label || index + 1}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Bottom Row: Optional precision / description */}
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor={`reward-desc-${index}`}
+                    className="text-muted-foreground text-xs font-semibold"
+                  >
+                    Précision (facultatif)
+                  </Label>
+                  <Input
+                    id={`reward-desc-${index}`}
+                    value={reward.description}
+                    onChange={(e) =>
+                      handleUpdateField(index, "description", e.target.value)
+                    }
+                    placeholder="Ex: Hors formules déjà en promotion, valable du lundi au vendredi..."
+                    className="h-10 text-xs"
+                  />
+                </div>
+              </div>
+            ))
+          )}
 
           {/* Add Reward Button */}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleAddReward}
-            className="hover:border-foreground/50 hover:bg-muted/50 h-12 w-full rounded-2xl border-dashed text-xs font-bold transition-all"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            <span>Ajouter une récompense</span>
-          </Button>
+          {rewardsList.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddReward}
+              className="hover:border-foreground/50 hover:bg-muted/50 h-12 w-full rounded-2xl border-dashed text-xs font-bold transition-all"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              <span>Ajouter une récompense</span>
+            </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -336,38 +377,37 @@ export const RewardsMenuView = ({
         </CardHeader>
         <CardContent className="pt-6">
           <div className="mx-auto w-full max-w-md">
-            {/* Dark Styled Box (matching customer card) */}
-            <div className="rounded-3xl bg-zinc-950 p-6 text-white shadow-2xl">
-              <div className="flex items-center gap-2 text-xs font-black tracking-widest text-zinc-400 uppercase">
-                <Gift className="h-3.5 w-3.5" />
-                <span>Vos récompenses</span>
+            {previewRewards.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-zinc-800 bg-zinc-950/60 p-6 text-center text-zinc-400">
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-900 text-zinc-500">
+                  <Gift className="h-5 w-5" />
+                </div>
+                <p className="text-xs font-bold text-zinc-300">
+                  Section « Vos récompenses » masquée
+                </p>
+                <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
+                  Aucune récompense active. Le bloc « Vos récompenses » ne sera
+                  pas affiché sur la carte de fidélité de vos clients.
+                </p>
               </div>
-              <h2 className="mt-1 text-2xl font-black tracking-tight uppercase">
-                Ce que vous pouvez gagner
-              </h2>
+            ) : (
+              /* Dark Styled Box (matching customer card) */
+              <div className="rounded-3xl bg-zinc-950 p-6 text-white shadow-2xl">
+                <div className="flex items-center gap-2 text-xs font-black tracking-widest text-zinc-400 uppercase">
+                  <Gift className="h-3.5 w-3.5" />
+                  <span>Vos récompenses</span>
+                </div>
+                <h2 className="mt-1 text-2xl font-black tracking-tight uppercase">
+                  Ce que vous pouvez gagner
+                </h2>
 
-              <p className="mt-1 mb-4 text-xs font-medium text-zinc-400">
-                Aperçu indicatif : chaque client voit sa propre progression.
-              </p>
+                <p className="mt-1 mb-4 text-xs font-medium text-zinc-400">
+                  Aperçu indicatif : chaque client voit sa propre progression.
+                </p>
 
-              {/* Rewards List */}
-              <div className="space-y-2">
-                {previewRewards.length === 0 ? (
-                  <div className="flex items-center justify-between rounded-2xl bg-zinc-900/90 p-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-600/90 text-white shadow-xs">
-                        <Check className="h-4 w-4 stroke-[3]" />
-                      </div>
-                      <span className="text-xs font-bold text-zinc-300">
-                        Récompense sans nom
-                      </span>
-                    </div>
-                    <span className="rounded-lg bg-zinc-800 px-2.5 py-1 text-xs font-semibold text-zinc-400">
-                      3 {isPoints ? "points" : "tampons"}
-                    </span>
-                  </div>
-                ) : (
-                  previewRewards.map((item) => (
+                {/* Rewards List */}
+                <div className="space-y-2">
+                  {previewRewards.map((item) => (
                     <div
                       key={item.id}
                       className="flex items-center justify-between rounded-2xl bg-zinc-900/90 p-3.5 shadow-sm transition-all"
@@ -392,14 +432,14 @@ export const RewardsMenuView = ({
                         {item.cost || "0"} {isPoints ? "points" : "tampons"}
                       </span>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
 
-              <p className="mt-4 text-[11px] font-medium text-zinc-400">
-                Présentez votre carte en caisse pour utiliser une récompense.
-              </p>
-            </div>
+                <p className="mt-4 text-[11px] font-medium text-zinc-400">
+                  Présentez votre carte en caisse pour utiliser une récompense.
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

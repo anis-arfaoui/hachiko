@@ -35,19 +35,6 @@ export const getProgramRewardsAction =
     }
 
     const rewardsList = await getRewardsByProgramId(program.id);
-    const effectiveRewards: RewardItem[] =
-      rewardsList.length > 0
-        ? rewardsList
-        : [
-            {
-              cost: program.stampsRequired,
-              createdAt: new Date(),
-              description: null,
-              id: "initial-reward",
-              label: program.rewardLabel,
-              programId: program.id,
-            },
-          ];
 
     return {
       program: {
@@ -57,7 +44,7 @@ export const getProgramRewardsAction =
         stampsRequired: program.stampsRequired,
         type: program.type === "points" ? "points" : "stamps",
       },
-      rewards: effectiveRewards,
+      rewards: rewardsList,
     };
   };
 
@@ -88,13 +75,6 @@ export const saveProgramRewardsAction = async (
     (r) => r.label.trim().length > 0 && Number(r.cost) > 0
   );
 
-  if (validRewards.length === 0) {
-    return {
-      error: "Vous devez définir au moins une récompense valide.",
-      success: false,
-    };
-  }
-
   const updatedRewards = await syncProgramRewards(program.id, validRewards);
 
   revalidatePath("/rewards");
@@ -103,6 +83,7 @@ export const saveProgramRewardsAction = async (
   revalidatePath("/dashboard");
   revalidatePath("/program");
   revalidatePath("/dashboard/program");
+  revalidatePath("/c");
 
   return {
     rewards: updatedRewards,

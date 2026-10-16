@@ -87,23 +87,10 @@ export const getCardByToken = async (token: string) => {
   }
 
   const programRewards = await getRewardsByProgramId(card.programId);
-  const rewardsList =
-    programRewards.length > 0
-      ? programRewards
-      : [
-          {
-            cost: card.stampsRequired,
-            createdAt: card.cardCreatedAt,
-            description: null,
-            id: "default-reward",
-            label: card.rewardLabel,
-            programId: card.programId,
-          },
-        ];
 
   return {
     ...card,
-    rewards: rewardsList,
+    rewards: programRewards,
   };
 };
 
@@ -235,25 +222,12 @@ export const findCardByIdentifier = async (
   }
 
   const programRewards = await getRewardsByProgramId(card.programId);
-  const rewardsList =
-    programRewards.length > 0
-      ? programRewards
-      : [
-          {
-            cost: card.stampsRequired,
-            createdAt: card.cardCreatedAt,
-            description: null,
-            id: "default-reward",
-            label: card.rewardLabel,
-            programId: card.programId,
-          },
-        ];
 
   return {
     ...card,
     cooldownRemainingSeconds,
     customerCode: card.customerCode,
     isCooldownActive,
-    rewards: rewardsList,
+    rewards: programRewards,
   };
 };

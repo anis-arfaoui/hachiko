@@ -5,7 +5,6 @@ import {
   Check,
   Gift,
   Loader2,
-  LogOut,
   QrCode,
   RotateCcw,
   ScanLine,
@@ -495,46 +494,37 @@ export const CashierPortalView = ({
     }
   };
 
-  // Logout / Switch cashier
-  const handleLogoutCashier = () => {
-    setCashierData(null);
-    setDigits(["", "", "", "", "", ""]);
-    setVerifyError(null);
-    setCurrentStep("scanner");
-  };
-
   // =========================================================================
-  // VIEW 1: ACTIVATION SCREEN (screen104.png)
+  // VIEW 1: ACTIVATION SCREEN (matching screen104.png)
   // =========================================================================
   if (!cashierData?.cashier) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-between bg-zinc-50 p-6 sm:p-10 dark:bg-zinc-950">
+      <div className="flex min-h-screen flex-col items-center justify-between bg-white px-4 py-8 text-zinc-900 sm:px-6 sm:py-12">
         <div className="my-auto w-full max-w-md space-y-8 text-center">
           {/* Scanner Icon in dark square */}
           <div className="flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-950 text-white shadow-md dark:bg-zinc-800">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-950 text-white shadow-md">
               <ScanLine className="h-8 w-8 stroke-[2.5]" />
             </div>
           </div>
 
           {/* Heading & Subtitle */}
           <div className="space-y-2">
-            <h1 className="text-foreground text-3xl font-black tracking-tight uppercase sm:text-4xl">
+            <h1 className="text-3xl font-black tracking-tight text-zinc-950 uppercase sm:text-4xl">
               Activer cette caisse
             </h1>
-            <p className="text-muted-foreground mx-auto max-w-sm text-xs leading-relaxed sm:text-sm">
+            <p className="mx-auto max-w-sm text-xs leading-relaxed text-zinc-500 sm:text-sm">
               Demandez le code au gérant : il l&apos;affiche depuis son espace
               Walaa, dans la page Caisses employé.
             </p>
           </div>
 
           {/* Button: Scanner le QR du gérant */}
-          <div>
+          <div className="flex justify-center">
             <Button
               type="button"
-              size="lg"
               onClick={() => setIsScanningPairingQr(true)}
-              className="h-12 w-full max-w-xs rounded-2xl bg-red-600 font-bold text-white shadow-md hover:bg-red-700"
+              className="h-12 w-full max-w-xs rounded-2xl bg-zinc-950 text-sm font-bold text-white shadow-md transition-all hover:bg-zinc-800 active:translate-y-0.5"
             >
               <QrCode className="mr-2 h-5 w-5" />
               <span>Scanner le QR du gérant</span>
@@ -544,16 +534,16 @@ export const CashierPortalView = ({
           {/* Modal to scan manager QR */}
           {isScanningPairingQr && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs">
-              <div className="border-border bg-card relative w-full max-w-sm space-y-4 rounded-3xl border p-5 shadow-2xl">
+              <div className="relative w-full max-w-sm space-y-4 rounded-3xl border border-zinc-200 bg-white p-5 text-zinc-900 shadow-2xl">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold">
+                  <h3 className="text-sm font-bold text-zinc-900">
                     Scannez le code du gérant
                   </h3>
                   <button
                     type="button"
                     onClick={() => setIsScanningPairingQr(false)}
                     aria-label="Fermer"
-                    className="hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg p-1.5"
+                    className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -566,7 +556,7 @@ export const CashierPortalView = ({
                   onScanError={(err) => setPairingCameraError(err)}
                   onResetError={() => setPairingCameraError(null)}
                 />
-                <p className="text-muted-foreground text-center text-xs">
+                <p className="text-center text-xs text-zinc-500">
                   Pointez vers le QR code affiché sur l&apos;écran du gérant.
                 </p>
               </div>
@@ -574,9 +564,9 @@ export const CashierPortalView = ({
           )}
 
           {/* Divider: OU SAISISSEZ LE CODE */}
-          <div className="relative flex items-center justify-center">
-            <div className="border-border w-full border-t" />
-            <span className="text-muted-foreground absolute bg-zinc-50 px-3 text-[11px] font-bold tracking-widest uppercase dark:bg-zinc-950">
+          <div className="relative mx-auto flex w-full max-w-xs items-center justify-center">
+            <div className="w-full border-t border-zinc-200" />
+            <span className="absolute bg-white px-3 text-[11px] font-bold tracking-widest text-zinc-400 uppercase">
               ou saisissez le code
             </span>
           </div>
@@ -602,22 +592,22 @@ export const CashierPortalView = ({
                   onPaste={handleDigitPaste}
                   disabled={isVerifying}
                   className={cn(
-                    "border-border focus:border-foreground focus:ring-foreground/20 h-14 w-11 rounded-xl border-2 bg-white text-center font-mono text-2xl font-black shadow-xs transition-all focus:ring-2 focus:outline-none sm:w-12 dark:bg-zinc-900",
-                    digits[idx] && "border-foreground"
+                    "h-16 w-11 rounded-2xl border-2 border-zinc-200 bg-white text-center font-mono text-2xl font-black text-zinc-900 shadow-xs transition-all focus:border-zinc-950 focus:outline-none sm:w-12",
+                    digits[idx] && "border-zinc-950"
                   )}
                 />
               ))}
             </div>
 
             {isVerifying && (
-              <div className="text-muted-foreground flex items-center justify-center gap-2 text-xs font-semibold">
-                <Loader2 className="h-4 w-4 animate-spin" />
+              <div className="flex items-center justify-center gap-2 text-xs font-semibold text-zinc-500">
+                <Loader2 className="h-4 w-4 animate-spin text-zinc-900" />
                 <span>Vérification de la caisse...</span>
               </div>
             )}
 
             {verifyError && (
-              <div className="border-destructive/20 bg-destructive/10 text-destructive mx-auto max-w-xs rounded-xl border p-3 text-xs font-semibold">
+              <div className="mx-auto max-w-xs rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
                 {verifyError}
               </div>
             )}
@@ -627,9 +617,9 @@ export const CashierPortalView = ({
         {/* Footer: Propulsé par Walaa */}
         <div className="mt-8 flex items-center justify-center gap-2 text-xs font-medium text-zinc-400">
           <span>Propulsé par</span>
-          <div className="flex items-center gap-1.5 font-bold text-zinc-700 dark:text-zinc-300">
+          <div className="flex items-center gap-1.5 font-bold text-zinc-700">
             <Image
-              src="/walaa-logo.png"
+              src="/icon.png"
               alt="Walaa"
               width={18}
               height={18}
@@ -643,66 +633,53 @@ export const CashierPortalView = ({
   }
 
   // =========================================================================
-  // VIEW 2: ACTIVE CASHIER SCANNER (screen105.png)
+  // VIEW 2: ACTIVE CASHIER SCANNER (matching screen105.png)
   // =========================================================================
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-between bg-zinc-50 p-4 sm:p-6 dark:bg-zinc-950">
+    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-between bg-white p-4 text-zinc-900 sm:p-6">
       <div className="space-y-6">
-        {/* Top Bar: Brand + Cashier Badge */}
+        {/* Top Bar: Brand Logo + Names (left) and Cashier Name pill badge (right). NO LOGOUT BUTTON */}
         <header className="flex items-center justify-between pt-2">
           <div className="flex items-center gap-2.5">
             <Image
-              src={cashierData.organization?.logo || "/walaa-logo.png"}
+              src={cashierData.organization?.logo || "/icon.png"}
               alt="Logo"
-              width={32}
-              height={32}
-              className="h-8 w-8 rounded-full object-cover shadow-xs"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-full object-cover shadow-xs"
               unoptimized={Boolean(cashierData.organization?.logo)}
             />
-            <div className="flex flex-col">
-              <span className="text-foreground text-sm font-black tracking-tight">
-                {cashierData.organization?.name || "Walaa"}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black tracking-tight text-zinc-900">
+                Walaa
               </span>
-              <span className="text-muted-foreground text-[10px] font-semibold">
-                Fidélité Digitale
+              <span className="text-sm font-bold text-zinc-700">
+                {cashierData.organization?.name || "Commerce"}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="border-border bg-card inline-flex items-center gap-1.5 rounded-full border px-3 py-1 shadow-xs">
-              <User className="h-3 w-3 text-zinc-500" />
-              <span className="text-foreground text-xs font-bold">
-                {cashierData.cashier.name}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleLogoutCashier}
-              title="Changer de caisse"
-              className="hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg p-1.5 transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+          {/* Cashier pill badge (matching screen105.png: coucou) - NO LOGOUT BUTTON */}
+          <div className="rounded-full bg-zinc-100 px-4 py-1.5 text-xs font-semibold text-zinc-700 shadow-xs">
+            {cashierData.cashier.name}
           </div>
         </header>
 
         {/* =====================================================================
-            STAGE 1: CAMERA SCANNER (screen105.png)
+            STAGE 1: CAMERA SCANNER (matching screen105.png)
             ===================================================================== */}
         {currentStep === "scanner" && (
           <div className="space-y-6 pt-2">
             {/* Mode Caisse Label */}
-            <div className="flex items-center justify-center gap-2 text-center">
-              <ScanLine className="text-muted-foreground h-4 w-4" />
-              <span className="text-muted-foreground text-xs font-black tracking-[0.2em] uppercase">
+            <div className="flex items-center justify-center gap-1.5 text-center">
+              <ScanLine className="h-4 w-4 text-zinc-400" />
+              <span className="text-xs font-black tracking-[0.2em] text-zinc-400 uppercase">
                 Mode Caisse
               </span>
             </div>
 
-            {/* Camera Viewfinder with Target Reticle */}
-            <div className="relative">
+            {/* Camera Viewfinder (Rounded container with reticle overlay matching screen105.png) */}
+            <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-3xl bg-black shadow-lg">
               <CameraView
                 error={cameraError}
                 isProcessing={isSearching}
@@ -715,24 +692,48 @@ export const CashierPortalView = ({
                 }}
               />
 
+              {/* White corner reticles and guide text overlay (matching screen105.png) */}
+              {isCameraActive && !cameraError && (
+                <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="h-8 w-8 rounded-tl-sm border-t-4 border-l-4 border-white" />
+                    <div className="h-8 w-8 rounded-tr-sm border-t-4 border-r-4 border-white" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <div className="w-full border-t border-white/60 shadow-sm" />
+                  </div>
+                  <div>
+                    <p className="mb-2 text-center text-[11px] font-semibold text-white/90 drop-shadow-md">
+                      Pointez vers le QR code du client
+                    </p>
+                    <div className="flex items-end justify-between">
+                      <div className="h-8 w-8 rounded-bl-sm border-b-4 border-l-4 border-white" />
+                      <div className="h-8 w-8 rounded-br-sm border-r-4 border-b-4 border-white" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {!isCameraActive && (
-                <Button
-                  size="lg"
-                  className="mt-4 w-full"
-                  onClick={() => {
-                    setCameraError(null);
-                    setIsCameraActive(true);
-                  }}
-                >
-                  <Camera className="mr-2 h-5 w-5" />
-                  <span>Activer la caméra</span>
-                </Button>
+                <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <Button
+                    size="lg"
+                    className="w-full max-w-xs bg-white font-bold text-zinc-900 hover:bg-zinc-100"
+                    onClick={() => {
+                      setCameraError(null);
+                      setIsCameraActive(true);
+                    }}
+                  >
+                    <Camera className="mr-2 h-5 w-5" />
+                    <span>Activer la caméra</span>
+                  </Button>
+                </div>
               )}
             </div>
 
-            {/* Instruction Below Camera */}
-            <div className="space-y-2 pt-2 text-center">
-              <p className="text-muted-foreground text-xs font-medium">
+            {/* Instruction Below Camera (matching screen105.png) */}
+            <div className="space-y-3 pt-1 text-center">
+              <p className="text-xs font-medium text-zinc-500">
                 La caméra ne lit pas ? Entrez le code client, ou collez le lien
                 de sa carte :
               </p>
@@ -743,12 +744,12 @@ export const CashierPortalView = ({
                   placeholder="Code client C-XXXXXX, ou lien de la carte"
                   value={manualQuery}
                   onChange={(e) => setManualQuery(e.target.value)}
-                  className="h-11 rounded-xl text-xs font-medium"
+                  className="h-11 rounded-xl border-zinc-200 bg-white text-xs font-medium text-zinc-900 shadow-xs placeholder:text-zinc-400"
                 />
                 <Button
                   type="submit"
                   disabled={isSearching || !manualQuery.trim()}
-                  className="h-11 rounded-xl bg-zinc-600 px-5 font-bold text-white hover:bg-zinc-700 dark:bg-zinc-700"
+                  className="h-11 rounded-xl bg-zinc-400 px-5 text-xs font-bold text-white transition-colors hover:bg-zinc-500"
                 >
                   {isSearching ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -759,7 +760,7 @@ export const CashierPortalView = ({
               </form>
 
               {lookupError && (
-                <div className="border-destructive/20 bg-destructive/10 text-destructive flex items-start gap-2 rounded-xl border p-3 text-left text-xs font-semibold">
+                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-left text-xs font-semibold text-red-600">
                   <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>{lookupError}</span>
                 </div>
@@ -881,8 +882,8 @@ export const CashierPortalView = ({
                         className={cn(
                           "flex items-center justify-between rounded-xl border p-3 text-xs transition-all",
                           canRedeem
-                            ? "border-amber-300 bg-amber-50/80 text-amber-950 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-200"
-                            : "border-border bg-card/60 text-muted-foreground opacity-70"
+                            ? "border-amber-300 bg-amber-50/80 text-amber-950"
+                            : "border-zinc-200 bg-zinc-50/60 text-zinc-500 opacity-70"
                         )}
                       >
                         <div className="min-w-0 pr-2">
@@ -890,14 +891,12 @@ export const CashierPortalView = ({
                             <Gift
                               className={cn(
                                 "h-3.5 w-3.5 shrink-0",
-                                canRedeem
-                                  ? "text-amber-600 dark:text-amber-400"
-                                  : "text-muted-foreground"
+                                canRedeem ? "text-amber-600" : "text-zinc-400"
                               )}
                             />
                             <span className="truncate">{reward.label}</span>
                           </div>
-                          <div className="text-muted-foreground mt-0.5 text-[11px]">
+                          <div className="mt-0.5 text-[11px] text-zinc-500">
                             Coût : {reward.cost}{" "}
                             {activeCard.programType === "points"
                               ? "points"
@@ -919,7 +918,7 @@ export const CashierPortalView = ({
                             <span>Récompenser (-{reward.cost})</span>
                           </Button>
                         ) : (
-                          <span className="text-muted-foreground shrink-0 text-[11px] font-medium">
+                          <span className="shrink-0 text-[11px] font-medium text-zinc-400">
                             Manque {reward.cost - activeCard.balance}
                           </span>
                         )}
@@ -932,15 +931,15 @@ export const CashierPortalView = ({
 
             {/* Cooldown Warning */}
             {activeCard.isCooldownActive && (
-              <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-900 dark:text-amber-200">
+              <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-900">
                 <div className="flex items-start gap-2 font-semibold">
-                  <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                   <span>
                     Ce client a déjà été scanné il y a moins de 3 minutes (délai
                     restant : {activeCard.cooldownRemainingSeconds}s).
                   </span>
                 </div>
-                <label className="flex cursor-pointer items-center gap-2 pt-1 text-xs font-medium">
+                <label className="flex cursor-pointer items-center gap-2 pt-1 text-xs font-medium text-amber-950">
                   <input
                     type="checkbox"
                     checked={bypassCooldown}
@@ -1112,7 +1111,7 @@ export const CashierPortalView = ({
       {/* Footer */}
       <footer className="pt-8 text-center text-xs text-zinc-400">
         <span>Caisse enregistrée sous </span>
-        <strong className="text-zinc-600 dark:text-zinc-300">
+        <strong className="text-zinc-600">
           {cashierData.organization?.name}
         </strong>
       </footer>
