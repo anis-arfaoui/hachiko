@@ -4,20 +4,18 @@ import { Check, Copy, ExternalLink } from "lucide-react";
 import { useState } from "react";
 
 interface DashboardHeaderProps {
-  locale: string;
+  locale?: string;
   orgSlug: string;
 }
 
-export const DashboardHeader = ({ locale, orgSlug }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ orgSlug }: DashboardHeaderProps) => {
   const [copied, setCopied] = useState(false);
 
   const relativePath = `/j/${orgSlug}`;
 
   const handleCopy = () => {
     const origin = typeof window === "undefined" ? "" : window.location.origin;
-    const fullJoinUrl = origin
-      ? `${origin}/${locale}/j/${orgSlug}`
-      : relativePath;
+    const fullJoinUrl = origin ? `${origin}/j/${orgSlug}` : relativePath;
 
     navigator.clipboard.writeText(fullJoinUrl);
     setCopied(true);
@@ -67,7 +65,7 @@ export const DashboardHeader = ({ locale, orgSlug }: DashboardHeaderProps) => {
           </button>
 
           <a
-            href={`/${locale}/j/${orgSlug}`}
+            href={`/j/${orgSlug}`}
             target="_blank"
             rel="noopener noreferrer"
             title="Ouvrir la page client dans un nouvel onglet"

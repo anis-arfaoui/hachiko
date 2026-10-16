@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 interface CashiersViewProps {
   initialCashiers: CashierItem[];
   initialStats: CashierLeaderboardStats[];
-  locale: string;
+  locale?: string;
   program: {
     brandColor: string;
     rewardLabel: string;
@@ -75,7 +75,7 @@ const renderRankBadge = (rank: number) => {
 export const CashiersView = ({
   initialCashiers,
   initialStats,
-  locale,
+  locale: _locale,
   program,
 }: CashiersViewProps) => {
   const [cashiersList, setCashiersList] =
@@ -131,7 +131,7 @@ export const CashiersView = ({
         typeof window === "undefined"
           ? "https://walaa.app"
           : window.location.origin;
-      const pairingUrl = `${host}/${locale}/caisse?code=${pairingCashier.code}`;
+      const pairingUrl = `${host}/caisse?code=${pairingCashier.code}`;
 
       const generateQr = async () => {
         try {
@@ -153,7 +153,7 @@ export const CashiersView = ({
     return () => {
       isMounted = false;
     };
-  }, [pairingCashier, locale]);
+  }, [pairingCashier]);
 
   // Handle Create Cashier
   const handleCreateCashier = async (e: React.FormEvent) => {
@@ -222,7 +222,7 @@ export const CashiersView = ({
       typeof window === "undefined"
         ? "https://walaa.app"
         : window.location.origin;
-    const pairingUrl = `${host}/${locale}/caisse?code=${pairingCashier.code}`;
+    const pairingUrl = `${host}/caisse?code=${pairingCashier.code}`;
 
     navigator.clipboard.writeText(pairingUrl);
     setIsCopied(true);

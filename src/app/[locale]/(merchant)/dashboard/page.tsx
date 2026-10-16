@@ -20,7 +20,7 @@ const DashboardPage = async ({ params }: DashboardPageProps) => {
   ]);
 
   if (!merchantSession) {
-    redirect(`/${locale}/sign-in`);
+    redirect("/sign-in");
   }
 
   const stats = await getMerchantStats(merchantSession.organizationId);

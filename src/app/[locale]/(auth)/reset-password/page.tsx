@@ -1,7 +1,6 @@
 "use client";
 
 import { AlertTriangle, CheckCircle2, Lock, ShieldCheck } from "lucide-react";
-import { useLocale } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -21,7 +20,6 @@ import { resetPassword } from "@/lib/auth-client";
 
 const ResetPasswordForm = () => {
   const router = useRouter();
-  const locale = useLocale();
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token");
@@ -97,13 +95,13 @@ const ResetPasswordForm = () => {
             <Button
               type="button"
               className="w-full"
-              onClick={() => router.push(`/${locale}/forgot-password`)}
+              onClick={() => router.push("/forgot-password")}
             >
               Demander un nouveau lien
             </Button>
             <div className="text-center">
               <Link
-                href={`/${locale}/sign-in`}
+                href="/sign-in"
                 className="text-muted-foreground hover:text-foreground text-sm underline transition-colors"
               >
                 Retour à la connexion
@@ -132,7 +130,7 @@ const ResetPasswordForm = () => {
           <Button
             type="button"
             className="w-full"
-            onClick={() => router.push(`/${locale}/sign-in`)}
+            onClick={() => router.push("/sign-in")}
           >
             Se connecter
           </Button>
@@ -198,7 +196,7 @@ const ResetPasswordForm = () => {
 
         <div className="text-muted-foreground mt-6 text-center text-sm">
           <Link
-            href={`/${locale}/sign-in`}
+            href="/sign-in"
             className="hover:text-primary underline transition-colors"
           >
             Annuler et retourner à la connexion

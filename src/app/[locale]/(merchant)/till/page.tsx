@@ -13,7 +13,6 @@ import {
   TriangleAlert,
   User,
 } from "lucide-react";
-import { useLocale } from "next-intl";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
@@ -72,8 +71,6 @@ interface SuccessState {
 }
 
 const TillScannerPage = () => {
-  const locale = useLocale();
-
   // Step state: "scan" -> "preview" -> "success"
   const [currentStep, setCurrentStep] = useState<TillStep>("scan");
 
@@ -407,7 +404,7 @@ const TillScannerPage = () => {
       {/* Back to Dashboard Link */}
       <div>
         <Link
-          href={`/${locale}/dashboard`}
+          href="/dashboard"
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />

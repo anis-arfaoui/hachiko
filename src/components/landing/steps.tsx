@@ -2,10 +2,10 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 interface LandingStepsProps {
-  locale: string;
+  locale?: string;
 }
 
-export const LandingSteps = ({ locale }: LandingStepsProps) => (
+export const LandingSteps = ({ locale: _locale }: LandingStepsProps = {}) => (
   <section id="etapes" className="bg-card py-20 lg:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="mx-auto mb-16 max-w-3xl text-center">
@@ -38,7 +38,7 @@ export const LandingSteps = ({ locale }: LandingStepsProps) => (
             </p>
           </div>
           <Link
-            href={`/${locale}/sign-up`}
+            href="/sign-up"
             className="text-primary group mt-8 inline-flex items-center text-sm font-bold hover:underline"
           >
             Créer mon compte{" "}
@@ -84,7 +84,7 @@ export const LandingSteps = ({ locale }: LandingStepsProps) => (
             </p>
           </div>
           <Link
-            href={`/${locale}/sign-up`}
+            href="/sign-up"
             className="text-primary group mt-8 inline-flex items-center text-sm font-bold hover:underline"
           >
             Commencer maintenant{" "}

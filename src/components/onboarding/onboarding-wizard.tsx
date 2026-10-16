@@ -12,7 +12,6 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useLocale } from "next-intl";
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import type { CSSProperties, ChangeEvent } from "react";
@@ -95,7 +94,6 @@ interface OnboardingWizardProps {
 export const OnboardingWizard = ({
   initialBusinessName,
 }: OnboardingWizardProps) => {
-  const locale = useLocale();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Step state
@@ -267,7 +265,7 @@ export const OnboardingWizard = ({
         return;
       }
 
-      window.location.href = `/${locale}/dashboard`;
+      window.location.href = "/dashboard";
     } catch {
       setErrorMessage("Erreur de connexion. Veuillez réessayer.");
       setIsSubmitting(false);

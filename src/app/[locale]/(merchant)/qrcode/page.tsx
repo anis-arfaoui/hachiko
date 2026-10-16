@@ -15,7 +15,7 @@ const QrCodePage = async ({ params }: QrCodePageProps) => {
   ]);
 
   if (!merchantSession) {
-    redirect(`/${locale}/sign-in`);
+    redirect("/sign-in");
   }
 
   const program = await getProgramByOrganization(

@@ -15,7 +15,7 @@ const ClientsPage = async ({ params }: ClientsPageProps) => {
   ]);
 
   if (!merchantSession) {
-    redirect(`/${locale}/sign-in`);
+    redirect("/sign-in");
   }
 
   const data = await getMerchantClientsWithStats(

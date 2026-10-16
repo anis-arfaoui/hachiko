@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 
 interface ClientsViewProps {
   initialClients: MerchantClientItem[];
-  locale: string;
+  locale?: string;
   program: {
     brandColor: string;
     id: string;
@@ -107,7 +107,7 @@ const getInitials = (name: string): string => {
 
 export const ClientsView = ({
   initialClients,
-  locale,
+  locale: _locale,
   program,
   stats,
 }: ClientsViewProps) => {
@@ -126,7 +126,7 @@ export const ClientsView = ({
     if (typeof window === "undefined") {
       return;
     }
-    const cardUrl = `${window.location.origin}/${locale}/c/${token}`;
+    const cardUrl = `${window.location.origin}/c/${token}`;
     try {
       await navigator.clipboard.writeText(cardUrl);
       setCopiedToken(token);
@@ -200,14 +200,14 @@ export const ClientsView = ({
 
         <div className="flex items-center gap-2">
           <Link
-            href={`/${locale}/qrcode`}
+            href="/qrcode"
             className="border-border bg-card hover:bg-muted text-foreground inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-xs transition-colors"
           >
             <QrCode className="h-4 w-4" />
             <span>QR Code d&apos;inscription</span>
           </Link>
           <Link
-            href={`/${locale}/till`}
+            href="/till"
             className="bg-foreground text-background hover:bg-foreground/90 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition-colors"
           >
             <Sparkles className="h-4 w-4" />
@@ -458,7 +458,7 @@ export const ClientsView = ({
               </Button>
             ) : (
               <Link
-                href={`/${locale}/qrcode`}
+                href="/qrcode"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs"
               >
                 <QrCode className="h-4 w-4" />
@@ -665,7 +665,7 @@ export const ClientsView = ({
                               </button>
 
                               <a
-                                href={`/${locale}/c/${client.cardToken}`}
+                                href={`/c/${client.cardToken}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
@@ -856,7 +856,7 @@ export const ClientsView = ({
                         selectedClient.name,
                         typeof window === "undefined"
                           ? ""
-                          : `${window.location.origin}/${locale}/c/${selectedClient.cardToken}`
+                          : `${window.location.origin}/c/${selectedClient.cardToken}`
                       )}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -868,7 +868,7 @@ export const ClientsView = ({
                   </div>
 
                   <a
-                    href={`/${locale}/c/${selectedClient.cardToken}`}
+                    href={`/c/${selectedClient.cardToken}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="border-border text-muted-foreground hover:text-foreground flex w-full items-center justify-center gap-1.5 py-1.5 text-center text-xs font-medium transition-colors"

@@ -41,57 +41,87 @@ export const MerchantNav = ({
 
   const handleSignOut = async () => {
     await signOut();
-    router.push(`/${locale}/sign-in`);
+    router.push("/sign-in");
   };
 
   const navLinks = [
     {
-      href: `/${locale}/dashboard`,
+      aliases: [`/${locale}/dashboard`],
+      href: `/dashboard`,
       icon: BarChart3,
       label: "Tableau de bord",
     },
     {
-      aliases: [`/${locale}/client`, `/${locale}/dashboard/clients`],
-      href: `/${locale}/clients`,
+      aliases: [
+        "/client",
+        "/dashboard/clients",
+        `/${locale}/clients`,
+        `/${locale}/client`,
+        `/${locale}/dashboard/clients`,
+      ],
+      href: `/clients`,
       icon: Users,
       label: "Clients",
     },
     {
-      aliases: [`/${locale}/reward`, `/${locale}/dashboard/rewards`],
-      href: `/${locale}/rewards`,
+      aliases: [
+        "/reward",
+        "/dashboard/rewards",
+        `/${locale}/rewards`,
+        `/${locale}/reward`,
+        `/${locale}/dashboard/rewards`,
+      ],
+      href: `/rewards`,
       icon: Gift,
       label: "Menu fidélité",
     },
     {
-      aliases: [`/${locale}/dashboard/program`],
-      href: `/${locale}/program`,
+      aliases: [
+        "/dashboard/program",
+        `/${locale}/program`,
+        `/${locale}/dashboard/program`,
+      ],
+      href: `/program`,
       icon: Settings,
       label: "Programme",
     },
     {
-      aliases: [`/${locale}/dashboard/appearance`],
-      href: `/${locale}/appearance`,
+      aliases: [
+        "/dashboard/appearance",
+        `/${locale}/appearance`,
+        `/${locale}/dashboard/appearance`,
+      ],
+      href: `/appearance`,
       icon: Palette,
       label: "Apparence",
     },
     {
-      aliases: [`/${locale}/dashboard/qrcode`],
-      href: `/${locale}/qrcode`,
+      aliases: [
+        "/dashboard/qrcode",
+        `/${locale}/qrcode`,
+        `/${locale}/dashboard/qrcode`,
+      ],
+      href: `/qrcode`,
       icon: QrCode,
       label: "QR Code",
     },
     {
       aliases: [
+        "/caisse-employe",
+        "/cashier",
+        "/cashiers",
+        `/${locale}/caisses`,
         `/${locale}/caisse-employe`,
         `/${locale}/cashier`,
         `/${locale}/cashiers`,
       ],
-      href: `/${locale}/caisses`,
+      href: `/caisses`,
       icon: ScanLine,
       label: "Caisses employé",
     },
     {
-      href: `/${locale}/till`,
+      aliases: [`/${locale}/till`],
+      href: `/till`,
       icon: ScanLine,
       label: "Scanner de caisse",
     },
@@ -107,7 +137,7 @@ export const MerchantNav = ({
         <div className="space-y-6">
           {/* Brand header */}
           <Link
-            href={`/${locale}/dashboard`}
+            href="/dashboard"
             className="flex items-center gap-3 transition-opacity hover:opacity-90"
           >
             <Image
@@ -196,10 +226,7 @@ export const MerchantNav = ({
       {/* 2. Mobile Header & Drawer */}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="border-border bg-card/90 sticky top-0 z-30 flex items-center justify-between border-b px-4 py-3 backdrop-blur-xs md:hidden">
-          <Link
-            href={`/${locale}/dashboard`}
-            className="flex items-center gap-2.5"
-          >
+          <Link href="/dashboard" className="flex items-center gap-2.5">
             <Image
               src="/walaa-logo.png"
               alt="Walaa"

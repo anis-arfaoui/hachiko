@@ -27,9 +27,9 @@ const HomePage = async ({ params }: HomePageProps) => {
       merchantSession.organizationId
     );
     if (!program) {
-      redirect(`/${locale}/onboarding`);
+      redirect("/onboarding");
     }
-    redirect(`/${locale}/dashboard`);
+    redirect("/dashboard");
   }
 
   return (

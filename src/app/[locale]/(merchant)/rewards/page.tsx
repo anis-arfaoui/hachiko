@@ -5,18 +5,11 @@ import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization } from "@/dal/program";
 import { getRewardsByProgramId } from "@/dal/rewards";
 
-interface RewardsPageProps {
-  params: Promise<{ locale: string }>;
-}
-
-const RewardsPage = async ({ params }: RewardsPageProps) => {
-  const [{ locale }, merchantSession] = await Promise.all([
-    params,
-    getMerchantSession(),
-  ]);
+const RewardsPage = async () => {
+  const merchantSession = await getMerchantSession();
 
   if (!merchantSession) {
-    redirect(`/${locale}/sign-in`);
+    redirect("/sign-in");
   }
 
   const program = await getProgramByOrganization(
@@ -24,7 +17,7 @@ const RewardsPage = async ({ params }: RewardsPageProps) => {
   );
 
   if (!program) {
-    redirect(`/${locale}/onboarding`);
+    redirect("/onboarding");
   }
 
   const initialRewards = await getRewardsByProgramId(program.id);

@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckCircle2, KeyRound, Mail } from "lucide-react";
-import { useLocale } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,7 +21,6 @@ import { requestPasswordReset } from "@/lib/auth-client";
 
 const ForgotPasswordPage = () => {
   const router = useRouter();
-  const locale = useLocale();
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +35,7 @@ const ForgotPasswordPage = () => {
     try {
       const res = await requestPasswordReset({
         email: email.trim().toLowerCase(),
-        redirectTo: `/${locale}/reset-password`,
+        redirectTo: "/reset-password",
       });
 
       if (res.error) {
@@ -125,7 +123,7 @@ const ForgotPasswordPage = () => {
                   <Button
                     type="button"
                     className="w-full"
-                    onClick={() => router.push(`/${locale}/sign-in`)}
+                    onClick={() => router.push("/sign-in")}
                   >
                     Retour à la connexion
                   </Button>
@@ -173,7 +171,7 @@ const ForgotPasswordPage = () => {
               <div className="text-muted-foreground mt-6 text-center text-sm">
                 Vous vous souvenez de votre mot de passe ?{" "}
                 <Link
-                  href={`/${locale}/sign-in`}
+                  href="/sign-in"
                   className="text-foreground hover:text-primary font-medium underline transition-colors"
                 >
                   Se connecter

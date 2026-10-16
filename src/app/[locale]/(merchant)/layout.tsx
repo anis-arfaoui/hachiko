@@ -7,24 +7,20 @@ import { getProgramByOrganization } from "@/dal/program";
 
 interface MerchantLayoutProps {
   children: ReactNode;
-  params: Promise<{ locale: string }>;
 }
 
-const MerchantLayout = async ({ children, params }: MerchantLayoutProps) => {
-  const [{ locale }, merchantSession] = await Promise.all([
-    params,
-    getMerchantSession(),
-  ]);
+const MerchantLayout = async ({ children }: MerchantLayoutProps) => {
+  const merchantSession = await getMerchantSession();
 
   if (!merchantSession) {
-    redirect(`/${locale}/sign-in`);
+    redirect("/sign-in");
   }
 
   const program = await getProgramByOrganization(
     merchantSession.organizationId
   );
   if (!program) {
-    redirect(`/${locale}/onboarding`);
+    redirect("/onboarding");
   }
 
   return (

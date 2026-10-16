@@ -10,17 +10,17 @@ import { Button } from "@/components/ui/button";
 interface QrCodeViewProps {
   brandColor?: string;
   businessName: string;
-  locale: string;
+  locale?: string;
   orgSlug: string;
 }
 
 export const QrCodeView = ({
   brandColor = "#18181b",
   businessName,
-  locale,
+  locale: _locale,
   orgSlug,
 }: QrCodeViewProps) => {
-  const relativeJoinPath = `/${locale}/j/${orgSlug}`;
+  const relativeJoinPath = `/j/${orgSlug}`;
   const [copied, setCopied] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [displayUrl, setDisplayUrl] = useState(relativeJoinPath);

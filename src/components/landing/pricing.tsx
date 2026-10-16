@@ -2,10 +2,12 @@ import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
 interface LandingPricingProps {
-  locale: string;
+  locale?: string;
 }
 
-export const LandingPricing = ({ locale }: LandingPricingProps) => (
+export const LandingPricing = ({
+  locale: _locale,
+}: LandingPricingProps = {}) => (
   <>
     {/* Pricing Section */}
     <section
@@ -66,7 +68,7 @@ export const LandingPricing = ({ locale }: LandingPricingProps) => (
             </ul>
           </div>
           <Link
-            href={`/${locale}/sign-up`}
+            href="/sign-up"
             className="bg-primary text-primary-foreground hover:bg-primary/90 mt-8 inline-flex w-full items-center justify-center rounded-full px-6 py-3.5 text-sm font-bold shadow-md transition-colors"
           >
             Commencer <span className="ml-1.5">→</span>
@@ -110,7 +112,7 @@ export const LandingPricing = ({ locale }: LandingPricingProps) => (
             </ul>
           </div>
           <Link
-            href={`/${locale}/sign-up`}
+            href="/sign-up"
             className="border-primary bg-card text-primary hover:bg-muted mt-8 inline-flex w-full items-center justify-center rounded-full border px-6 py-3.5 text-sm font-bold transition-colors"
           >
             Commencer <span className="ml-1.5">→</span>
@@ -130,13 +132,13 @@ export const LandingPricing = ({ locale }: LandingPricingProps) => (
       </p>
       <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
         <Link
-          href={`/${locale}/sign-up`}
+          href="/sign-up"
           className="bg-primary text-primary-foreground shadow-primary/30 hover:bg-primary/90 inline-flex w-full items-center justify-center rounded-full px-8 py-3.5 text-sm font-bold shadow-lg transition-colors sm:w-auto"
         >
           Créer mon programme <ArrowRight className="ml-2 h-4 w-4" />
         </Link>
         <Link
-          href={`/${locale}/sign-in`}
+          href="/sign-in"
           className="inline-flex w-full items-center justify-center rounded-full border border-white/20 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/15 sm:w-auto"
         >
           Accéder à mon espace

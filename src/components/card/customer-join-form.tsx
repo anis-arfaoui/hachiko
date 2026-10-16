@@ -19,11 +19,14 @@ import { Label } from "@/components/ui/label";
 import { isValidAlgerianPhone } from "@/lib/phone";
 
 interface CustomerJoinFormProps {
-  locale: string;
+  locale?: string;
   slug: string;
 }
 
-export const CustomerJoinForm = ({ locale, slug }: CustomerJoinFormProps) => {
+export const CustomerJoinForm = ({
+  locale: _locale,
+  slug,
+}: CustomerJoinFormProps) => {
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -80,7 +83,7 @@ export const CustomerJoinForm = ({ locale, slug }: CustomerJoinFormProps) => {
         return;
       }
 
-      router.push(`/${locale}/c/${res.token}`);
+      router.push(`/c/${res.token}`);
     } catch {
       setError("Erreur de connexion. Veuillez réessayer.");
       setIsLoading(false);

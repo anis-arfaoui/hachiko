@@ -14,7 +14,6 @@ import {
   RefreshCw,
   User,
 } from "lucide-react";
-import { useLocale } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -27,8 +26,6 @@ import { sendVerificationEmail, signUp } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const SignUpPage = () => {
-  const locale = useLocale();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -90,7 +87,7 @@ const SignUpPage = () => {
     try {
       // SAFETY: Better Auth dynamically accepts custom request fields like phoneNumber
       const payload = {
-        callbackURL: `/${locale}/email-confirmed`,
+        callbackURL: "/email-confirmed",
         email: email.trim().toLowerCase(),
         name: name.trim(),
         password,
@@ -123,7 +120,7 @@ const SignUpPage = () => {
 
     try {
       const res = await sendVerificationEmail({
-        callbackURL: `/${locale}/email-confirmed`,
+        callbackURL: "/email-confirmed",
         email: submittedEmail,
       });
 
@@ -456,14 +453,14 @@ const SignUpPage = () => {
                 >
                   J&apos;accepte les{" "}
                   <Link
-                    href={`/${locale}`}
+                    href="/"
                     className="text-blue-600 underline hover:text-blue-700"
                   >
                     conditions d&apos;utilisation
                   </Link>{" "}
                   et la{" "}
                   <Link
-                    href={`/${locale}`}
+                    href="/"
                     className="text-blue-600 underline hover:text-blue-700"
                   >
                     politique de confidentialité
@@ -497,7 +494,7 @@ const SignUpPage = () => {
             <div className="text-muted-foreground mt-6 text-center text-xs sm:text-sm">
               Déjà un compte ?{" "}
               <Link
-                href={`/${locale}/sign-in`}
+                href="/sign-in"
                 className="font-semibold text-blue-600 hover:underline"
               >
                 Se connecter

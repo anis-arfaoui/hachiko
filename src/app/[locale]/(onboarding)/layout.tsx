@@ -6,20 +6,13 @@ import { getProgramByOrganization } from "@/dal/program";
 
 interface OnboardingLayoutProps {
   children: ReactNode;
-  params: Promise<{ locale: string }>;
 }
 
-const OnboardingLayout = async ({
-  children,
-  params,
-}: OnboardingLayoutProps) => {
-  const [{ locale }, merchantSession] = await Promise.all([
-    params,
-    getMerchantSession(),
-  ]);
+const OnboardingLayout = async ({ children }: OnboardingLayoutProps) => {
+  const merchantSession = await getMerchantSession();
 
   if (!merchantSession) {
-    redirect(`/${locale}/sign-in`);
+    redirect("/sign-in");
   }
 
   // If the merchant already has a loyalty program set up, go straight to dashboard
@@ -27,7 +20,7 @@ const OnboardingLayout = async ({
     merchantSession.organizationId
   );
   if (program) {
-    redirect(`/${locale}/dashboard`);
+    redirect("/dashboard");
   }
 
   return (

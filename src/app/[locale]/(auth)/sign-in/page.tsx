@@ -9,7 +9,6 @@ import {
   Mail,
   RefreshCw,
 } from "lucide-react";
-import { useLocale } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -22,8 +21,6 @@ import { sendVerificationEmail, signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const SignInPage = () => {
-  const locale = useLocale();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -69,7 +66,7 @@ const SignInPage = () => {
       }
 
       // Full page navigation ensures session cookies are reliably sent to server layout
-      window.location.href = `/${locale}/dashboard`;
+      window.location.href = "/dashboard";
     } catch {
       setError("Une erreur inattendue est survenue");
       setIsLoading(false);
@@ -85,7 +82,7 @@ const SignInPage = () => {
 
     try {
       const res = await sendVerificationEmail({
-        callbackURL: `/${locale}/email-confirmed`,
+        callbackURL: "/email-confirmed",
         email: email.trim().toLowerCase(),
       });
 
@@ -248,7 +245,7 @@ const SignInPage = () => {
               </label>
 
               <Link
-                href={`/${locale}/forgot-password`}
+                href="/forgot-password"
                 className="font-medium text-blue-600 hover:underline"
               >
                 Mot de passe oublié ?
@@ -278,7 +275,7 @@ const SignInPage = () => {
           <div className="text-muted-foreground mt-6 text-center text-xs sm:text-sm">
             Vous n&apos;avez pas de compte ?{" "}
             <Link
-              href={`/${locale}/sign-up`}
+              href="/sign-up"
               className="font-semibold text-blue-600 hover:underline"
             >
               Créer un compte

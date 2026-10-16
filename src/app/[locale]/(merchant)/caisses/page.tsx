@@ -15,7 +15,7 @@ const CaissesPage = async ({ params }: CaissesPageProps) => {
   ]);
 
   if (!merchantSession) {
-    redirect(`/${locale}/sign-in`);
+    redirect("/sign-in");
   }
 
   const data = await getCashiersDataAction("30d");

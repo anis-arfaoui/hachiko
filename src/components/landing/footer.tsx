@@ -3,10 +3,10 @@ import Link from "next/link";
 import { WalaaLogo } from "./logo";
 
 interface LandingFooterProps {
-  locale: string;
+  locale?: string;
 }
 
-export const LandingFooter = ({ locale }: LandingFooterProps) => (
+export const LandingFooter = ({ locale: _locale }: LandingFooterProps = {}) => (
   <footer className="border-t border-white/10 pt-12 pb-10 text-xs text-white/60">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col items-center justify-between gap-6 border-b border-white/10 pb-8 md:flex-row">
@@ -55,13 +55,13 @@ export const LandingFooter = ({ locale }: LandingFooterProps) => (
         <div>© 2026 Walaa. Tous droits réservés.</div>
         <div className="mt-2 flex gap-4 sm:mt-0">
           <Link
-            href={`/${locale}/sign-in`}
+            href="/sign-in"
             className="text-white/60 transition-colors hover:text-white hover:underline"
           >
             Espace Commerçant
           </Link>
           <Link
-            href={`/${locale}/sign-up`}
+            href="/sign-up"
             className="text-white/60 transition-colors hover:text-white hover:underline"
           >
             Inscription

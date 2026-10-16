@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface LandingHeroProps {
-  locale: string;
+  locale?: string;
 }
 
-export const LandingHero = ({ locale }: LandingHeroProps) => (
+export const LandingHero = ({ locale: _locale }: LandingHeroProps = {}) => (
   <section className="custom-gradient-bg relative overflow-hidden pt-8 pb-16 sm:pt-12 sm:pb-24">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
@@ -35,13 +35,13 @@ export const LandingHero = ({ locale }: LandingHeroProps) => (
           {/* CTAs */}
           <div className="mb-8 flex w-full flex-col items-stretch gap-3.5 sm:w-auto sm:flex-row sm:items-center">
             <Link
-              href={`/${locale}/sign-up`}
+              href="/sign-up"
               className="bg-primary text-primary-foreground shadow-primary/25 hover:bg-primary/90 inline-flex items-center justify-center rounded-full px-7 py-3.5 text-center text-sm font-bold shadow-lg transition-colors"
             >
               Créer mon programme <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
             <Link
-              href={`/${locale}/sign-in`}
+              href="/sign-in"
               className="border-border bg-card text-foreground hover:bg-muted inline-flex items-center justify-center rounded-full border px-7 py-3.5 text-center text-sm font-semibold shadow-sm transition-colors"
             >
               Accéder à mon espace

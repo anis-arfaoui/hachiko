@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export interface WalaaRoiCalculatorProps {
-  locale: string;
+  locale?: string;
 }
 
-export const WalaaRoiCalculator = ({ locale }: WalaaRoiCalculatorProps) => {
+export const WalaaRoiCalculator = ({
+  locale: _locale,
+}: WalaaRoiCalculatorProps = {}) => {
   const [visits, setVisits] = useState(10);
   const [basket, setBasket] = useState(350);
   const [reward, setReward] = useState(500);
@@ -176,7 +178,7 @@ export const WalaaRoiCalculator = ({ locale }: WalaaRoiCalculatorProps) => {
 
         {/* Action button */}
         <Link
-          href={`/${locale}/sign-up`}
+          href="/sign-up"
           className="bg-primary text-primary-foreground hover:bg-primary/90 mt-8 inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-center text-sm font-bold shadow-md transition-colors"
         >
           Lancer mon programme <span className="ml-2">→</span>
