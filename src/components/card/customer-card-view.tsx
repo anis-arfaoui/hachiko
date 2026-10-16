@@ -164,9 +164,20 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
       <div className="w-full max-w-sm space-y-4">
         {/* Top Shop Info */}
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-lg">
-              <Store className="h-4 w-4" />
+          <div className="flex items-center gap-2.5">
+            <div className="bg-primary text-primary-foreground relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-xs">
+              {card.logoUrl ? (
+                <Image
+                  src={card.logoUrl}
+                  alt={card.businessName}
+                  fill
+                  sizes="36px"
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : (
+                <Store className="h-4 w-4" />
+              )}
             </div>
             <div>
               <h2 className="text-foreground text-sm leading-tight font-bold">
@@ -200,13 +211,27 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
         >
           {/* Card Header */}
           <div className="flex items-center justify-between border-b border-white/20 pb-4">
-            <div>
-              <span className="text-xs font-medium tracking-wider text-white/80 uppercase">
-                Carte de Fidélité
-              </span>
-              <h3 className="text-xl font-extrabold text-white">
-                {card.businessName}
-              </h3>
+            <div className="flex items-center gap-3">
+              {card.logoUrl && (
+                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/30 bg-white/20 shadow-xs">
+                  <Image
+                    src={card.logoUrl}
+                    alt={card.businessName}
+                    fill
+                    sizes="40px"
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              )}
+              <div>
+                <span className="text-xs font-medium tracking-wider text-white/80 uppercase">
+                  Carte de Fidélité
+                </span>
+                <h3 className="text-xl font-extrabold text-white">
+                  {card.businessName}
+                </h3>
+              </div>
             </div>
             <Gift className="h-7 w-7 text-white/90" />
           </div>

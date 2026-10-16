@@ -49,22 +49,22 @@ const ESTABLISHMENT_CATEGORIES = [
     namePrompt: "Nom du Barbershop",
   },
   {
-    icon: "👕",
-    id: "vetements",
-    label: "Mode & Vêtements",
-    namePrompt: "Nom de la Boutique",
-  },
-  {
     icon: "🥐",
     id: "patisserie",
     label: "Pâtisserie",
     namePrompt: "Nom de la Pâtisserie",
   },
   {
-    icon: "📚",
-    id: "librairie",
-    label: "Librairie",
-    namePrompt: "Nom de la Librairie",
+    icon: "👕",
+    id: "vetements",
+    label: "Vêtements",
+    namePrompt: "Nom de la Boutique",
+  },
+  {
+    icon: "💄",
+    id: "cosmetique",
+    label: "Cosmétique",
+    namePrompt: "Nom de la Boutique",
   },
   {
     icon: "🏪",
@@ -654,9 +654,17 @@ export const OnboardingWizard = ({
 
             {/* System Selector Cards */}
             <div className="space-y-2">
-              <Label className="text-foreground text-xs font-semibold">
-                Choisissez votre système
-              </Label>
+              <div className="flex flex-col gap-1">
+                <Label className="text-foreground text-xs font-semibold">
+                  Choisissez votre système de fidélité
+                </Label>
+                <p className="text-muted-foreground text-xs">
+                  Choisissez le modèle adapté à votre établissement. Ce choix
+                  est unique et définitif : les deux programmes ne fonctionnent
+                  pas ensemble sur un même compte et ne pourront plus être
+                  modifiés.
+                </p>
+              </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {/* Points Card */}
                 <button

@@ -4,6 +4,7 @@ import {
   BarChart3,
   LogOut,
   Menu,
+  Palette,
   QrCode,
   ScanLine,
   Settings,
@@ -53,6 +54,11 @@ export const MerchantNav = ({
       label: "Programme",
     },
     {
+      href: `/${locale}/dashboard/appearance`,
+      icon: Palette,
+      label: "Apparence",
+    },
+    {
       href: `/${locale}/dashboard/qrcode`,
       icon: QrCode,
       label: "QR Code",
@@ -96,8 +102,19 @@ export const MerchantNav = ({
 
           {/* Commerce Badge */}
           <div className="border-border bg-muted/40 flex items-center gap-2.5 rounded-xl border p-2.5">
-            <div className="bg-primary/10 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-              <Store className="h-4 w-4" />
+            <div className="bg-primary/10 text-primary relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+              {activeOrg?.logo ? (
+                <Image
+                  src={activeOrg.logo}
+                  alt={orgName}
+                  fill
+                  sizes="32px"
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : (
+                <Store className="h-4 w-4" />
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-foreground truncate text-xs font-bold">

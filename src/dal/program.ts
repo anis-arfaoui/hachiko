@@ -5,7 +5,7 @@ import { programs } from "@/db/schema/loyalty";
 
 export interface ProgramInput {
   brandColor?: string;
-  logoUrl?: string;
+  logoUrl?: string | null;
   rewardLabel: string;
   stampsRequired: number;
   type?: "stamps" | "points";
@@ -32,10 +32,10 @@ export const upsertProgram = async (
       .update(programs)
       .set({
         brandColor: input.brandColor ?? existing.brandColor,
-        logoUrl: input.logoUrl ?? existing.logoUrl,
+        logoUrl: input.logoUrl === undefined ? existing.logoUrl : input.logoUrl,
         rewardLabel: input.rewardLabel,
         stampsRequired: input.stampsRequired,
-        type: input.type ?? existing.type,
+        type: existing.type,
         updatedAt: new Date(),
       })
       .where(
