@@ -65,6 +65,27 @@ export const cashiers = pgTable(
   ]
 );
 
+export const managers = pgTable(
+  "managers",
+  {
+    code: text("code").notNull(),
+    codeExpiresAt: timestamp("code_expires_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: text("id").primaryKey(),
+    lastActiveAt: timestamp("last_active_at"),
+    name: text("name").notNull(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("managers_org_name_idx").on(table.organizationId, table.name),
+    uniqueIndex("managers_code_idx").on(table.code),
+  ]
+);
+
 export const customers = pgTable(
   "customers",
   {

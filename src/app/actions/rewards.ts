@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { getManagerSession } from "@/dal/manager";
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization } from "@/dal/program";
 import { getRewardsByProgramId, syncProgramRewards } from "@/dal/rewards";
@@ -21,14 +22,15 @@ export interface GetProgramRewardsResult {
 export const getProgramRewardsAction =
   async (): Promise<GetProgramRewardsResult | null> => {
     const merchantSession = await getMerchantSession();
+    const managerSession = merchantSession ? null : await getManagerSession();
+    const organizationId =
+      merchantSession?.organizationId || managerSession?.organizationId;
 
-    if (!merchantSession) {
+    if (!organizationId) {
       return null;
     }
 
-    const program = await getProgramByOrganization(
-      merchantSession.organizationId
-    );
+    const program = await getProgramByOrganization(organizationId);
 
     if (!program) {
       return null;
@@ -58,14 +60,15 @@ export const saveProgramRewardsAction = async (
   rewardList: SaveRewardInput[]
 ): Promise<SaveProgramRewardsResult> => {
   const merchantSession = await getMerchantSession();
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
 
-  if (!merchantSession) {
+  if (!organizationId) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
-  const program = await getProgramByOrganization(
-    merchantSession.organizationId
-  );
+  const program = await getProgramByOrganization(organizationId);
 
   if (!program) {
     return { error: "PROGRAM_NOT_FOUND", success: false };

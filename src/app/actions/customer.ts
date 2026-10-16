@@ -10,6 +10,7 @@ import {
 } from "@/dal/card";
 import type { CardDetailsWithCooldown } from "@/dal/card";
 import { findOrCreateCustomer } from "@/dal/customer";
+import { getManagerSession } from "@/dal/manager";
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization, upsertProgram } from "@/dal/program";
 import {
@@ -168,15 +169,15 @@ export const lookupCustomerAction = async (
   identifier: string
 ): Promise<LookupCustomerActionResult> => {
   const merchantSession = await getMerchantSession();
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
 
-  if (!merchantSession) {
+  if (!organizationId) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
-  const card = await findCardByIdentifier(
-    merchantSession.organizationId,
-    identifier
-  );
+  const card = await findCardByIdentifier(organizationId, identifier);
 
   if (!card) {
     return { error: "CUSTOMER_NOT_FOUND", success: false };
@@ -207,8 +208,11 @@ export const scanStampAction = async (
   input: ScanStampInput
 ): Promise<ScanStampActionResult> => {
   const merchantSession = await getMerchantSession();
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
 
-  if (!merchantSession) {
+  if (!organizationId) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
@@ -216,9 +220,9 @@ export const scanStampAction = async (
     amount: input.amount,
     clientUuid: input.clientUuid,
     ignoreCooldown: input.ignoreCooldown,
-    organizationId: merchantSession.organizationId,
+    organizationId,
     spendAmount: input.spendAmount,
-    staffUserId: merchantSession.userId,
+    staffUserId: merchantSession?.userId || managerSession?.manager.id,
     token: input.token,
   });
 };
@@ -235,15 +239,18 @@ export const scanRedeemAction = async (
   rewardId?: string
 ): Promise<ScanRedeemActionResult> => {
   const merchantSession = await getMerchantSession();
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
 
-  if (!merchantSession) {
+  if (!organizationId) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
   return redeemCardReward({
-    organizationId: merchantSession.organizationId,
+    organizationId,
     rewardId,
-    staffUserId: merchantSession.userId,
+    staffUserId: merchantSession?.userId || managerSession?.manager.id,
     token,
   });
 };
@@ -259,14 +266,17 @@ export const cancelTransactionAction = async (
   transactionId: string
 ): Promise<CancelTransactionActionResult> => {
   const merchantSession = await getMerchantSession();
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
 
-  if (!merchantSession) {
+  if (!organizationId) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
   return cancelTransaction({
-    organizationId: merchantSession.organizationId,
-    staffUserId: merchantSession.userId,
+    organizationId,
+    staffUserId: merchantSession?.userId || managerSession?.manager.id,
     transactionId,
   });
 };

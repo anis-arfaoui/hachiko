@@ -14,6 +14,7 @@ import {
   regenerateCashierCode,
 } from "@/dal/cashier";
 import type { CashierItem, CashierLeaderboardStats } from "@/dal/cashier";
+import { getManagerSession } from "@/dal/manager";
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization } from "@/dal/program";
 import { getRewardsByProgramId } from "@/dal/rewards";
@@ -40,7 +41,11 @@ export const createCashierAction = async (
   name: string
 ): Promise<CreateCashierResult> => {
   const merchantSession = await getMerchantSession();
-  if (!merchantSession) {
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
+
+  if (!organizationId) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
@@ -53,12 +58,10 @@ export const createCashierAction = async (
   }
 
   try {
-    const cashier = await createCashier(
-      merchantSession.organizationId,
-      trimmed
-    );
+    const cashier = await createCashier(organizationId, trimmed);
     revalidatePath("/caisses");
     revalidatePath("/caisse");
+    revalidatePath("/responsable/caisses");
     return { cashier, success: true };
   } catch (error) {
     console.error("Create cashier error:", error);
@@ -73,16 +76,18 @@ export const deleteCashierAction = async (
   cashierId: string
 ): Promise<{ error?: string; success: boolean }> => {
   const merchantSession = await getMerchantSession();
-  if (!merchantSession) {
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
+
+  if (!organizationId) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
   try {
-    const deleted = await deleteCashier(
-      merchantSession.organizationId,
-      cashierId
-    );
+    const deleted = await deleteCashier(organizationId, cashierId);
     revalidatePath("/caisses");
+    revalidatePath("/responsable/caisses");
     return { success: deleted };
   } catch (error) {
     console.error("Delete cashier error:", error);
@@ -94,19 +99,21 @@ export const regenerateCashierCodeAction = async (
   cashierId: string
 ): Promise<{ cashier?: CashierItem; error?: string; success: boolean }> => {
   const merchantSession = await getMerchantSession();
-  if (!merchantSession) {
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
+
+  if (!organizationId) {
     return { error: "UNAUTHORIZED", success: false };
   }
 
   try {
-    const cashier = await regenerateCashierCode(
-      merchantSession.organizationId,
-      cashierId
-    );
+    const cashier = await regenerateCashierCode(organizationId, cashierId);
     if (!cashier) {
       return { error: "Caisse introuvable.", success: false };
     }
     revalidatePath("/caisses");
+    revalidatePath("/responsable/caisses");
     return { cashier, success: true };
   } catch (error) {
     console.error("Regenerate cashier code error:", error);
@@ -129,13 +136,17 @@ export const getCashiersDataAction = async (
   period: "7d" | "30d" | "all" | string = "30d"
 ): Promise<CashiersDataResult | null> => {
   const merchantSession = await getMerchantSession();
-  if (!merchantSession) {
+  const managerSession = merchantSession ? null : await getManagerSession();
+  const organizationId =
+    merchantSession?.organizationId || managerSession?.organizationId;
+
+  if (!organizationId) {
     return null;
   }
 
   const [leaderboardData, program] = await Promise.all([
-    getCashiersLeaderboard(merchantSession.organizationId, period),
-    getProgramByOrganization(merchantSession.organizationId),
+    getCashiersLeaderboard(organizationId, period),
+    getProgramByOrganization(organizationId),
   ]);
 
   return {

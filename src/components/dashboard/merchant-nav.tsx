@@ -9,6 +9,7 @@ import {
   QrCode,
   ScanLine,
   Settings,
+  Shield,
   Store,
   Users,
   X,
@@ -118,6 +119,17 @@ export const MerchantNav = ({
       href: `/caisses`,
       icon: ScanLine,
       label: "Caisses employé",
+    },
+    {
+      aliases: [
+        "/responsable",
+        "/responsables",
+        `/${locale}/responsables`,
+        `/${locale}/responsable`,
+      ],
+      href: `/responsables`,
+      icon: Shield,
+      label: "Responsables",
     },
     {
       aliases: [`/${locale}/till`],

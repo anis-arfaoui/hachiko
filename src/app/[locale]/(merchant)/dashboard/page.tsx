@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 import { AnalyticsSection } from "@/components/dashboard/analytics-section";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { KpiCards } from "@/components/dashboard/kpi-cards";
+import { ManagersCard } from "@/components/dashboard/managers-card";
 import { RecentActivityFeed } from "@/components/dashboard/recent-activity-feed";
 import { ReferralSection } from "@/components/dashboard/referral-section";
 import { SegmentationSection } from "@/components/dashboard/segmentation-section";
+import { getManagersByOrganization } from "@/dal/manager";
 import { getMerchantSession } from "@/dal/merchant";
 import { getMerchantStats } from "@/dal/stats";
 
@@ -23,7 +25,10 @@ const DashboardPage = async ({ params }: DashboardPageProps) => {
     redirect("/sign-in");
   }
 
-  const stats = await getMerchantStats(merchantSession.organizationId);
+  const [stats, managers] = await Promise.all([
+    getMerchantStats(merchantSession.organizationId),
+    getManagersByOrganization(merchantSession.organizationId),
+  ]);
   const orgSlug =
     merchantSession.organization.slug || merchantSession.organization.id;
 
@@ -40,7 +45,13 @@ const DashboardPage = async ({ params }: DashboardPageProps) => {
         totalTransactions={stats.totalTransactions}
       />
 
-      {/* 4. Visual 30-Day Activity & Retention Analytics */}
+      {/* 4. Vos responsables card */}
+      <ManagersCard
+        managers={managers}
+        orgName={merchantSession.organization.name}
+      />
+
+      {/* 5. Visual 30-Day Activity & Retention Analytics */}
       <AnalyticsSection
         dailyVisits={stats.dailyVisits}
         peakDailyVisits={stats.peakDailyVisits}
