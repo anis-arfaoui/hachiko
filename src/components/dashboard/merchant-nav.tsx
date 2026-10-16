@@ -81,6 +81,16 @@ export const MerchantNav = ({
       label: "QR Code",
     },
     {
+      aliases: [
+        `/${locale}/caisse-employe`,
+        `/${locale}/cashier`,
+        `/${locale}/cashiers`,
+      ],
+      href: `/${locale}/caisses`,
+      icon: ScanLine,
+      label: "Caisses employé",
+    },
+    {
       href: `/${locale}/till`,
       icon: ScanLine,
       label: "Scanner de caisse",

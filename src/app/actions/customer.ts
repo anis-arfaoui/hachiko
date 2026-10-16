@@ -28,6 +28,7 @@ import { isValidAlgerianPhone } from "@/lib/phone";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export interface JoinProgramInput {
+  cashierId?: string;
   name: string;
   orgSlugOrId: string;
   phone: string;
@@ -133,6 +134,7 @@ export const joinProgramAction = async (
 
   // Find or create customer for this business
   const customer = await findOrCreateCustomer(business.id, {
+    cashierId: input.cashierId,
     name: trimmedName,
     phone: input.phone,
   });

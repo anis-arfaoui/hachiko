@@ -11,6 +11,7 @@ import {
 import { normalizeAlgerianPhone } from "@/lib/phone";
 
 export interface CustomerInput {
+  cashierId?: string;
   name: string;
   phone: string;
 }
@@ -86,6 +87,7 @@ export const findOrCreateCustomer = async (
   const inserted = await db
     .insert(customers)
     .values({
+      cashierId: input.cashierId ?? null,
       code,
       id: crypto.randomUUID(),
       name: input.name.trim(),

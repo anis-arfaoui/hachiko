@@ -3,6 +3,7 @@ import { and, desc, eq, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
   cards,
+  cashiers,
   programs,
   redemptions,
   rewards,
@@ -15,6 +16,7 @@ const DEFAULT_COOLDOWN_MINUTES = 3;
 
 export interface AddStampOptions {
   amount?: number;
+  cashierId?: string;
   clientUuid: string;
   cooldownMinutes?: number;
   ignoreCooldown?: boolean;
@@ -131,12 +133,20 @@ export const addStampToCard = async (
     await tx.insert(transactions).values({
       amount: increment,
       cardId: card.cardId,
+      cashierId: options.cashierId ?? null,
       clientUuid: options.clientUuid,
       id: transactionId,
       spendAmount: options.spendAmount ?? null,
       staffUserId: options.staffUserId,
       type: txType,
     });
+
+    if (options.cashierId) {
+      await tx
+        .update(cashiers)
+        .set({ lastActiveAt: new Date(), updatedAt: new Date() })
+        .where(eq(cashiers.id, options.cashierId));
+    }
   });
 
   return {
@@ -216,6 +226,7 @@ export const cancelTransaction = async (
 };
 
 export interface RedeemRewardOptions {
+  cashierId?: string;
   organizationId: string;
   rewardId?: string;
   staffUserId?: string;
@@ -292,6 +303,7 @@ export const redeemCardReward = async (
 
     await tx.insert(redemptions).values({
       cardId: card.cardId,
+      cashierId: options.cashierId ?? null,
       id: crypto.randomUUID(),
       rewardId: selectedRewardId,
       staffUserId: options.staffUserId,
@@ -300,11 +312,19 @@ export const redeemCardReward = async (
     await tx.insert(transactions).values({
       amount: rewardCost,
       cardId: card.cardId,
+      cashierId: options.cashierId ?? null,
       clientUuid: crypto.randomUUID(),
       id: crypto.randomUUID(),
       staffUserId: options.staffUserId,
       type: "reset",
     });
+
+    if (options.cashierId) {
+      await tx
+        .update(cashiers)
+        .set({ lastActiveAt: new Date(), updatedAt: new Date() })
+        .where(eq(cashiers.id, options.cashierId));
+    }
   });
 
   return {

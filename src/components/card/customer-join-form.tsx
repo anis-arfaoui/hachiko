@@ -45,7 +45,18 @@ export const CustomerJoinForm = ({ locale, slug }: CustomerJoinFormProps) => {
     setIsLoading(true);
 
     try {
+      const search =
+        typeof window === "undefined"
+          ? null
+          : new URLSearchParams(window.location.search);
+      const cashierParam =
+        search?.get("caisse") ||
+        search?.get("csh") ||
+        search?.get("cashier") ||
+        undefined;
+
       const res = await joinProgramAction({
+        cashierId: cashierParam,
         name,
         orgSlugOrId: slug,
         phone,
