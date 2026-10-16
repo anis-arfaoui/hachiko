@@ -6,6 +6,8 @@ import { cards, customers, programs, transactions } from "@/db/schema/loyalty";
 import { normalizeAlgerianPhone } from "@/lib/phone";
 
 import { generateCustomerCode } from "./customer";
+import { getRewardsByProgramId } from "./rewards";
+import type { RewardItem } from "./rewards";
 
 export const generateSecureCardToken = (): string =>
   `${crypto.randomUUID().replaceAll("-", "")}${crypto.randomUUID().replaceAll("-", "")}`;
@@ -84,7 +86,25 @@ export const getCardByToken = async (token: string) => {
     card.customerCode = newCode;
   }
 
-  return card;
+  const programRewards = await getRewardsByProgramId(card.programId);
+  const rewardsList =
+    programRewards.length > 0
+      ? programRewards
+      : [
+          {
+            cost: card.stampsRequired,
+            createdAt: card.cardCreatedAt,
+            description: null,
+            id: "default-reward",
+            label: card.rewardLabel,
+            programId: card.programId,
+          },
+        ];
+
+  return {
+    ...card,
+    rewards: rewardsList,
+  };
 };
 
 export interface CardDetailsWithCooldown {
@@ -104,6 +124,7 @@ export interface CardDetailsWithCooldown {
   logoUrl: string | null;
   programId: string;
   programType: string;
+  rewards: RewardItem[];
   rewardLabel: string;
   stampsRequired: number;
   token: string;
@@ -213,10 +234,26 @@ export const findCardByIdentifier = async (
     }
   }
 
+  const programRewards = await getRewardsByProgramId(card.programId);
+  const rewardsList =
+    programRewards.length > 0
+      ? programRewards
+      : [
+          {
+            cost: card.stampsRequired,
+            createdAt: card.cardCreatedAt,
+            description: null,
+            id: "default-reward",
+            label: card.rewardLabel,
+            programId: card.programId,
+          },
+        ];
+
   return {
     ...card,
     cooldownRemainingSeconds,
     customerCode: card.customerCode,
     isCooldownActive,
+    rewards: rewardsList,
   };
 };

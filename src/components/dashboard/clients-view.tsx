@@ -200,7 +200,7 @@ export const ClientsView = ({
 
         <div className="flex items-center gap-2">
           <Link
-            href={`/${locale}/dashboard/qrcode`}
+            href={`/${locale}/qrcode`}
             className="border-border bg-card hover:bg-muted text-foreground inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-xs transition-colors"
           >
             <QrCode className="h-4 w-4" />
@@ -458,7 +458,7 @@ export const ClientsView = ({
               </Button>
             ) : (
               <Link
-                href={`/${locale}/dashboard/qrcode`}
+                href={`/${locale}/qrcode`}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs"
               >
                 <QrCode className="h-4 w-4" />

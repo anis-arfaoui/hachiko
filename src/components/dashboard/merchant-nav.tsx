@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  Gift,
   LogOut,
   Menu,
   Palette,
@@ -50,22 +51,32 @@ export const MerchantNav = ({
       label: "Tableau de bord",
     },
     {
-      href: `/${locale}/dashboard/clients`,
+      aliases: [`/${locale}/client`, `/${locale}/dashboard/clients`],
+      href: `/${locale}/clients`,
       icon: Users,
       label: "Clients",
     },
     {
-      href: `/${locale}/dashboard/program`,
+      aliases: [`/${locale}/reward`, `/${locale}/dashboard/rewards`],
+      href: `/${locale}/rewards`,
+      icon: Gift,
+      label: "Menu fidélité",
+    },
+    {
+      aliases: [`/${locale}/dashboard/program`],
+      href: `/${locale}/program`,
       icon: Settings,
       label: "Programme",
     },
     {
-      href: `/${locale}/dashboard/appearance`,
+      aliases: [`/${locale}/dashboard/appearance`],
+      href: `/${locale}/appearance`,
       icon: Palette,
       label: "Apparence",
     },
     {
-      href: `/${locale}/dashboard/qrcode`,
+      aliases: [`/${locale}/dashboard/qrcode`],
+      href: `/${locale}/qrcode`,
       icon: QrCode,
       label: "QR Code",
     },
@@ -136,7 +147,9 @@ export const MerchantNav = ({
           <nav className="space-y-1">
             {navLinks.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive =
+                pathname === item.href ||
+                Boolean(item.aliases?.includes(pathname));
 
               return (
                 <Link
@@ -242,7 +255,9 @@ export const MerchantNav = ({
                 <nav className="space-y-1">
                   {navLinks.map((item) => {
                     const Icon = item.icon;
-                    const isActive = pathname === item.href;
+                    const isActive =
+                      pathname === item.href ||
+                      Boolean(item.aliases?.includes(pathname));
 
                     return (
                       <Link

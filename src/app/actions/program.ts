@@ -182,8 +182,10 @@ export const saveProgramLogicAction = async (input: SaveProgramLogicInput) => {
     type: programType,
   });
 
+  revalidatePath("/program");
   revalidatePath("/dashboard/program");
   revalidatePath("/dashboard");
+  revalidatePath("/appearance");
   revalidatePath("/dashboard/appearance");
 
   return { program, success: true };
@@ -251,7 +253,9 @@ export const saveAppearanceAction = async (input: SaveAppearanceInput) => {
     type: (existingProgram?.type as "stamps" | "points") ?? "stamps",
   });
 
+  revalidatePath("/appearance");
   revalidatePath("/dashboard/appearance");
+  revalidatePath("/program");
   revalidatePath("/dashboard/program");
   revalidatePath("/dashboard");
 
@@ -293,6 +297,7 @@ export const saveProgramAction = async (input: SaveProgramInput) => {
     type: programType,
   });
 
+  revalidatePath("/program");
   revalidatePath("/dashboard/program");
   revalidatePath("/dashboard");
 
@@ -382,6 +387,7 @@ export const completeOnboardingAction = async (
   });
 
   revalidatePath("/dashboard");
+  revalidatePath("/program");
   revalidatePath("/dashboard/program");
   revalidatePath("/onboarding");
 

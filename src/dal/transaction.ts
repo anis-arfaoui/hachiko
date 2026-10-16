@@ -5,6 +5,7 @@ import {
   cards,
   programs,
   redemptions,
+  rewards,
   transactions,
 } from "@/db/schema/loyalty";
 
@@ -216,6 +217,7 @@ export const cancelTransaction = async (
 
 export interface RedeemRewardOptions {
   organizationId: string;
+  rewardId?: string;
   staffUserId?: string;
   token: string;
 }
@@ -225,7 +227,8 @@ export type RedeemRewardResult =
       error:
         | "CARD_NOT_FOUND"
         | "UNAUTHORIZED_ORGANIZATION"
-        | "INSUFFICIENT_STAMPS";
+        | "INSUFFICIENT_STAMPS"
+        | "REWARD_NOT_FOUND";
       success: false;
     }
   | {
@@ -247,14 +250,36 @@ export const redeemCardReward = async (
     return { error: "UNAUTHORIZED_ORGANIZATION", success: false };
   }
 
-  if (card.balance < card.stampsRequired) {
+  let { stampsRequired: rewardCost, rewardLabel } = card;
+  let selectedRewardId: string | null = null;
+
+  if (options.rewardId) {
+    const [foundReward] = await db
+      .select()
+      .from(rewards)
+      .where(
+        and(
+          eq(rewards.id, options.rewardId),
+          eq(rewards.programId, card.programId)
+        )
+      )
+      .limit(1);
+
+    if (!foundReward) {
+      return { error: "REWARD_NOT_FOUND", success: false };
+    }
+
+    rewardCost = foundReward.cost;
+    rewardLabel = foundReward.label;
+    selectedRewardId = foundReward.id;
+  }
+
+  if (card.balance < rewardCost) {
     return { error: "INSUFFICIENT_STAMPS", success: false };
   }
 
-  const isPoints = card.programType === "points";
-  const newBalance = isPoints
-    ? Math.max(0, card.balance - card.stampsRequired)
-    : 0;
+  // Deduct reward cost from card balance
+  const newBalance = Math.max(0, card.balance - rewardCost);
 
   await db.transaction(async (tx) => {
     await tx
@@ -268,11 +293,12 @@ export const redeemCardReward = async (
     await tx.insert(redemptions).values({
       cardId: card.cardId,
       id: crypto.randomUUID(),
+      rewardId: selectedRewardId,
       staffUserId: options.staffUserId,
     });
 
     await tx.insert(transactions).values({
-      amount: 0,
+      amount: rewardCost,
       cardId: card.cardId,
       clientUuid: crypto.randomUUID(),
       id: crypto.randomUUID(),
@@ -283,7 +309,7 @@ export const redeemCardReward = async (
 
   return {
     balance: newBalance,
-    rewardLabel: card.rewardLabel,
+    rewardLabel,
     success: true,
   };
 };

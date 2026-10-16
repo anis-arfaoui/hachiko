@@ -239,7 +239,7 @@ const TillScannerPage = () => {
   };
 
   // Redeem reward from Stage 2
-  const handleRedeem = async () => {
+  const handleRedeem = async (rewardId?: string) => {
     if (!activeCard) {
       return;
     }
@@ -248,7 +248,7 @@ const TillScannerPage = () => {
     setActionError(null);
 
     try {
-      const res = await scanRedeemAction(activeCard.token);
+      const res = await scanRedeemAction(activeCard.token, rewardId);
       if (res.success) {
         playSuccessBeep();
         triggerHaptic();
@@ -299,6 +299,107 @@ const TillScannerPage = () => {
       setCancelFeedback("Erreur lors de l'annulation.");
       setIsCanceling(false);
     }
+  };
+
+  const renderRewardsSection = () => {
+    if (activeCard?.rewards && activeCard.rewards.length > 0) {
+      return (
+        <div className="space-y-2">
+          <div className="text-foreground flex items-center justify-between px-1 text-xs font-bold">
+            <span className="flex items-center gap-1.5">
+              <Gift className="h-4 w-4 text-amber-500" />
+              <span>Récompenses disponibles</span>
+            </span>
+            <span className="text-muted-foreground text-[11px] font-medium">
+              {activeCard.balance}{" "}
+              {activeCard.programType === "points" ? "pts" : "tampons"}{" "}
+              disponibles
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {activeCard.rewards.map((reward) => {
+              const canRedeem = activeCard.balance >= reward.cost;
+              return (
+                <div
+                  key={reward.id}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl border p-3 text-xs transition-all",
+                    canRedeem
+                      ? "border-amber-300 bg-amber-50/80 text-amber-950 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-200"
+                      : "border-border bg-card/60 text-muted-foreground opacity-70"
+                  )}
+                >
+                  <div className="min-w-0 pr-2">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <Gift
+                        className={cn(
+                          "h-3.5 w-3.5 shrink-0",
+                          canRedeem
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-muted-foreground"
+                        )}
+                      />
+                      <span className="truncate">{reward.label}</span>
+                    </div>
+                    <div className="text-muted-foreground mt-0.5 text-[11px]">
+                      Coût : {reward.cost}{" "}
+                      {activeCard.programType === "points"
+                        ? "points"
+                        : "tampons"}
+                      {reward.description ? ` • ${reward.description}` : ""}
+                    </div>
+                  </div>
+
+                  {canRedeem ? (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => handleRedeem(reward.id)}
+                      disabled={isSubmitting}
+                      className="h-8 shrink-0 bg-amber-600 font-bold text-white shadow-xs hover:bg-amber-700"
+                    >
+                      <Sparkles className="mr-1 h-3.5 w-3.5" />
+                      <span>Récompenser (-{reward.cost})</span>
+                    </Button>
+                  ) : (
+                    <span className="text-muted-foreground shrink-0 text-[11px] font-medium">
+                      Manque {reward.cost - activeCard.balance}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    if (activeCard?.rewardLabel) {
+      return (
+        <div className="flex items-center justify-between rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-950 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-200">
+          <div className="flex items-center gap-2 font-medium">
+            <Gift className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <span>{activeCard.rewardLabel}</span>
+          </div>
+
+          {activeCard.balance >= activeCard.stampsRequired && (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => handleRedeem()}
+              disabled={isSubmitting}
+              className="h-8 bg-amber-600 font-bold text-white hover:bg-amber-700"
+            >
+              <Sparkles className="mr-1 h-3.5 w-3.5" />
+              <span>Récompenser</span>
+            </Button>
+          )}
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -498,28 +599,8 @@ const TillScannerPage = () => {
             )}
           </div>
 
-          {/* Yellow Reward Box */}
-          {activeCard.rewardLabel && (
-            <div className="flex items-center justify-between rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-950 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-200">
-              <div className="flex items-center gap-2 font-medium">
-                <Gift className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                <span>{activeCard.rewardLabel}</span>
-              </div>
-
-              {activeCard.balance >= activeCard.stampsRequired && (
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={handleRedeem}
-                  disabled={isSubmitting}
-                  className="h-8 bg-amber-600 font-bold text-white hover:bg-amber-700"
-                >
-                  <Sparkles className="mr-1 h-3.5 w-3.5" />
-                  <span>Récompenser</span>
-                </Button>
-              )}
-            </div>
-          )}
+          {/* Rewards List & Redemption Options */}
+          {renderRewardsSection()}
 
           {/* Cooldown Warning & Bypass Banner */}
           {activeCard.isCooldownActive && (

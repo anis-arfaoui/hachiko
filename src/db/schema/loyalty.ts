@@ -36,6 +36,7 @@ export const programs = pgTable("programs", {
 export const rewards = pgTable("rewards", {
   cost: integer("cost").default(10).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  description: text("description"),
   id: text("id").primaryKey(),
   label: text("label").notNull(),
   programId: text("program_id")

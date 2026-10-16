@@ -229,7 +229,8 @@ export type ScanRedeemActionResult =
     };
 
 export const scanRedeemAction = async (
-  token: string
+  token: string,
+  rewardId?: string
 ): Promise<ScanRedeemActionResult> => {
   const merchantSession = await getMerchantSession();
 
@@ -239,6 +240,7 @@ export const scanRedeemAction = async (
 
   return redeemCardReward({
     organizationId: merchantSession.organizationId,
+    rewardId,
     staffUserId: merchantSession.userId,
     token,
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Gift, RefreshCw, Sparkles, Store } from "lucide-react";
+import { Check, Gift, Lock, RefreshCw, Sparkles, Store } from "lucide-react";
 import Image from "next/image";
 import QRCode from "qrcode";
 import { useCallback, useEffect, useState } from "react";
@@ -30,10 +30,17 @@ interface CardDetailsState {
   balance: number;
   brandColor: string;
   businessName: string;
+  cardCreatedAt?: Date;
   customerCode?: string | null;
   customerName: string;
   logoUrl: string | null;
   programType?: string;
+  rewards?: {
+    cost: number;
+    description: string | null;
+    id: string;
+    label: string;
+  }[];
   rewardLabel: string;
   stampsRequired: number;
   token: string;
@@ -365,6 +372,160 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
               </p>
             </div>
           )}
+        </div>
+
+        {/* Mon Compte */}
+        <div className="border-border bg-card space-y-2.5 rounded-2xl border p-4 text-xs shadow-xs">
+          <div className="text-muted-foreground text-[10px] font-black tracking-wider uppercase">
+            Mon Compte
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground text-xs">Code client</span>
+            <span className="text-foreground font-mono text-xs font-bold">
+              {card.customerCode || "—"}
+            </span>
+          </div>
+          {card.cardCreatedAt && (
+            <div className="border-border flex items-center justify-between border-t pt-2">
+              <span className="text-muted-foreground text-xs">
+                Membre depuis
+              </span>
+              <span className="text-foreground text-xs font-semibold capitalize">
+                {new Date(card.cardCreatedAt).toLocaleDateString("fr-FR", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Info Note */}
+        <p className="text-muted-foreground px-2 text-center text-[11px] leading-relaxed">
+          Votre carte est mise à jour automatiquement après chaque visite chez{" "}
+          <strong className="text-foreground">{card.businessName}</strong>.
+        </p>
+
+        {/* 🎁 VOS RÉCOMPENSES - CE QUE VOUS POUVEZ GAGNER (matching image 2) */}
+        <div className="space-y-3.5 rounded-3xl bg-zinc-950 p-5 text-white shadow-xl">
+          <div className="flex items-center gap-1.5 text-[11px] font-black tracking-widest text-zinc-400 uppercase">
+            <Gift className="h-3.5 w-3.5" />
+            <span>Vos récompenses</span>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-black tracking-tight uppercase sm:text-2xl">
+              Ce que vous pouvez gagner
+            </h3>
+
+            {/* Dynamic prompt */}
+            <p className="mt-0.5 text-xs font-semibold text-zinc-300">
+              {(() => {
+                const effectiveRewards =
+                  card.rewards && card.rewards.length > 0
+                    ? card.rewards
+                    : [
+                        {
+                          cost: card.stampsRequired,
+                          description: null,
+                          id: "default",
+                          label: card.rewardLabel,
+                        },
+                      ];
+                const nextLocked = effectiveRewards.find(
+                  (r) => r.cost > card.balance
+                );
+                if (nextLocked) {
+                  const diff = nextLocked.cost - card.balance;
+                  let unit = "points";
+                  if (card.programType !== "points") {
+                    unit = diff > 1 ? "tampons" : "tampon";
+                  }
+                  return `Plus que ${diff} ${unit} pour ${nextLocked.label}`;
+                }
+                return "Vous avez débloqué toutes les récompenses ! 🎉";
+              })()}
+            </p>
+          </div>
+
+          {/* Reward Tiers List */}
+          <div className="space-y-2 pt-1">
+            {(() => {
+              const effectiveRewards =
+                card.rewards && card.rewards.length > 0
+                  ? card.rewards
+                  : [
+                      {
+                        cost: card.stampsRequired,
+                        description: null,
+                        id: "default",
+                        label: card.rewardLabel,
+                      },
+                    ];
+              return effectiveRewards.map((reward) => {
+                const isUnlocked = card.balance >= reward.cost;
+                return (
+                  <div
+                    key={reward.id}
+                    className={cn(
+                      "flex items-center justify-between rounded-2xl p-3 transition-all",
+                      isUnlocked
+                        ? "border border-amber-500/20 bg-zinc-900 shadow-xs"
+                        : "bg-zinc-900/60 opacity-80"
+                    )}
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div
+                        className={cn(
+                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-all",
+                          isUnlocked
+                            ? "bg-amber-600 text-white shadow-sm"
+                            : "bg-zinc-800 text-zinc-500"
+                        )}
+                      >
+                        {isUnlocked ? (
+                          <Check className="h-4 w-4 stroke-[3]" />
+                        ) : (
+                          <Lock className="h-3.5 w-3.5" />
+                        )}
+                      </div>
+                      <div className="min-w-0 truncate">
+                        <div
+                          className={cn(
+                            "truncate text-xs font-bold",
+                            isUnlocked ? "text-white" : "text-zinc-200"
+                          )}
+                        >
+                          {reward.label}
+                        </div>
+                        {reward.description && (
+                          <div className="truncate text-[10px] text-zinc-400">
+                            {reward.description}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-lg px-2.5 py-1 font-mono text-xs font-semibold",
+                        isUnlocked
+                          ? "border border-amber-500/20 bg-amber-500/10 text-amber-300"
+                          : "bg-zinc-800 text-zinc-400"
+                      )}
+                    >
+                      {reward.cost}{" "}
+                      {card.programType === "points" ? "points" : "tampons"}
+                    </span>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+
+          <p className="pt-1 text-[11px] font-medium text-zinc-400">
+            Présentez votre carte en caisse pour utiliser une récompense.
+          </p>
         </div>
 
         {/* PWA / Home screen tip */}
