@@ -10,6 +10,7 @@ import {
   ScanLine,
   Settings,
   Shield,
+  Star,
   Store,
   Users,
   X,
@@ -83,7 +84,7 @@ export const MerchantNav = ({
         `/${locale}/dashboard/program`,
       ],
       href: `/program`,
-      icon: Settings,
+      icon: Star,
       label: "Programme",
     },
     {
@@ -136,6 +137,20 @@ export const MerchantNav = ({
       href: `/till`,
       icon: ScanLine,
       label: "Scanner de caisse",
+    },
+    {
+      aliases: [
+        "/parametres",
+        "/dashboard/settings",
+        "/dashboard/parametres",
+        `/${locale}/settings`,
+        `/${locale}/parametres`,
+        `/${locale}/dashboard/settings`,
+        `/${locale}/dashboard/parametres`,
+      ],
+      href: `/settings`,
+      icon: Settings,
+      label: "Paramètres",
     },
   ];
 
