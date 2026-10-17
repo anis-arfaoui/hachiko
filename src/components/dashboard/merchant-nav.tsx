@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  CreditCard,
   Gift,
   LogOut,
   Menu,
@@ -137,6 +138,21 @@ export const MerchantNav = ({
       href: `/till`,
       icon: ScanLine,
       label: "Scanner de caisse",
+    },
+    {
+      aliases: [
+        "/billing",
+        "/abonnement",
+        "/dashboard/billing",
+        "/dashboard/abonnement",
+        `/${locale}/billing`,
+        `/${locale}/abonnement`,
+        `/${locale}/dashboard/billing`,
+        `/${locale}/dashboard/abonnement`,
+      ],
+      href: `/billing`,
+      icon: CreditCard,
+      label: "Abonnement",
     },
     {
       aliases: [

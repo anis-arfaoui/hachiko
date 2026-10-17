@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# credentials & secrets
+*.pem
+*key.json
+*credentials*.json
+google-wallet-key.json
+
