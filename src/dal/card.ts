@@ -2,7 +2,13 @@ import { and, desc, eq, or } from "drizzle-orm";
 
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
-import { cards, customers, programs, transactions } from "@/db/schema/loyalty";
+import {
+  cards,
+  customers,
+  locations,
+  programs,
+  transactions,
+} from "@/db/schema/loyalty";
 import { normalizeAlgerianPhone } from "@/lib/phone";
 
 import { generateCustomerCode } from "./customer";
@@ -86,10 +92,30 @@ export const getCardByToken = async (token: string) => {
     card.customerCode = newCode;
   }
 
-  const programRewards = await getRewardsByProgramId(card.programId);
+  const [programRewards, activeLocations] = await Promise.all([
+    getRewardsByProgramId(card.programId),
+    db
+      .select({
+        address: locations.address,
+        city: locations.city,
+        id: locations.id,
+        isDefault: locations.isDefault,
+        name: locations.name,
+        phone: locations.phone,
+      })
+      .from(locations)
+      .where(
+        and(
+          eq(locations.organizationId, card.businessId),
+          eq(locations.status, "active")
+        )
+      )
+      .orderBy(desc(locations.isDefault), locations.createdAt),
+  ]);
 
   return {
     ...card,
+    locations: activeLocations,
     rewards: programRewards,
   };
 };

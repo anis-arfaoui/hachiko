@@ -1,7 +1,12 @@
 import { and, desc, eq, gte, inArray, lte } from "drizzle-orm";
 
 import { db } from "@/db";
-import { cashiers, customers, transactions } from "@/db/schema/loyalty";
+import {
+  cashiers,
+  customers,
+  locations,
+  transactions,
+} from "@/db/schema/loyalty";
 
 export interface CashierItem {
   code: string;
@@ -9,6 +14,8 @@ export interface CashierItem {
   createdAt: Date;
   id: string;
   lastActiveAt: Date | null;
+  locationId: string | null;
+  locationName?: string | null;
   name: string;
   organizationId: string;
   token: string;
@@ -57,8 +64,20 @@ export const getCashiersByOrganization = async (
   organizationId: string
 ): Promise<CashierItem[]> => {
   const rows = await db
-    .select()
+    .select({
+      code: cashiers.code,
+      codeExpiresAt: cashiers.codeExpiresAt,
+      createdAt: cashiers.createdAt,
+      id: cashiers.id,
+      lastActiveAt: cashiers.lastActiveAt,
+      locationId: cashiers.locationId,
+      locationName: locations.name,
+      name: cashiers.name,
+      organizationId: cashiers.organizationId,
+      token: cashiers.token,
+    })
     .from(cashiers)
+    .leftJoin(locations, eq(cashiers.locationId, locations.id))
     .where(eq(cashiers.organizationId, organizationId))
     .orderBy(desc(cashiers.createdAt));
 
@@ -101,7 +120,8 @@ export const getCashierByToken = async (
 
 export const createCashier = async (
   organizationId: string,
-  name: string
+  name: string,
+  locationId?: string | null
 ): Promise<CashierItem> => {
   const trimmedName = name.trim();
   const code = await generateUniqueCashierCode();
@@ -113,6 +133,7 @@ export const createCashier = async (
     .values({
       code,
       id,
+      locationId: locationId || null,
       name: trimmedName,
       organizationId,
       token,

@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 
 interface CashiersViewProps {
   initialCashiers: CashierItem[];
+  initialLocations?: { id: string; isDefault: boolean; name: string }[];
   initialStats: CashierLeaderboardStats[];
   locale?: string;
   program: {
@@ -74,6 +75,7 @@ const renderRankBadge = (rank: number) => {
 
 export const CashiersView = ({
   initialCashiers,
+  initialLocations,
   initialStats,
   locale: _locale,
   program,
@@ -90,6 +92,12 @@ export const CashiersView = ({
 
   // New cashier creation state
   const [newCashierName, setNewCashierName] = useState("");
+  const [selectedLocationId, setSelectedLocationId] = useState<string>(
+    () =>
+      initialLocations?.find((l) => l.isDefault)?.id ||
+      initialLocations?.[0]?.id ||
+      ""
+  );
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
@@ -166,7 +174,10 @@ export const CashiersView = ({
     setIsCreating(true);
     setCreateError(null);
 
-    const res = await createCashierAction(trimmed);
+    const res = await createCashierAction(
+      trimmed,
+      selectedLocationId || undefined
+    );
     if (res.success && res.cashier) {
       const created = res.cashier;
       setCashiersList((prev) => [created, ...prev]);
@@ -385,35 +396,61 @@ export const CashiersView = ({
         </CardHeader>
         <CardContent className="pt-6">
           <form onSubmit={handleCreateCashier} className="space-y-4">
-            <div className="space-y-2">
-              <Label
-                htmlFor="newCashierName"
-                className="text-foreground text-xs font-bold"
-              >
-                Prénom de l&apos;employé
-              </Label>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="newCashierName"
+                  className="text-foreground text-xs font-bold"
+                >
+                  Prénom de l&apos;employé *
+                </Label>
                 <Input
                   id="newCashierName"
                   value={newCashierName}
                   onChange={(e) => setNewCashierName(e.target.value)}
                   placeholder="Youssef"
-                  className="h-11 flex-1 text-sm font-medium"
+                  className="h-11 text-sm font-medium"
                   required
                 />
-                <Button
-                  type="submit"
-                  disabled={isCreating || !newCashierName.trim()}
-                  className="h-11 bg-red-600 px-6 font-bold text-white shadow-xs hover:bg-red-700"
-                >
-                  {isCreating ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <ScanLine className="mr-2 h-4 w-4" />
-                  )}
-                  <span>Créer</span>
-                </Button>
               </div>
+
+              {initialLocations && initialLocations.length > 1 && (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="cashierLocation"
+                    className="text-foreground text-xs font-bold"
+                  >
+                    Boutique de rattachement
+                  </Label>
+                  <select
+                    id="cashierLocation"
+                    value={selectedLocationId}
+                    onChange={(e) => setSelectedLocationId(e.target.value)}
+                    className="border-input bg-background text-foreground h-11 w-full rounded-xl border px-3 text-sm font-medium"
+                  >
+                    {initialLocations.map((loc) => (
+                      <option key={loc.id} value={loc.id}>
+                        {loc.name} {loc.isDefault ? "(Siège)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={isCreating || !newCashierName.trim()}
+                className="h-11 bg-red-600 px-6 font-bold text-white shadow-xs hover:bg-red-700"
+              >
+                {isCreating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ScanLine className="mr-2 h-4 w-4" />
+                )}
+                <span>Créer la caisse</span>
+              </Button>
             </div>
 
             {createError && (
@@ -611,8 +648,13 @@ export const CashiersView = ({
                       <ScanLine className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="text-foreground text-sm font-bold">
-                        {cashier.name}
+                      <div className="text-foreground flex items-center gap-2 text-sm font-bold">
+                        <span>{cashier.name}</span>
+                        {cashier.locationName && (
+                          <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[10px] font-bold">
+                            📍 {cashier.locationName}
+                          </span>
+                        )}
                       </div>
                       <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
                         <span>⏱</span>

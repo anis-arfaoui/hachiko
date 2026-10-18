@@ -23,6 +23,7 @@ const CaissesPage = async ({ params }: CaissesPageProps) => {
   return (
     <CashiersView
       initialCashiers={data?.cashiers || []}
+      initialLocations={data?.locations || []}
       initialStats={data?.stats || []}
       locale={locale}
       program={data?.program || null}

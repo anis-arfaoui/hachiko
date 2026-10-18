@@ -1,6 +1,14 @@
 "use client";
 
-import { Check, Gift, Lock, RefreshCw, Sparkles, Store } from "lucide-react";
+import {
+  Check,
+  Gift,
+  Lock,
+  MapPin,
+  RefreshCw,
+  Sparkles,
+  Store,
+} from "lucide-react";
 import Image from "next/image";
 import QRCode from "qrcode";
 import { useCallback, useEffect, useState } from "react";
@@ -33,6 +41,14 @@ interface CardDetailsState {
   cardCreatedAt?: Date;
   customerCode?: string | null;
   customerName: string;
+  locations?: {
+    address: string | null;
+    city: string | null;
+    id: string;
+    isDefault: boolean;
+    name: string;
+    phone: string | null;
+  }[];
   logoUrl: string | null;
   programType?: string;
   rewards?: {
@@ -503,6 +519,38 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
             <p className="pt-1 text-[11px] font-medium text-zinc-400">
               Présentez votre carte en caisse pour utiliser une récompense.
             </p>
+          </div>
+        )}
+
+        {/* Store Locations / Nos adresses */}
+        {card.locations && card.locations.length > 0 && (
+          <div className="space-y-2 rounded-3xl border border-zinc-200/80 bg-white p-4 shadow-md dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-bold tracking-wider uppercase">
+              <MapPin className="text-primary h-3.5 w-3.5" />
+              <span>Valable dans nos boutiques ({card.locations.length})</span>
+            </div>
+            <div className="space-y-2 pt-1">
+              {card.locations.map((loc) => (
+                <div
+                  key={loc.id}
+                  className="border-border bg-muted/40 rounded-2xl border p-2.5 text-xs"
+                >
+                  <div className="text-foreground flex items-center justify-between font-bold">
+                    <span>{loc.name}</span>
+                    {loc.isDefault && (
+                      <span className="text-muted-foreground text-[10px]">
+                        ⭐ Siège
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-muted-foreground mt-0.5 space-y-0.5 text-[11px]">
+                    {loc.address && <p>📍 {loc.address}</p>}
+                    {loc.city && <p>🏙️ {loc.city}</p>}
+                    {loc.phone && <p>📞 {loc.phone}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

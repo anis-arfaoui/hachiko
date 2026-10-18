@@ -20,6 +20,7 @@ export interface AddStampOptions {
   clientUuid: string;
   cooldownMinutes?: number;
   ignoreCooldown?: boolean;
+  locationId?: string;
   organizationId: string;
   spendAmount?: number;
   staffUserId?: string;
@@ -130,12 +131,23 @@ export const addStampToCard = async (
       })
       .where(eq(cards.id, card.cardId));
 
+    let locId = options.locationId ?? null;
+    if (!locId && options.cashierId) {
+      const [c] = await tx
+        .select({ locationId: cashiers.locationId })
+        .from(cashiers)
+        .where(eq(cashiers.id, options.cashierId))
+        .limit(1);
+      locId = c?.locationId ?? null;
+    }
+
     await tx.insert(transactions).values({
       amount: increment,
       cardId: card.cardId,
       cashierId: options.cashierId ?? null,
       clientUuid: options.clientUuid,
       id: transactionId,
+      locationId: locId,
       spendAmount: options.spendAmount ?? null,
       staffUserId: options.staffUserId,
       type: txType,

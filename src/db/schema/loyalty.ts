@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   pgTable,
   text,
@@ -10,12 +11,18 @@ import { organization, user } from "./auth";
 
 export const locations = pgTable("locations", {
   address: text("address"),
+  city: text("city"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   id: text("id").primaryKey(),
+  isDefault: boolean("is_default").default(false).notNull(),
   name: text("name").notNull(),
   organizationId: text("organization_id")
     .notNull()
     .references(() => organization.id, { onDelete: "cascade" }),
+  phone: text("phone"),
+  // Status can be 'active' or 'pending'
+  status: text("status").default("active").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const programs = pgTable("programs", {
@@ -52,6 +59,9 @@ export const cashiers = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     id: text("id").primaryKey(),
     lastActiveAt: timestamp("last_active_at"),
+    locationId: text("location_id").references(() => locations.id, {
+      onDelete: "set null",
+    }),
     name: text("name").notNull(),
     organizationId: text("organization_id")
       .notNull()
@@ -148,6 +158,9 @@ export const transactions = pgTable(
     clientUuid: text("client_uuid").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     id: text("id").primaryKey(),
+    locationId: text("location_id").references(() => locations.id, {
+      onDelete: "set null",
+    }),
     spendAmount: integer("spend_amount"),
     staffUserId: text("staff_user_id").references(() => user.id, {
       onDelete: "set null",

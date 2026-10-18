@@ -14,6 +14,7 @@ import {
   regenerateCashierCode,
 } from "@/dal/cashier";
 import type { CashierItem, CashierLeaderboardStats } from "@/dal/cashier";
+import { getOrganizationLocations } from "@/dal/location";
 import { getManagerSession } from "@/dal/manager";
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization } from "@/dal/program";
@@ -38,7 +39,8 @@ export interface CreateCashierResult {
 }
 
 export const createCashierAction = async (
-  name: string
+  name: string,
+  locationId?: string | null
 ): Promise<CreateCashierResult> => {
   const merchantSession = await getMerchantSession();
   const managerSession = merchantSession ? null : await getManagerSession();
@@ -58,7 +60,7 @@ export const createCashierAction = async (
   }
 
   try {
-    const cashier = await createCashier(organizationId, trimmed);
+    const cashier = await createCashier(organizationId, trimmed, locationId);
     revalidatePath("/caisses");
     revalidatePath("/caisse");
     revalidatePath("/responsable/caisses");
@@ -123,6 +125,11 @@ export const regenerateCashierCodeAction = async (
 
 export interface CashiersDataResult {
   cashiers: CashierItem[];
+  locations: {
+    id: string;
+    isDefault: boolean;
+    name: string;
+  }[];
   program: {
     brandColor: string;
     rewardLabel: string;
@@ -144,13 +151,19 @@ export const getCashiersDataAction = async (
     return null;
   }
 
-  const [leaderboardData, program] = await Promise.all([
+  const [leaderboardData, program, locs] = await Promise.all([
     getCashiersLeaderboard(organizationId, period),
     getProgramByOrganization(organizationId),
+    getOrganizationLocations(organizationId),
   ]);
 
   return {
     cashiers: leaderboardData.cashiers,
+    locations: locs.map((l) => ({
+      id: l.id,
+      isDefault: l.isDefault,
+      name: l.name,
+    })),
     program: program
       ? {
           brandColor: program.brandColor,

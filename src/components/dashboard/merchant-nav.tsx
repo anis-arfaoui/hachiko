@@ -3,10 +3,12 @@
 import {
   BarChart3,
   CreditCard,
+  Eye,
   Gift,
   LogOut,
   Menu,
   Palette,
+  Plus,
   QrCode,
   ScanLine,
   Settings,
@@ -21,8 +23,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { getLocationsAction } from "@/app/actions/location";
+import { AddStoreModal } from "@/components/dashboard/add-store-modal";
+import { CardPreviewModal } from "@/components/dashboard/card-preview-modal";
+import { StoreSwitcher } from "@/components/dashboard/store-switcher";
+import type { LocationItem } from "@/dal/location";
 import { signOut, useActiveOrganization } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +46,37 @@ export const MerchantNav = ({
   const router = useRouter();
   const locale = useLocale();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Multi-Store State
+  const [locations, setLocations] = useState<LocationItem[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
+    null
+  );
+  const [allowedPointsOfSale, setAllowedPointsOfSale] = useState(1);
+  const [planName, setPlanName] = useState("Starter");
+  const [isCardPreviewOpen, setIsCardPreviewOpen] = useState(false);
+  const [isAddStoreOpen, setIsAddStoreOpen] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchLocations = async () => {
+      const res = await getLocationsAction();
+      if (res && isMounted) {
+        setLocations(res.locations);
+        setAllowedPointsOfSale(res.allowedPointsOfSale);
+        setPlanName(res.plan === "pro" ? "Pro" : "Starter");
+        const defaultLoc =
+          res.locations.find((l) => l.isDefault) || res.locations[0];
+        if (defaultLoc) {
+          setSelectedLocationId(defaultLoc.id);
+        }
+      }
+    };
+    void fetchLocations();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const { data: activeOrg } = useActiveOrganization();
 
@@ -110,6 +148,17 @@ export const MerchantNav = ({
     },
     {
       aliases: [
+        "/boutiques",
+        "/stores",
+        `/${locale}/boutiques`,
+        `/${locale}/stores`,
+      ],
+      href: `/boutiques`,
+      icon: Store,
+      label: "Boutiques",
+    },
+    {
+      aliases: [
         "/caisse-employe",
         "/cashier",
         "/cashiers",
@@ -171,6 +220,8 @@ export const MerchantNav = ({
   ];
 
   const orgName = activeOrg?.name || initialOrgName;
+  const currentStore =
+    locations.find((l) => l.id === selectedLocationId) || locations[0];
 
   return (
     <div className="bg-background text-foreground flex min-h-screen">
@@ -200,29 +251,66 @@ export const MerchantNav = ({
             </div>
           </Link>
 
-          {/* Commerce Badge */}
-          <div className="border-border bg-muted/40 flex items-center gap-2.5 rounded-xl border p-2.5">
-            <div className="bg-primary/10 text-primary relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-              {activeOrg?.logo ? (
-                <Image
-                  src={activeOrg.logo}
-                  alt={orgName}
-                  fill
-                  sizes="32px"
-                  className="object-cover"
-                  unoptimized
-                />
-              ) : (
-                <Store className="h-4 w-4" />
-              )}
+          {/* Commerce & Multi-Store Hub */}
+          <div className="border-border bg-muted/40 space-y-2 rounded-2xl border p-3 shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <div className="bg-primary/10 text-primary border-border relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border">
+                {activeOrg?.logo ? (
+                  <Image
+                    src={activeOrg.logo}
+                    alt={orgName}
+                    fill
+                    sizes="36px"
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <Store className="h-4 w-4" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-foreground truncate text-xs font-bold">
+                  {orgName}
+                </div>
+                <div className="text-muted-foreground truncate text-[10px]">
+                  {currentStore
+                    ? currentStore.city || currentStore.name
+                    : "Espace Commerçant"}
+                </div>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-foreground truncate text-xs font-bold">
-                {orgName}
-              </div>
-              <div className="text-muted-foreground text-[10px]">
-                Espace Commerçant
-              </div>
+
+            {/* Store Switcher (if 2+ stores) */}
+            {locations.length > 1 && (
+              <StoreSwitcher
+                locations={locations}
+                selectedLocationId={selectedLocationId}
+                onSelectStore={(id) => setSelectedLocationId(id)}
+                onAddStoreClick={() => setIsAddStoreOpen(true)}
+              />
+            )}
+
+            {/* Quick Actions: Voir carte client & Ajouter boutique */}
+            <div className="grid grid-cols-2 gap-1.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsCardPreviewOpen(true)}
+                className="border-border bg-card hover:bg-muted text-foreground flex items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[11px] font-semibold shadow-2xs transition-all"
+                title="Voir la carte client"
+              >
+                <Eye className="text-primary h-3.5 w-3.5" />
+                <span>Voir carte</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsAddStoreOpen(true)}
+                className="border-border bg-card hover:bg-muted text-foreground flex items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[11px] font-semibold shadow-2xs transition-all"
+                title="Ajouter une boutique"
+              >
+                <Plus className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Boutique</span>
+              </button>
             </div>
           </div>
 
@@ -328,8 +416,64 @@ export const MerchantNav = ({
                   </button>
                 </div>
 
-                <div className="border-border bg-muted/40 rounded-xl border p-2.5 text-xs font-semibold">
-                  <div className="text-foreground truncate">{orgName}</div>
+                {/* Store Hub for Mobile */}
+                <div className="border-border bg-muted/40 space-y-2 rounded-2xl border p-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="bg-primary/10 text-primary border-border relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl border">
+                      {activeOrg?.logo ? (
+                        <Image
+                          src={activeOrg.logo}
+                          alt={orgName}
+                          fill
+                          sizes="32px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <Store className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1 truncate text-xs font-bold">
+                      {orgName}
+                    </div>
+                  </div>
+
+                  {locations.length > 1 && (
+                    <StoreSwitcher
+                      locations={locations}
+                      selectedLocationId={selectedLocationId}
+                      onSelectStore={(id) => setSelectedLocationId(id)}
+                      onAddStoreClick={() => {
+                        setMobileMenuOpen(false);
+                        setIsAddStoreOpen(true);
+                      }}
+                    />
+                  )}
+
+                  <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setIsCardPreviewOpen(true);
+                      }}
+                      className="border-border bg-card hover:bg-muted text-foreground flex items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[11px] font-semibold"
+                    >
+                      <Eye className="text-primary h-3.5 w-3.5" />
+                      <span>Voir carte</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setIsAddStoreOpen(true);
+                      }}
+                      className="border-border bg-card hover:bg-muted text-foreground flex items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[11px] font-semibold"
+                    >
+                      <Plus className="h-3.5 w-3.5 text-emerald-500" />
+                      <span>Boutique</span>
+                    </button>
+                  </div>
                 </div>
 
                 <nav className="space-y-1">
@@ -376,6 +520,24 @@ export const MerchantNav = ({
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
+
+      {/* Live Modals */}
+      <CardPreviewModal
+        isOpen={isCardPreviewOpen}
+        onClose={() => setIsCardPreviewOpen(false)}
+      />
+
+      <AddStoreModal
+        isOpen={isAddStoreOpen}
+        onClose={() => setIsAddStoreOpen(false)}
+        allowedCount={allowedPointsOfSale}
+        currentCount={locations.filter((l) => l.status === "active").length}
+        planName={planName}
+        onSuccess={(newLoc) => {
+          setLocations((prev) => [...prev, newLoc]);
+          setSelectedLocationId(newLoc.id);
+        }}
+      />
     </div>
   );
 };
