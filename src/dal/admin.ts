@@ -90,19 +90,8 @@ export interface AdminPendingStore {
   phone: string | null;
 }
 
-export const isAdminEmail = (email?: string | null): boolean => {
-  if (!email) {
-    return false;
-  }
-  const cleanEmail = email.trim().toLowerCase();
-
-  const envAdmins = (process.env.ADMIN_EMAILS || "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-
-  return isSuperAdminEmail(cleanEmail) || envAdmins.includes(cleanEmail);
-};
+export const isAdminEmail = (email?: string | null): boolean =>
+  isSuperAdminEmail(email);
 
 export const getAdminSession = async (): Promise<{
   user: { email: string; id: string; name: string };

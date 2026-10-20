@@ -22,9 +22,10 @@ const MerchantLayout = async ({ children }: MerchantLayoutProps) => {
     redirect("/sign-in");
   }
 
-  const [program, subDetails] = await Promise.all([
+  const [program, subDetails, adminSession] = await Promise.all([
     getProgramByOrganization(merchantSession.organizationId),
     getSubscriptionDetails(merchantSession.organizationId),
+    getAdminSession(),
   ]);
 
   if (!program) {
@@ -35,6 +36,7 @@ const MerchantLayout = async ({ children }: MerchantLayoutProps) => {
     <MerchantNav
       initialOrgName={merchantSession.organization.name}
       subscriptionDetails={subDetails}
+      isSuperAdmin={Boolean(adminSession)}
     >
       {children}
     </MerchantNav>

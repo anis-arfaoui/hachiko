@@ -36,19 +36,20 @@ import { CardPreviewModal } from "@/components/dashboard/card-preview-modal";
 import { StoreSwitcher } from "@/components/dashboard/store-switcher";
 import type { LocationItem } from "@/dal/location";
 import type { SubscriptionDetails } from "@/dal/subscription";
-import { isSuperAdminEmail } from "@/lib/admin";
-import { signOut, useActiveOrganization, useSession } from "@/lib/auth-client";
+import { signOut, useActiveOrganization } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 interface MerchantNavProps {
   children: ReactNode;
   initialOrgName?: string;
+  isSuperAdmin?: boolean;
   subscriptionDetails?: SubscriptionDetails | null;
 }
 
 export const MerchantNav = ({
   children,
   initialOrgName = "Mon Commerce",
+  isSuperAdmin = false,
   subscriptionDetails,
 }: MerchantNavProps) => {
   const pathname = usePathname();
@@ -88,8 +89,6 @@ export const MerchantNav = ({
   }, []);
 
   const { data: activeOrg } = useActiveOrganization();
-  const { data: sessionData } = useSession();
-  const isSuperAdmin = isSuperAdminEmail(sessionData?.user?.email);
 
   const handleSignOut = async () => {
     await signOut();

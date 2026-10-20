@@ -14,10 +14,10 @@ import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 
+import { getPostSignInUrlAction } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { isSuperAdminEmail } from "@/lib/admin";
 import { sendVerificationEmail, signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -66,8 +66,9 @@ const SignInPage = () => {
         return;
       }
 
-      // Full page navigation ensures session cookies are reliably sent to server layout
-      window.location.href = isSuperAdminEmail(email) ? "/admin" : "/dashboard";
+      // Server securely determines whether to redirect to /admin or /dashboard
+      const redirectUrl = await getPostSignInUrlAction();
+      window.location.href = redirectUrl;
     } catch {
       setError("Une erreur inattendue est survenue");
       setIsLoading(false);

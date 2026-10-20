@@ -137,3 +137,11 @@ export const adminSwitchOrgAction = async (organizationId: string) => {
 
   return res;
 };
+
+export const getPostSignInUrlAction = async (): Promise<string> => {
+  const session = await getAdminSession();
+  if (session) {
+    return "/admin";
+  }
+  return "/dashboard";
+};
