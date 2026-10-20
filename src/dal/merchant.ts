@@ -36,7 +36,10 @@ export const getMerchantSession =
       return null;
     }
 
-    let organizationId = session.session.activeOrganizationId;
+    const activeOrgId = (
+      session.session as { activeOrganizationId?: string | null }
+    ).activeOrganizationId;
+    let organizationId = activeOrgId;
     let orgData: { id: string; name: string; slug: string | null } | null =
       null;
 

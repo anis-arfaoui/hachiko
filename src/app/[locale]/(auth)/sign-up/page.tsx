@@ -31,7 +31,6 @@ const SignUpPage = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -72,13 +71,6 @@ const SignUpPage = () => {
 
     if (password !== confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
-      return;
-    }
-
-    if (!acceptTerms) {
-      setError(
-        "Veuillez accepter les conditions d'utilisation pour continuer."
-      );
       return;
     }
 
@@ -435,38 +427,6 @@ const SignUpPage = () => {
                     )}
                   </button>
                 </div>
-              </div>
-
-              {/* Conditions d'utilisation checkbox */}
-              <div className="flex items-start gap-2.5 pt-1">
-                <input
-                  id="terms"
-                  type="checkbox"
-                  checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="border-border mt-0.5 h-4 w-4 cursor-pointer rounded text-blue-600 focus:ring-blue-500"
-                  required
-                />
-                <label
-                  htmlFor="terms"
-                  className="text-muted-foreground cursor-pointer text-xs leading-normal select-none"
-                >
-                  J&apos;accepte les{" "}
-                  <Link
-                    href="/"
-                    className="text-blue-600 underline hover:text-blue-700"
-                  >
-                    conditions d&apos;utilisation
-                  </Link>{" "}
-                  et la{" "}
-                  <Link
-                    href="/"
-                    className="text-blue-600 underline hover:text-blue-700"
-                  >
-                    politique de confidentialité
-                  </Link>
-                  .
-                </label>
               </div>
 
               {/* Submit button */}

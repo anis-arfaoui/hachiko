@@ -1,9 +1,16 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, Lock, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Lock,
+  ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { resetPassword } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 const ResetPasswordForm = () => {
   const router = useRouter();
@@ -27,9 +35,26 @@ const ResetPasswordForm = () => {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Password criteria check
+  const passwordCriteria = useMemo(
+    () => ({
+      hasMinLength: newPassword.length >= 8,
+      hasNumber: /\d/u.test(newPassword),
+      hasUppercase: /[A-Z]/u.test(newPassword),
+    }),
+    [newPassword]
+  );
+
+  const isPasswordValid =
+    passwordCriteria.hasMinLength &&
+    passwordCriteria.hasNumber &&
+    passwordCriteria.hasUppercase;
 
   const isInvalidToken = Boolean(urlError) || (!token && !isSuccess);
 
@@ -38,17 +63,19 @@ const ResetPasswordForm = () => {
     setError(null);
 
     if (!token) {
-      setError("Jeton de réinitialisation manquant ou invalide");
+      setError("Jeton de réinitialisation manquant ou invalide.");
       return;
     }
 
-    if (newPassword.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
+    if (!isPasswordValid) {
+      setError(
+        "Votre mot de passe doit respecter les critères de sécurité ci-dessous (au moins 8 caractères, 1 chiffre et 1 majuscule)."
+      );
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Les deux mots de passe ne correspondent pas");
+      setError("Les deux mots de passe ne correspondent pas.");
       return;
     }
 
@@ -123,7 +150,7 @@ const ResetPasswordForm = () => {
           <CardTitle>Mot de passe mis à jour !</CardTitle>
           <CardDescription>
             Votre mot de passe a été modifié avec succès. Vous pouvez dès à
-            présent vous connecter à votre espace commerçant.
+            présent vous connecter à votre compte.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -144,7 +171,7 @@ const ResetPasswordForm = () => {
       <CardHeader>
         <CardTitle>Nouveau mot de passe</CardTitle>
         <CardDescription>
-          Choisissez un nouveau mot de passe pour sécuriser votre compte
+          Choisissez un nouveau mot de passe sécurisé pour votre compte
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -155,31 +182,139 @@ const ResetPasswordForm = () => {
             </div>
           )}
 
+          {/* Nouveau mot de passe */}
           <div className="space-y-1.5">
             <Label htmlFor="newPassword">Nouveau mot de passe</Label>
-            <Input
-              id="newPassword"
-              type="password"
-              placeholder="Minimum 8 caractères"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={8}
-              autoFocus
-            />
+            <div className="relative">
+              <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
+              <Input
+                id="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                placeholder="Votre nouveau mot de passe"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="pr-10 pl-10"
+                required
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                aria-label={
+                  showNewPassword
+                    ? "Masquer le mot de passe"
+                    : "Afficher le mot de passe"
+                }
+                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3.5 -translate-y-1/2 cursor-pointer transition-colors"
+              >
+                {showNewPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Password strength checklist */}
+            {newPassword.length > 0 && (
+              <div className="bg-muted/40 border-border/60 space-y-1 rounded-xl border p-2.5 text-[11px]">
+                <span className="text-muted-foreground block text-[10px] font-semibold tracking-wider uppercase">
+                  Sécurité du mot de passe :
+                </span>
+                <div className="grid grid-cols-1 gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2
+                      className={cn(
+                        "h-3.5 w-3.5",
+                        passwordCriteria.hasMinLength
+                          ? "text-emerald-600"
+                          : "text-muted-foreground/50"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        passwordCriteria.hasMinLength
+                          ? "text-foreground font-medium"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      Au moins 8 caractères
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2
+                      className={cn(
+                        "h-3.5 w-3.5",
+                        passwordCriteria.hasNumber
+                          ? "text-emerald-600"
+                          : "text-muted-foreground/50"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        passwordCriteria.hasNumber
+                          ? "text-foreground font-medium"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      Au moins 1 chiffre
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2
+                      className={cn(
+                        "h-3.5 w-3.5",
+                        passwordCriteria.hasUppercase
+                          ? "text-emerald-600"
+                          : "text-muted-foreground/50"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        passwordCriteria.hasUppercase
+                          ? "text-foreground font-medium"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      Au moins 1 lettre majuscule
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* Confirmer le nouveau mot de passe */}
           <div className="space-y-1.5">
             <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="Répétez votre nouveau mot de passe"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
-            />
+            <div className="relative">
+              <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Répétez votre nouveau mot de passe"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="pr-10 pl-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={
+                  showConfirmPassword
+                    ? "Masquer le mot de passe"
+                    : "Afficher le mot de passe"
+                }
+                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3.5 -translate-y-1/2 cursor-pointer transition-colors"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

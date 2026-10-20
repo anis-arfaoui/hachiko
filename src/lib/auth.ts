@@ -2,9 +2,15 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { member, organization as orgTable } from "@/db/schema/auth";
+import {
+  member,
+  organization as orgTable,
+  user as userTable,
+} from "@/db/schema/auth";
+import { isSuperAdminEmail } from "@/lib/admin";
 import {
   sendPasswordResetEmail,
   sendVerificationEmailMessage,
@@ -94,6 +100,17 @@ export const auth = betterAuth({
       create: {
         after: async (createdUser, context) => {
           try {
+            // Super-Admin does not have a merchant store / organization
+            if (isSuperAdminEmail(createdUser.email)) {
+              if (!createdUser.emailVerified) {
+                await db
+                  .update(userTable)
+                  .set({ emailVerified: true })
+                  .where(eq(userTable.id, createdUser.id));
+              }
+              return;
+            }
+
             // SAFETY: Better Auth passes EndpointContext which contains optional body with businessName
             const ctx = context as SignUpContext | undefined;
             const businessName = getBusinessNameFromContext(
