@@ -3,7 +3,6 @@
 import {
   AlertCircle,
   AlertTriangle,
-  ArrowLeft,
   Building2,
   Calendar,
   Check,
@@ -18,11 +17,9 @@ import {
   Shield,
   SlidersHorizontal,
   Sparkles,
-  Store,
   Users,
   X,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -402,15 +399,6 @@ export const AdminDashboardView = ({
       {/* Top Bar Navigation */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <Link href={`/${locale}/dashboard`}>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 w-9 rounded-xl p-0 text-zinc-400 hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
           <div>
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1 rounded-md bg-purple-500/20 px-2 py-0.5 text-[10px] font-black tracking-wider text-purple-400 uppercase">
@@ -428,16 +416,14 @@ export const AdminDashboardView = ({
           </div>
         </div>
 
-        <Link href={`/${locale}/dashboard`}>
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-xl border-zinc-800 text-xs text-zinc-300 hover:text-white"
-          >
-            <Store className="mr-1.5 h-3.5 w-3.5" />
-            <span>Retour à mon commerce</span>
-          </Button>
-        </Link>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-900 px-3.5 py-2 text-xs font-semibold text-zinc-200 transition-colors hover:bg-zinc-800 hover:text-white"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+          <span>Actualiser les données</span>
+        </button>
       </div>
 
       {/* Global Success Notification */}
@@ -822,10 +808,10 @@ export const AdminDashboardView = ({
               type="button"
               onClick={() => setStatusFilter(tab.id)}
               className={cn(
-                "rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors",
+                "rounded-xl px-3 py-1.5 text-xs font-semibold transition-all",
                 statusFilter === tab.id
-                  ? "bg-white font-bold text-zinc-950 shadow-xs"
-                  : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                  ? "border border-purple-500 bg-purple-600 font-bold text-white shadow-md"
+                  : "border border-zinc-700/80 bg-zinc-900 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800 hover:text-white"
               )}
             >
               {tab.label}
@@ -900,7 +886,7 @@ export const AdminDashboardView = ({
                     variant="outline"
                     onClick={() => handleSwitchToOrg(org.id)}
                     disabled={isLoadingSwitch}
-                    className="border-zinc-800 text-xs text-zinc-300 hover:text-white"
+                    className="border border-zinc-700 bg-zinc-900 text-xs font-semibold text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white"
                   >
                     {isLoadingSwitch ? (
                       <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
@@ -955,9 +941,9 @@ export const AdminDashboardView = ({
                 {/* Subscriptions Quick Management Actions */}
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-900 pt-3 text-xs">
                   <div className="flex items-center gap-1.5 text-zinc-400">
-                    <CreditCard className="h-3.5 w-3.5 text-zinc-500" />
-                    <span className="text-[11px] font-semibold">
-                      Gestion de l&apos;accès :
+                    <CreditCard className="h-3.5 w-3.5 text-zinc-400" />
+                    <span className="text-[11px] font-semibold text-zinc-300">
+                      Prolonger l&apos;accès :
                     </span>
                   </div>
 
@@ -967,7 +953,7 @@ export const AdminDashboardView = ({
                       variant="outline"
                       disabled={actionLoadingId === `quick-${org.id}-1`}
                       onClick={() => handleQuickAddMonths(org.id, 1)}
-                      className="h-7 rounded-lg border-emerald-500/30 bg-emerald-500/10 px-2.5 text-[11px] font-bold text-emerald-400 hover:bg-emerald-500/20"
+                      className="h-7 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 text-[11px] font-bold text-emerald-300 transition-colors hover:bg-emerald-600 hover:text-white"
                     >
                       <Calendar className="mr-1 h-3 w-3" />
                       +1 Mois
@@ -976,19 +962,30 @@ export const AdminDashboardView = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={actionLoadingId === `quick-${org.id}-12`}
-                      onClick={() => handleQuickAddMonths(org.id, 12)}
-                      className="h-7 rounded-lg border-emerald-500/30 bg-emerald-500/10 px-2.5 text-[11px] font-bold text-emerald-400 hover:bg-emerald-500/20"
+                      disabled={actionLoadingId === `quick-${org.id}-6`}
+                      onClick={() => handleQuickAddMonths(org.id, 6)}
+                      className="h-7 rounded-lg border border-blue-500/40 bg-blue-500/10 px-2.5 text-[11px] font-bold text-blue-300 transition-colors hover:bg-blue-600 hover:text-white"
                     >
                       <Calendar className="mr-1 h-3 w-3" />
-                      +1 An
+                      +6 Mois
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={actionLoadingId === `quick-${org.id}-12`}
+                      onClick={() => handleQuickAddMonths(org.id, 12)}
+                      className="h-7 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-2.5 text-[11px] font-bold text-indigo-300 transition-colors hover:bg-indigo-600 hover:text-white"
+                    >
+                      <Calendar className="mr-1 h-3 w-3" />
+                      +12 Mois
                     </Button>
 
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleOpenEditModal(org)}
-                      className="h-7 rounded-lg border-purple-500/30 bg-purple-500/10 px-2.5 text-[11px] font-bold text-purple-300 hover:bg-purple-500/20"
+                      className="h-7 rounded-lg border border-purple-500/40 bg-purple-500/10 px-2.5 text-[11px] font-bold text-purple-200 transition-colors hover:bg-purple-600 hover:text-white"
                     >
                       <SlidersHorizontal className="mr-1 h-3 w-3" />
                       Gérer l&apos;accès
@@ -1127,61 +1124,85 @@ export const AdminDashboardView = ({
                 />
               </div>
 
-              {/* Prolongation rapide */}
+              {/* Prolongation rapide & sur-mesure */}
               <div>
                 <span className="text-[11px] font-bold text-zinc-300 uppercase">
-                  Ou ajouter des mois au terme actuel
+                  Ajouter des mois d&apos;abonnement
                 </span>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {[1, 3, 6, 12].map((m) => (
-                    <Button
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  {[1, 6, 12].map((m) => (
+                    <button
                       key={m}
                       type="button"
-                      variant={editAddMonths === m ? "default" : "outline"}
-                      size="sm"
                       onClick={() => {
                         setEditAddMonths(m);
                         setEditExactExpiresAt("");
                       }}
                       className={cn(
-                        "h-8 rounded-xl text-xs font-bold",
+                        "h-8 rounded-xl px-3 text-xs font-bold transition-all",
                         editAddMonths === m
-                          ? "bg-purple-600 text-white"
-                          : "border-zinc-800 text-zinc-300 hover:text-white"
+                          ? "border border-purple-500 bg-purple-600 text-white shadow-md"
+                          : "border border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-white"
                       )}
                     >
                       +{m} Mois
-                    </Button>
+                    </button>
                   ))}
                   {editAddMonths > 0 && (
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
                       onClick={() => setEditAddMonths(0)}
-                      className="h-8 rounded-xl text-xs text-zinc-500"
+                      className="h-8 rounded-xl px-2 text-xs font-medium text-zinc-400 hover:text-white"
                     >
                       Réinitialiser
-                    </Button>
+                    </button>
                   )}
+                </div>
+
+                {/* Saisie libre pour n'importe quel nombre de mois */}
+                <div className="mt-2.5 flex items-center gap-2">
+                  <label
+                    htmlFor="edit-custom-months"
+                    className="text-[11px] text-zinc-400"
+                  >
+                    Ou ajouter librement :
+                  </label>
+                  <div className="relative flex items-center">
+                    <Input
+                      id="edit-custom-months"
+                      type="number"
+                      min={1}
+                      max={120}
+                      placeholder="Ex: 2, 3, 24"
+                      value={editAddMonths > 0 ? editAddMonths : ""}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setEditAddMonths(Math.max(val, 0));
+                        setEditExactExpiresAt("");
+                      }}
+                      className="h-8 w-28 rounded-lg border-zinc-700 bg-zinc-900 pr-8 text-xs text-white placeholder:text-zinc-600"
+                    />
+                    <span className="pointer-events-none absolute right-2.5 text-[11px] text-zinc-500">
+                      mois
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-2 border-t border-zinc-800 pt-3">
-              <Button
-                variant="outline"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => setEditingOrg(null)}
-                className="rounded-xl border-zinc-800 text-xs text-zinc-400 hover:text-white"
+                className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white"
               >
                 Annuler
-              </Button>
+              </button>
               <Button
                 size="sm"
                 onClick={handleSaveManualEdit}
                 disabled={actionLoadingId === `save-manual-${editingOrg.id}`}
-                className="gap-1.5 rounded-xl bg-purple-600 text-xs font-bold text-white hover:bg-purple-500"
+                className="gap-1.5 rounded-xl bg-purple-600 px-5 text-xs font-bold text-white shadow-md hover:bg-purple-500"
               >
                 {actionLoadingId === `save-manual-${editingOrg.id}` ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -7,6 +7,7 @@ import {
   organization,
   session as sessionTable,
 } from "@/db/schema/auth";
+import { isSuperAdminEmail } from "@/lib/admin";
 import { auth } from "@/lib/auth";
 import { generateUniqueSlug } from "@/lib/slug";
 
@@ -81,7 +82,12 @@ export const getMerchantSession =
     }
 
     // Auto-heal: If an authenticated merchant user has no organization yet, create one seamlessly
+    // Exception: Super Admin should NEVER have a fake dummy organization created!
     if (!orgData) {
+      if (isSuperAdminEmail(session.user.email)) {
+        return null;
+      }
+
       const fallbackOrgName = `Boutique de ${session.user.name || "Commerçant"}`;
       const uniqueSlug = await generateUniqueSlug(fallbackOrgName);
       const newOrgId = crypto.randomUUID();

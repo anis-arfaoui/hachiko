@@ -538,6 +538,28 @@ export const MerchantNav = ({
           </div>
         )}
 
+        {/* Super-Admin Inspection Mode Banner */}
+        {isSuperAdmin && (
+          <div className="border-b border-purple-500/30 bg-purple-500/10 px-4 py-2 text-xs text-purple-900 dark:text-purple-200">
+            <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" />
+                <span>
+                  <strong>Mode Super-Admin :</strong> Vous consultez
+                  l&apos;espace de <strong>{orgName}</strong> en mode
+                  inspection.
+                </span>
+              </div>
+              <Link
+                href="/admin"
+                className="inline-flex shrink-0 items-center justify-center rounded-lg bg-purple-600 px-3 py-1 text-[11px] font-bold text-white shadow-xs transition-colors hover:bg-purple-700"
+              >
+                ← Retour au Super-Admin
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Subscription Status Alert Banner */}
         {subscriptionDetails?.subscription?.status === "grace" && (
           <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-900 dark:text-amber-200">
