@@ -389,6 +389,10 @@ export const CashierPortalView = ({
           setActionError(
             `Ce client a déjà été scanné récemment. Patientez ${res.remainingSeconds}s ou cochez « Continuer quand même » ci-dessous.`
           );
+        } else if (res.error === "SUBSCRIPTION_EXPIRED") {
+          setActionError(
+            "L'abonnement de cet établissement a expiré. Veuillez contacter le gérant pour renouveler l'accès."
+          );
         } else if (res.error === "UNAUTHORIZED_ORGANIZATION") {
           setActionError("Cette carte appartient à un autre commerce.");
         } else {

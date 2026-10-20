@@ -19,6 +19,7 @@ import { getManagerSession } from "@/dal/manager";
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization } from "@/dal/program";
 import { getRewardsByProgramId } from "@/dal/rewards";
+import { checkCanScan } from "@/dal/subscription";
 import {
   addStampToCard,
   cancelTransaction,
@@ -316,11 +317,20 @@ export interface CashierScanStampInput {
 export const cashierScanStampAction = async (
   input: CashierScanStampInput
 ): Promise<
-  AddStampResult | { error: "UNAUTHORIZED_CASHIER"; success: false }
+  | AddStampResult
+  | {
+      error: "SUBSCRIPTION_EXPIRED" | "UNAUTHORIZED_CASHIER";
+      success: false;
+    }
 > => {
   const verifyRes = await verifyCashierCodeAction(input.cashierCodeOrToken);
   if (!verifyRes.success || !verifyRes.cashier || !verifyRes.organization) {
     return { error: "UNAUTHORIZED_CASHIER", success: false };
+  }
+
+  const canScan = await checkCanScan(verifyRes.organization.id);
+  if (!canScan.allowed) {
+    return { error: "SUBSCRIPTION_EXPIRED", success: false };
   }
 
   return addStampToCard({
@@ -339,11 +349,20 @@ export const cashierRedeemAction = async (
   token: string,
   rewardId?: string
 ): Promise<
-  RedeemRewardResult | { error: "UNAUTHORIZED_CASHIER"; success: false }
+  | RedeemRewardResult
+  | {
+      error: "SUBSCRIPTION_EXPIRED" | "UNAUTHORIZED_CASHIER";
+      success: false;
+    }
 > => {
   const verifyRes = await verifyCashierCodeAction(cashierCodeOrToken);
   if (!verifyRes.success || !verifyRes.cashier || !verifyRes.organization) {
     return { error: "UNAUTHORIZED_CASHIER", success: false };
+  }
+
+  const canScan = await checkCanScan(verifyRes.organization.id);
+  if (!canScan.allowed) {
+    return { error: "SUBSCRIPTION_EXPIRED", success: false };
   }
 
   return redeemCardReward({

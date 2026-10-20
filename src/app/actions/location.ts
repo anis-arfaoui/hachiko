@@ -17,7 +17,7 @@ import { getSubscriptionDetails } from "@/dal/subscription";
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
 
-const WHATSAPP_CONTACT_PHONE = "213550000000";
+const WHATSAPP_CONTACT_PHONE = "213796841801";
 
 export interface CardPreviewData {
   brandColor: string;

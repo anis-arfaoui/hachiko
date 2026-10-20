@@ -1,7 +1,10 @@
 "use client";
 
 import {
+  AlertCircle,
+  AlertTriangle,
   BarChart3,
+  Clock,
   CreditCard,
   Eye,
   Gift,
@@ -13,6 +16,8 @@ import {
   ScanLine,
   Settings,
   Shield,
+  ShieldCheck,
+  Sparkles,
   Star,
   Store,
   Users,
@@ -30,17 +35,21 @@ import { AddStoreModal } from "@/components/dashboard/add-store-modal";
 import { CardPreviewModal } from "@/components/dashboard/card-preview-modal";
 import { StoreSwitcher } from "@/components/dashboard/store-switcher";
 import type { LocationItem } from "@/dal/location";
-import { signOut, useActiveOrganization } from "@/lib/auth-client";
+import type { SubscriptionDetails } from "@/dal/subscription";
+import { isSuperAdminEmail } from "@/lib/admin";
+import { signOut, useActiveOrganization, useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 interface MerchantNavProps {
   children: ReactNode;
   initialOrgName?: string;
+  subscriptionDetails?: SubscriptionDetails | null;
 }
 
 export const MerchantNav = ({
   children,
   initialOrgName = "Mon Commerce",
+  subscriptionDetails,
 }: MerchantNavProps) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -79,6 +88,8 @@ export const MerchantNav = ({
   }, []);
 
   const { data: activeOrg } = useActiveOrganization();
+  const { data: sessionData } = useSession();
+  const isSuperAdmin = isSuperAdminEmail(sessionData?.user?.email);
 
   const handleSignOut = async () => {
     await signOut();
@@ -217,6 +228,16 @@ export const MerchantNav = ({
       icon: Settings,
       label: "Paramètres",
     },
+    ...(isSuperAdmin
+      ? [
+          {
+            aliases: ["/admin", `/${locale}/admin`],
+            href: `/admin`,
+            icon: ShieldCheck,
+            label: "Super-Admin",
+          },
+        ]
+      : []),
   ];
 
   const orgName = activeOrg?.name || initialOrgName;
@@ -513,6 +534,104 @@ export const MerchantNav = ({
                   <span>Déconnexion</span>
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Subscription Status Alert Banner */}
+        {subscriptionDetails?.subscription?.status === "grace" && (
+          <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-900 dark:text-amber-200">
+            <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <span>
+                  <strong>
+                    Période de grâce (
+                    {subscriptionDetails.graceDaysRemaining ?? 3} jour
+                    {(subscriptionDetails.graceDaysRemaining ?? 3) > 1
+                      ? "s"
+                      : ""}{" "}
+                    restant
+                    {(subscriptionDetails.graceDaysRemaining ?? 3) > 1
+                      ? "s"
+                      : ""}
+                    ) :
+                  </strong>{" "}
+                  Vos caisses continuent de fonctionner temporairement.
+                  Régularisez votre abonnement pour éviter l&apos;interruption
+                  des scans.
+                </span>
+              </div>
+              <Link
+                href="/billing"
+                className="inline-flex shrink-0 items-center justify-center rounded-lg bg-amber-600 px-3 py-1 text-[11px] font-bold text-white transition-colors hover:bg-amber-700"
+              >
+                Régulariser mon abonnement
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {subscriptionDetails?.subscription?.status === "expired" && (
+          <div className="border-destructive/30 bg-destructive/10 text-destructive border-b px-4 py-2.5 text-xs">
+            <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2.5">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>
+                  <strong>Abonnement expiré :</strong> L&apos;ajout de nouveaux
+                  clients et les scans sont suspendus. Vos données sont 100%
+                  conservées.
+                </span>
+              </div>
+              <Link
+                href="/billing"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 inline-flex shrink-0 items-center justify-center rounded-lg px-3 py-1 text-[11px] font-bold transition-colors"
+              >
+                Réactiver mon abonnement
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {subscriptionDetails?.subscription?.status === "prepaid" && (
+          <div className="border-b border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs text-emerald-900 dark:text-emerald-200">
+            <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                <span>
+                  <strong>Abonnement prépayé &amp; validé !</strong> Votre mois
+                  payé démarrera automatiquement dès votre 30ème carte fidélité
+                  (actuellement {subscriptionDetails.customerCount}/30 cartes
+                  créées).
+                </span>
+              </div>
+              <Link
+                href="/billing"
+                className="inline-flex shrink-0 items-center justify-center rounded-lg bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white transition-colors hover:bg-emerald-700"
+              >
+                Voir les détails
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {subscriptionDetails?.subscription?.status === "pending" && (
+          <div className="border-b border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-xs text-sky-900 dark:text-sky-200">
+            <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2.5">
+                <Clock className="h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400" />
+                <span>
+                  <strong>Demande d&apos;abonnement en attente :</strong>{" "}
+                  Envoyez votre reçu BaridiMob sur WhatsApp au 0796841801 pour
+                  valider votre compte.
+                </span>
+              </div>
+              <Link
+                href="/billing"
+                className="inline-flex shrink-0 items-center justify-center rounded-lg bg-sky-600 px-3 py-1 text-[11px] font-bold text-white transition-colors hover:bg-sky-700"
+              >
+                Coordonnées de paiement
+              </Link>
             </div>
           </div>
         )}

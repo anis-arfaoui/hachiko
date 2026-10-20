@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { MerchantNav } from "@/components/dashboard/merchant-nav";
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization } from "@/dal/program";
+import { getSubscriptionDetails } from "@/dal/subscription";
 
 interface MerchantLayoutProps {
   children: ReactNode;
@@ -16,15 +17,20 @@ const MerchantLayout = async ({ children }: MerchantLayoutProps) => {
     redirect("/sign-in");
   }
 
-  const program = await getProgramByOrganization(
-    merchantSession.organizationId
-  );
+  const [program, subDetails] = await Promise.all([
+    getProgramByOrganization(merchantSession.organizationId),
+    getSubscriptionDetails(merchantSession.organizationId),
+  ]);
+
   if (!program) {
     redirect("/onboarding");
   }
 
   return (
-    <MerchantNav initialOrgName={merchantSession.organization.name}>
+    <MerchantNav
+      initialOrgName={merchantSession.organization.name}
+      subscriptionDetails={subDetails}
+    >
       {children}
     </MerchantNav>
   );

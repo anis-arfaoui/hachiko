@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
 
 import { db } from "@/db";
@@ -63,6 +64,7 @@ const getAuthSecret = (): string => {
 
 const configuredOrigins = [
   "http://localhost:3000",
+  "http://127.0.0.1:3000",
   DEFAULT_PROD_URL,
   "https://www.walaa.tech",
   "https://walaa.tech",
@@ -156,7 +158,7 @@ export const auth = betterAuth({
       });
     },
   },
-  plugins: [organization()],
+  plugins: [organization(), nextCookies()],
   secret: getAuthSecret(),
   trustedOrigins,
 });

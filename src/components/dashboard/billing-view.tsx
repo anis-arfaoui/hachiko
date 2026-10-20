@@ -1,10 +1,13 @@
 "use client";
 
 import {
+  AlertCircle,
+  AlertTriangle,
   ArrowRight,
   Check,
   CheckCircle2,
   Clock,
+  Copy,
   CreditCard,
   Info,
   Loader2,
@@ -26,7 +29,11 @@ import {
 } from "@/app/actions/subscription";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { SubscriptionDetails, SubscriptionInfo } from "@/dal/subscription";
+import type {
+  SubscriptionDetails,
+  SubscriptionInfo,
+  SubscriptionStatus,
+} from "@/dal/subscription";
 import { cn } from "@/lib/utils";
 
 interface BillingViewProps {
@@ -38,8 +45,8 @@ const STARTER_MONTHLY_PRICE = 2900;
 const PRO_MONTHLY_PRICE = 4900;
 const EXTRA_STORE_MONTHLY_PRICE = 2500;
 const NFC_PLAQUE_PRICE = 2500;
-// Can be replaced by the platform owner's actual phone number
-const WHATSAPP_CONTACT_PHONE = "213550000000";
+// Official platform WhatsApp phone number
+const WHATSAPP_CONTACT_PHONE = "213796841801";
 
 const handleScrollToPlans = () => {
   const el = document.querySelector("#plans-section");
@@ -100,6 +107,18 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
   const [actionSuccessMessage, setActionSuccessMessage] = useState<
     string | null
   >(null);
+
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const handleCopy = async (text: string, fieldId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(fieldId);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch {
+      // ignore
+    }
+  };
 
   // Switch plan and reset points of sale if starter
   const handleSelectPlan = (plan: "starter" | "pro") => {
@@ -197,7 +216,7 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
 
   // Admin Quick Switch (For testing / platform owner)
   const handleAdminToggle = async (
-    targetStatus: "trial" | "pending" | "active",
+    targetStatus: SubscriptionStatus,
     months = 1
   ) => {
     setIsTogglingAdmin(true);
@@ -214,6 +233,10 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
               ? new Date(
                   Date.now() + months * 30 * 24 * 60 * 60 * 1000
                 ).toISOString()
+              : null,
+          graceUntil:
+            targetStatus === "grace"
+              ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
               : null,
           status: targetStatus,
         },
@@ -296,17 +319,118 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
         </div>
       </Card>
 
-      {/* 2. Status Callout if Pending or Active */}
-      {isPending && (
+      {/* 2. Status Callouts */}
+      {currentStatus === "prepaid" && (
+        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-emerald-900 shadow-xs dark:text-emerald-200">
+          <div className="flex items-start gap-3">
+            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold">
+                  Abonnement Prépayé Validé !
+                </h3>
+                <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                  Départ automatique à la 30ème carte
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-emerald-800 dark:text-emerald-300">
+                Votre règlement pour la formule{" "}
+                <strong>
+                  {details.subscription.prepaidPlan?.plan === "pro"
+                    ? "Pro"
+                    : "Débutant"}
+                </strong>{" "}
+                a bien été validé par l&apos;équipe Walaa. Votre période payée
+                ne sera pas décomptée tant que vous n&apos;avez pas atteint vos
+                30 cartes fidélité gratuites (actuellement{" "}
+                <strong>
+                  {details.customerCount} / {details.maxFreeCustomers} cartes
+                </strong>
+                ).
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {currentStatus === "grace" && (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-amber-900 shadow-xs dark:text-amber-200">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold">
+                    Période de grâce en cours
+                  </h3>
+                  <span className="rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                    {details.graceDaysRemaining ?? 3} jour
+                    {(details.graceDaysRemaining ?? 3) > 1 ? "s" : ""} restant
+                    {(details.graceDaysRemaining ?? 3) > 1 ? "s" : ""}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300">
+                  Votre quota de cartes d&apos;essai ou votre abonnement est
+                  arrivé à échéance. Vos caisses restent opérationnelles
+                  temporairement afin de ne pas bloquer vos encaissements.
+                  Veuillez régulariser votre abonnement pour continuer sans
+                  interruption.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleScrollToPlans}
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-xs transition-colors hover:bg-amber-700"
+            >
+              <span>Régulariser maintenant</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {currentStatus === "expired" && (
+        <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-2xl border p-5 shadow-xs">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold">
+                    Abonnement Suspendu (Scans caisse bloqués)
+                  </h3>
+                </div>
+                <p className="mt-0.5 text-xs">
+                  La période de grâce est expirée. L&apos;enregistrement de
+                  nouveaux clients et les scans sont suspendus. Vos données
+                  clients restent 100% conservées. Choisissez une formule
+                  ci-dessous et envoyez votre reçu pour réactiver immédiatement.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleScrollToPlans}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition-colors"
+            >
+              <span>Réactiver mon compte</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {isPending && (
+        <div className="rounded-2xl border border-sky-500/30 bg-sky-500/10 p-5 text-sky-900 shadow-xs dark:text-sky-200">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-sky-600 dark:text-sky-400" />
               <div>
                 <h3 className="text-sm font-bold">
                   Demande d&apos;abonnement en attente de validation
                 </h3>
-                <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300">
+                <p className="mt-0.5 text-xs text-sky-800 dark:text-sky-300">
                   Votre demande pour la formule{" "}
                   <strong>
                     {details.subscription.plan === "starter"
@@ -314,9 +438,9 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
                       : "Pro"}
                   </strong>{" "}
                   ({details.subscription.price.toLocaleString("fr-FR")} DA) est
-                  enregistrée. Veuillez nous faire parvenir votre reçu de
-                  règlement (BaridiMob / CCP / Virement) sur WhatsApp pour
-                  activer immédiatement votre compte.
+                  enregistrée. Envoyez votre reçu BaridiMob sur WhatsApp au{" "}
+                  <strong>0796841801</strong> pour activer immédiatement votre
+                  compte.
                 </p>
               </div>
             </div>
@@ -734,7 +858,101 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
         </Card>
       </div>
 
-      {/* 4. Full Plan Description Card (matching Fidelix bottom card) */}
+      {/* 4. Coordonnées de règlement BaridiMob & CCP */}
+      <Card className="border-border bg-card rounded-2xl p-5 shadow-xs sm:p-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-primary/10 text-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
+              <CreditCard className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-foreground text-sm font-bold">
+                Coordonnées de règlement BaridiMob &amp; CCP
+              </h3>
+              <p className="text-muted-foreground text-xs">
+                Effectuez votre virement BaridiMob ou versement CCP, puis
+                envoyez le reçu sur WhatsApp au <strong>0796841801</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {/* BaridiMob RIP */}
+            <div className="border-border bg-muted/40 flex flex-col justify-between rounded-xl border p-3">
+              <span className="text-muted-foreground text-[10px] font-bold uppercase">
+                BaridiMob RIP (20 chiffres)
+              </span>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <code className="text-foreground font-mono text-xs font-bold sm:text-sm">
+                  00799999000000000000
+                </code>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleCopy("00799999000000000000", "rip")}
+                  className="h-7 rounded-lg px-2 text-[11px]"
+                >
+                  {copiedField === "rip" ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                  <span className="ml-1">
+                    {copiedField === "rip" ? "Copié !" : "Copier"}
+                  </span>
+                </Button>
+              </div>
+            </div>
+
+            {/* CCP Account */}
+            <div className="border-border bg-muted/40 flex flex-col justify-between rounded-xl border p-3">
+              <span className="text-muted-foreground text-[10px] font-bold uppercase">
+                Compte CCP
+              </span>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <code className="text-foreground font-mono text-xs font-bold sm:text-sm">
+                  0021345678 Clé 90
+                </code>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleCopy("002134567890", "ccp")}
+                  className="h-7 rounded-lg px-2 text-[11px]"
+                >
+                  {copiedField === "ccp" ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                  <span className="ml-1">
+                    {copiedField === "ccp" ? "Copié !" : "Copier"}
+                  </span>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-border flex flex-col gap-2 border-t pt-3 text-xs sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-muted-foreground text-[11px]">
+              Titulaire : <strong>Walaa Loyalty Platform</strong> &bull; Contact
+              assistance : <strong>0796841801</strong>
+            </span>
+            <a
+              href={`https://wa.me/${WHATSAPP_CONTACT_PHONE}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              <span>Ouvrir WhatsApp (+213 796 841 801)</span>
+            </a>
+          </div>
+        </div>
+      </Card>
+
+      {/* 5. Full Plan Description Card (matching Fidelix bottom card) */}
       <div className="space-y-4">
         <Card className="border-border bg-card rounded-2xl p-6 text-center shadow-xs sm:p-8">
           <div className="bg-muted text-foreground mx-auto flex h-12 w-12 items-center justify-center rounded-2xl">
@@ -764,7 +982,7 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
         </Card>
       </div>
 
-      {/* 5. Owner / Dev Quick Switcher (Discreet testing helper for user) */}
+      {/* 6. Owner / Dev Quick Switcher (Discreet testing helper for user) */}
       <div className="border-border bg-muted/20 rounded-2xl border border-dashed p-4 text-xs">
         <div className="text-muted-foreground flex items-center gap-2 font-semibold">
           <Info className="h-4 w-4" />
@@ -812,13 +1030,58 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
             variant="outline"
             size="sm"
             disabled={isTogglingAdmin}
+            onClick={() => handleAdminToggle("prepaid")}
+            className="rounded-xl text-xs font-semibold"
+          >
+            {isTogglingAdmin ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              "Simuler Prépayé"
+            )}
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isTogglingAdmin}
+            onClick={() => handleAdminToggle("grace")}
+            className="rounded-xl text-xs font-semibold"
+          >
+            {isTogglingAdmin ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              "Simuler Grâce (3 jours)"
+            )}
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isTogglingAdmin}
+            onClick={() => handleAdminToggle("expired")}
+            className="rounded-xl text-xs font-semibold"
+          >
+            {isTogglingAdmin ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              "Simuler Expiré"
+            )}
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isTogglingAdmin}
             onClick={() => handleAdminToggle("trial")}
             className="rounded-xl text-xs font-semibold"
           >
             {isTogglingAdmin ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              "Remettre en Essai gratuit (30 clients max)"
+              "Remettre en Essai gratuit (< 30)"
             )}
           </Button>
         </div>

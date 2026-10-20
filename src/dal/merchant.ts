@@ -22,8 +22,14 @@ export interface ResolvedMerchantSession {
 
 export const getMerchantSession =
   async (): Promise<ResolvedMerchantSession | null> => {
-    const reqHeaders = await headers();
-    const session = await auth.api.getSession({ headers: reqHeaders });
+    let session: Awaited<ReturnType<typeof auth.api.getSession>> | null = null;
+    try {
+      const reqHeaders = await headers();
+      session = await auth.api.getSession({ headers: reqHeaders });
+    } catch (error) {
+      console.warn("[getMerchantSession] Could not resolve session:", error);
+      return null;
+    }
 
     if (!session?.user) {
       return null;

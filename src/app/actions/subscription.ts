@@ -8,7 +8,11 @@ import {
   requestSubscription,
   setSubscriptionStatus,
 } from "@/dal/subscription";
-import type { SubscriptionDetails, SubscriptionInfo } from "@/dal/subscription";
+import type {
+  SubscriptionDetails,
+  SubscriptionInfo,
+  SubscriptionStatus,
+} from "@/dal/subscription";
 
 export interface RequestSubscriptionInput {
   billingCycle: "mensuel" | "semestriel" | "annuel";
@@ -68,7 +72,7 @@ export const requestSubscriptionAction = async (
 };
 
 export const adminSetSubscriptionStatusAction = async (
-  status: "trial" | "pending" | "active" | "expired",
+  status: SubscriptionStatus,
   durationMonths = 1
 ): Promise<{ error?: string; success: boolean }> => {
   const session = await getMerchantSession();

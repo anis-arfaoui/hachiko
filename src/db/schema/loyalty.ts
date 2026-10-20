@@ -188,11 +188,17 @@ export const redemptions = pgTable("redemptions", {
   }),
 });
 
-export const subscriptions = pgTable("subscriptions", {
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  paidUntil: timestamp("paid_until").notNull(),
-});
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    paidUntil: timestamp("paid_until").notNull(),
+  },
+  (table) => [
+    uniqueIndex("subscriptions_organization_id_idx").on(table.organizationId),
+  ]
+);

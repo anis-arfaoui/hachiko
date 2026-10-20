@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, or } from "drizzle-orm";
+import { count, eq, or } from "drizzle-orm";
 import { headers } from "next/headers";
 
 import {
@@ -14,6 +14,10 @@ import { getManagerSession } from "@/dal/manager";
 import { getMerchantSession } from "@/dal/merchant";
 import { getProgramByOrganization, upsertProgram } from "@/dal/program";
 import {
+  checkCanAddCustomer,
+  onCustomerCreatedTrigger,
+} from "@/dal/subscription";
+import {
   addStampToCard,
   cancelTransaction,
   redeemCardReward,
@@ -25,6 +29,7 @@ import type {
 } from "@/dal/transaction";
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
+import { customers } from "@/db/schema/loyalty";
 import { isValidAlgerianPhone } from "@/lib/phone";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -42,7 +47,9 @@ export type JoinProgramResult =
         | "INVALID_NAME"
         | "INVALID_PHONE"
         | "PROGRAM_NOT_FOUND"
-        | "RATE_LIMITED";
+        | "RATE_LIMITED"
+        | "SUBSCRIPTION_LIMIT_REACHED";
+      message?: string;
       success: false;
     }
   | {
@@ -118,6 +125,16 @@ export const joinProgramAction = async (
     return { error: "BUSINESS_NOT_FOUND", success: false };
   }
 
+  // Subscription limit check: trial 30-card limit, grace period, active, or expired
+  const subCheck = await checkCanAddCustomer(business.id);
+  if (!subCheck.allowed) {
+    return {
+      error: "SUBSCRIPTION_LIMIT_REACHED",
+      message: subCheck.reason,
+      success: false,
+    };
+  }
+
   // Look up or initialize loyalty program
   let program = await getProgramByOrganization(business.id);
 
@@ -140,8 +157,17 @@ export const joinProgramAction = async (
     phone: input.phone,
   });
 
-  // Find or create customer loyalty card with unique secret token
-  const card = await findOrCreateCard(customer.id, program.id);
+  // Find or create customer loyalty card and count customers in parallel
+  const [[customerCountRes], card] = await Promise.all([
+    db
+      .select({ value: count(customers.id) })
+      .from(customers)
+      .where(eq(customers.organizationId, business.id)),
+    findOrCreateCard(customer.id, program.id),
+  ]);
+
+  const totalCount = customerCountRes?.value ?? 0;
+  await onCustomerCreatedTrigger(business.id, totalCount);
 
   return {
     orgId: business.id,
