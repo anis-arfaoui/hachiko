@@ -10,28 +10,62 @@ export interface GoogleWalletConfig {
 
 let cachedConfig: GoogleWalletConfig | null = null;
 
-export const formatPrivateKey = (key: string): string => {
-  if (!key) {
+export const formatPrivateKey = (rawInput: string): string => {
+  if (!rawInput) {
     return "";
   }
 
-  let cleaned = key.trim();
+  let str = rawInput.trim();
 
-  if (
-    (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
-    (cleaned.startsWith("'") && cleaned.endsWith("'"))
-  ) {
-    cleaned = cleaned.slice(1, -1).trim();
+  // 1. If someone pasted the entire JSON service account file
+  if (str.startsWith("{") && str.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(str) as { private_key?: string };
+      if (parsed.private_key) {
+        str = parsed.private_key.trim();
+      }
+    } catch {
+      // Ignore JSON parse error and continue
+    }
   }
 
-  cleaned = cleaned
+  // 2. Strip surrounding quotes if present
+  if (
+    (str.startsWith('"') && str.endsWith('"')) ||
+    (str.startsWith("'") && str.endsWith("'"))
+  ) {
+    str = str.slice(1, -1).trim();
+  }
+
+  // 3. Replace all variations of escaped newlines
+  str = str
     .replaceAll("\\\\r\\\\n", "\n")
     .replaceAll("\\\\n", "\n")
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\r\n", "\n");
 
-  return cleaned;
+  const beginMarker = "-----BEGIN PRIVATE KEY-----";
+  const endMarker = "-----END PRIVATE KEY-----";
+
+  let base64Body = "";
+  if (str.includes(beginMarker) && str.includes(endMarker)) {
+    const startIdx = str.indexOf(beginMarker) + beginMarker.length;
+    const endIdx = str.indexOf(endMarker);
+    base64Body = str.slice(startIdx, endIdx);
+  } else if (str.includes(beginMarker)) {
+    base64Body = str.slice(str.indexOf(beginMarker) + beginMarker.length);
+  } else {
+    base64Body = str;
+  }
+
+  // Remove ALL whitespace from the base64 body (spaces, newlines, tabs)
+  const cleanBase64 = base64Body.replaceAll(/\s+/gu, "");
+
+  // Re-chunk into standard 64-character PEM lines
+  const chunks = cleanBase64.match(/.{1,64}/gu) || [];
+
+  return `${beginMarker}\n${chunks.join("\n")}\n${endMarker}\n`;
 };
 
 export const getGoogleWalletConfig = (): GoogleWalletConfig => {
