@@ -10,6 +10,30 @@ export interface GoogleWalletConfig {
 
 let cachedConfig: GoogleWalletConfig | null = null;
 
+export const formatPrivateKey = (key: string): string => {
+  if (!key) {
+    return "";
+  }
+
+  let cleaned = key.trim();
+
+  if (
+    (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+    (cleaned.startsWith("'") && cleaned.endsWith("'"))
+  ) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  cleaned = cleaned
+    .replaceAll("\\\\r\\\\n", "\n")
+    .replaceAll("\\\\n", "\n")
+    .replaceAll("\\r\\n", "\n")
+    .replaceAll("\\n", "\n")
+    .replaceAll("\r\n", "\n");
+
+  return cleaned;
+};
+
 export const getGoogleWalletConfig = (): GoogleWalletConfig => {
   if (cachedConfig) {
     return cachedConfig;
@@ -23,9 +47,9 @@ export const getGoogleWalletConfig = (): GoogleWalletConfig => {
     process.env.GOOGLE_WALLET_PRIVATE_KEY
   ) {
     cachedConfig = {
-      clientEmail: process.env.GOOGLE_WALLET_CLIENT_EMAIL,
-      issuerId,
-      privateKey: process.env.GOOGLE_WALLET_PRIVATE_KEY.replaceAll("\\n", "\n"),
+      clientEmail: process.env.GOOGLE_WALLET_CLIENT_EMAIL.trim(),
+      issuerId: issuerId.trim(),
+      privateKey: formatPrivateKey(process.env.GOOGLE_WALLET_PRIVATE_KEY),
       projectId: process.env.GOOGLE_WALLET_PROJECT_ID || "walaa-loyalty-511913",
     };
     return cachedConfig;
@@ -76,9 +100,9 @@ export const getGoogleWalletConfig = (): GoogleWalletConfig => {
     }
 
     cachedConfig = {
-      clientEmail: parsed.client_email,
-      issuerId,
-      privateKey: parsed.private_key,
+      clientEmail: parsed.client_email.trim(),
+      issuerId: issuerId.trim(),
+      privateKey: formatPrivateKey(parsed.private_key),
       projectId: parsed.project_id || "walaa-loyalty-511913",
     };
 
