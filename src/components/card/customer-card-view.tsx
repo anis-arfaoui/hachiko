@@ -14,6 +14,7 @@ import QRCode from "qrcode";
 import { useCallback, useEffect, useState } from "react";
 
 import { getCardDetailsAction } from "@/app/actions/customer";
+import { WalletButtons } from "@/components/card/wallet-buttons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -389,6 +390,9 @@ export const CustomerCardView = ({ token }: CustomerCardViewProps) => {
             </div>
           )}
         </div>
+
+        {/* Wallet Passes */}
+        <WalletButtons brandColor={card.brandColor} token={card.token} />
 
         {/* Mon Compte */}
         <div className="border-border bg-card space-y-2.5 rounded-2xl border p-4 text-xs shadow-xs">
