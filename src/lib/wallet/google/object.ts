@@ -29,7 +29,9 @@ export const buildLoyaltyObjectPayload = (
 
   const isPoints = card.programType === "points";
   const pointsLabel = isPoints ? "Points" : "Tampons";
-  const balanceString = `${card.balance} / ${card.stampsRequired}`;
+  const balanceString = isPoints
+    ? `${card.balance} / ${card.stampsRequired} pts`
+    : `${card.balance} / ${card.stampsRequired}`;
 
   const textModules: walletobjects_v1.Schema$TextModuleData[] = [];
 

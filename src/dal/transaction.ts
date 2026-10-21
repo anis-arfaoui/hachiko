@@ -9,6 +9,7 @@ import {
   rewards,
   transactions,
 } from "@/db/schema/loyalty";
+import { syncGoogleWalletCard } from "@/lib/wallet/google";
 
 import { getCardByToken } from "./card";
 
@@ -161,13 +162,46 @@ export const addStampToCard = async (
     }
   });
 
+  const rewardReady = newBalance >= card.stampsRequired;
+
+  const headerText = isPoints
+    ? `+${increment} Points ! 🎉`
+    : `+${increment} ${increment > 1 ? "Tampons" : "Tampon"} ! 🎉`;
+
+  const bodyText = isPoints
+    ? `Votre solde a été crédité chez ${card.businessName}. Nouveau solde : ${newBalance} / ${card.stampsRequired} pts.`
+    : `Votre carte a été créditée chez ${card.businessName}. Nouveau solde : ${newBalance} / ${card.stampsRequired} tampons.`;
+
+  const rewardBodyText = isPoints
+    ? `Félicitations ! Vous avez atteint ${newBalance} points chez ${card.businessName}. Votre récompense "${card.rewardLabel || "Cadeau"}" est débloquée ! 🎁`
+    : `Félicitations ! Vous avez complété vos ${card.stampsRequired} tampons chez ${card.businessName}. Votre récompense "${card.rewardLabel || "Cadeau"}" est débloquée ! 🎁`;
+
+  // Asynchronously sync pass on Google Wallet with push notification
+  void syncGoogleWalletCard({
+    balance: newBalance,
+    businessName: card.businessName,
+    cardId: card.cardId,
+    notificationMessage: rewardReady
+      ? {
+          body: rewardBodyText,
+          header: "Récompense débloquée ! 🎁",
+        }
+      : {
+          body: bodyText,
+          header: headerText,
+        },
+    programType: card.programType,
+    rewardLabel: card.rewardLabel ?? undefined,
+    stampsRequired: card.stampsRequired,
+  });
+
   return {
     addedAmount: increment,
     balance: newBalance,
     customerCode: card.customerCode ?? undefined,
     isDuplicate: false,
     programType: card.programType === "points" ? "points" : "stamps",
-    rewardReady: newBalance >= card.stampsRequired,
+    rewardReady,
     stampsRequired: card.stampsRequired,
     success: true,
     transactionId,
@@ -229,6 +263,12 @@ export const cancelTransaction = async (
       .where(eq(cards.id, txRecord.cardId));
 
     await tx.delete(transactions).where(eq(transactions.id, txRecord.txId));
+  });
+
+  // Asynchronously sync pass on Google Wallet
+  void syncGoogleWalletCard({
+    balance: revertedBalance,
+    cardId: txRecord.cardId,
   });
 
   return {
@@ -337,6 +377,23 @@ export const redeemCardReward = async (
         .set({ lastActiveAt: new Date(), updatedAt: new Date() })
         .where(eq(cashiers.id, options.cashierId));
     }
+  });
+
+  const isPointsRedeem = card.programType === "points";
+  const redeemUnit = isPointsRedeem ? "pts" : "tampons";
+
+  // Asynchronously sync pass on Google Wallet with push notification
+  void syncGoogleWalletCard({
+    balance: newBalance,
+    businessName: card.businessName,
+    cardId: card.cardId,
+    notificationMessage: {
+      body: `Votre récompense "${rewardLabel}" a été validée avec succès chez ${card.businessName}. Nouveau solde : ${newBalance} / ${card.stampsRequired} ${redeemUnit}.`,
+      header: "Récompense validée ! ☕",
+    },
+    programType: card.programType,
+    rewardLabel: card.rewardLabel ?? undefined,
+    stampsRequired: card.stampsRequired,
   });
 
   return {
