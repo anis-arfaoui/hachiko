@@ -42,7 +42,11 @@ next-env.d.ts
 
 # credentials & secrets
 *.pem
+*.p12
+*.cer
+*.csr
 *key.json
 *credentials*.json
 google-wallet-key.json
+certificates/
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { getCardByToken } from "@/dal/card";
+import { isAppleWalletConfigured } from "@/lib/wallet/apple";
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google";
 
 export interface WalletSaveUrlResult {
@@ -8,6 +9,41 @@ export interface WalletSaveUrlResult {
   saveUrl?: string;
   success: boolean;
 }
+
+export interface AppleWalletUrlResult {
+  configured: boolean;
+  error?: string;
+  passUrl?: string;
+  success: boolean;
+}
+
+export const getAppleWalletPassUrlAction = async (
+  token: string
+): Promise<AppleWalletUrlResult> => {
+  if (!token) {
+    return { configured: false, error: "INVALID_TOKEN", success: false };
+  }
+
+  if (!isAppleWalletConfigured()) {
+    return {
+      configured: false,
+      error:
+        "Le pass Apple Wallet sera activé très prochainement pour ce commerce. Utilisez votre QR code en caisse !",
+      success: false,
+    };
+  }
+
+  const card = await getCardByToken(token);
+  if (!card) {
+    return { configured: true, error: "CARD_NOT_FOUND", success: false };
+  }
+
+  return {
+    configured: true,
+    passUrl: `/api/wallet/apple/pass/${token}`,
+    success: true,
+  };
+};
 
 export const getGoogleWalletSaveUrlAction = async (
   token: string

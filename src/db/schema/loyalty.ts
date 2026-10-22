@@ -202,3 +202,25 @@ export const subscriptions = pgTable(
     uniqueIndex("subscriptions_organization_id_idx").on(table.organizationId),
   ]
 );
+
+export const appleWalletRegistrations = pgTable(
+  "apple_wallet_registrations",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    deviceLibraryIdentifier: text("device_library_identifier").notNull(),
+    id: text("id").primaryKey(),
+    passTypeIdentifier: text("pass_type_identifier").notNull(),
+    pushToken: text("push_token").notNull(),
+    serialNumber: text("serial_number")
+      .notNull()
+      .references(() => cards.id, { onDelete: "cascade" }),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("apple_registrations_device_pass_serial_idx").on(
+      table.deviceLibraryIdentifier,
+      table.passTypeIdentifier,
+      table.serialNumber
+    ),
+  ]
+);

@@ -6,6 +6,7 @@
       "name": "loyalty-app",
       "dependencies": {
         "@neondatabase/serverless": "^1.2.0",
+        "@walletpass/pass-js": "^7.2.0",
         "better-auth": "^1.7.7",
         "clsx": "^2.1.1",
         "drizzle-orm": "^0.45.3",
@@ -611,6 +612,8 @@
     "@unrs/resolver-binding-win32-ia32-msvc": ["@unrs/resolver-binding-win32-ia32-msvc@1.12.2", "", { "os": "win32", "cpu": "ia32" }, "sha512-WD9sY00OfpHVGfsnHZoA8jVT+esS/Bg8z8jzxp5BnDCjjwsuKsPQrzswwpFy4J1AUJbXPRfkpcX0mXrzeXW79g=="],
 
     "@unrs/resolver-binding-win32-x64-msvc": ["@unrs/resolver-binding-win32-x64-msvc@1.12.2", "", { "os": "win32", "cpu": "x64" }, "sha512-nAB74NfSNKknqQ1RrYj6uz8FcXEomu/MATJZxh/x+BArzN2U3JbOYC0APYzUIGhVY3m5hRxA8VPNdPBoG8txlA=="],
+
+    "@walletpass/pass-js": ["@walletpass/pass-js@7.2.0", "", { "bin": { "passkit-keys": "bin/passkit-keys" } }, "sha512-iIhFVmZr5ULLwhfMTyzENk31JvJnNKwME2cAZYtXcqLPSZE39B2B8srXWi9qmwsJ7kUuKXE4+ZeIuehcj+B/kg=="],
 
     "acorn": ["acorn@8.18.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-lGq+9yr1/GuAWaVYIHRjvvySG5/4VfKIvC8EWxStPdcDh/Ka7FG3twP6v4d5BkravUilhIAsG4Qj83t02LWUPQ=="],
 

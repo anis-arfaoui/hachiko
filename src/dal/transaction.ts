@@ -9,6 +9,7 @@ import {
   rewards,
   transactions,
 } from "@/db/schema/loyalty";
+import { syncAppleWalletCard } from "@/lib/wallet/apple";
 import { syncGoogleWalletCard } from "@/lib/wallet/google";
 
 import { getCardByToken } from "./card";
@@ -176,7 +177,7 @@ export const addStampToCard = async (
     ? `Félicitations ! Vous avez atteint ${newBalance} points chez ${card.businessName}. Votre récompense "${card.rewardLabel || "Cadeau"}" est débloquée ! 🎁`
     : `Félicitations ! Vous avez complété vos ${card.stampsRequired} tampons chez ${card.businessName}. Votre récompense "${card.rewardLabel || "Cadeau"}" est débloquée ! 🎁`;
 
-  // Asynchronously sync pass on Google Wallet with push notification
+  // Asynchronously sync pass on Google & Apple Wallet with push notification
   void syncGoogleWalletCard({
     balance: newBalance,
     businessName: card.businessName,
@@ -194,6 +195,7 @@ export const addStampToCard = async (
     rewardLabel: card.rewardLabel ?? undefined,
     stampsRequired: card.stampsRequired,
   });
+  void syncAppleWalletCard({ cardId: card.cardId });
 
   return {
     addedAmount: increment,
@@ -265,11 +267,12 @@ export const cancelTransaction = async (
     await tx.delete(transactions).where(eq(transactions.id, txRecord.txId));
   });
 
-  // Asynchronously sync pass on Google Wallet
+  // Asynchronously sync pass on Google & Apple Wallet
   void syncGoogleWalletCard({
     balance: revertedBalance,
     cardId: txRecord.cardId,
   });
+  void syncAppleWalletCard({ cardId: txRecord.cardId });
 
   return {
     newBalance: revertedBalance,
@@ -382,7 +385,7 @@ export const redeemCardReward = async (
   const isPointsRedeem = card.programType === "points";
   const redeemUnit = isPointsRedeem ? "pts" : "tampons";
 
-  // Asynchronously sync pass on Google Wallet with push notification
+  // Asynchronously sync pass on Google & Apple Wallet with push notification
   void syncGoogleWalletCard({
     balance: newBalance,
     businessName: card.businessName,
@@ -395,6 +398,7 @@ export const redeemCardReward = async (
     rewardLabel: card.rewardLabel ?? undefined,
     stampsRequired: card.stampsRequired,
   });
+  void syncAppleWalletCard({ cardId: card.cardId });
 
   return {
     balance: newBalance,

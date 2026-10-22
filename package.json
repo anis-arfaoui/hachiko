@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
+    "@walletpass/pass-js": "^7.2.0",
     "better-auth": "^1.7.7",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.3",
