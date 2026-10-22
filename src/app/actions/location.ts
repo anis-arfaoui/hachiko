@@ -17,9 +17,12 @@ import { getSubscriptionDetails } from "@/dal/subscription";
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
 
+import type { OrganizationMetadata } from "./program";
+
 const WHATSAPP_CONTACT_PHONE = "213796841801";
 
 export interface CardPreviewData {
+  bgImageUrl?: string | null;
   brandColor: string;
   businessName: string;
   locations: {
@@ -251,6 +254,7 @@ export const getClientCardPreviewDataAction =
         .select({
           id: organization.id,
           logo: organization.logo,
+          metadata: organization.metadata,
           name: organization.name,
           slug: organization.slug,
         })
@@ -264,6 +268,17 @@ export const getClientCardPreviewDataAction =
     if (!currentOrg) {
       return null;
     }
+
+    let metadataObj: OrganizationMetadata = {};
+    if (currentOrg.metadata) {
+      try {
+        metadataObj = JSON.parse(currentOrg.metadata) as OrganizationMetadata;
+      } catch {
+        metadataObj = {};
+      }
+    }
+
+    const { bgImageUrl = null } = metadataObj;
 
     let rewardItems: {
       cost: number;
@@ -283,6 +298,7 @@ export const getClientCardPreviewDataAction =
     }
 
     return {
+      bgImageUrl,
       brandColor: program?.brandColor || "#18181b",
       businessName: currentOrg.name,
       locations: locs.map((l) => ({

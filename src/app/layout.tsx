@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "./globals.css";
 
-const geistMono = Geist_Mono({
+const inter = Inter({
+  display: "swap",
   subsets: ["latin"],
-  variable: "--font-geist-mono",
+  variable: "--font-sans",
 });
 
-const geistSans = Geist({
+const plusJakartaSans = Plus_Jakarta_Sans({
+  display: "swap",
   subsets: ["latin"],
-  variable: "--font-geist-sans",
+  variable: "--font-heading",
 });
 
 export const metadata: Metadata = {
@@ -33,10 +35,10 @@ interface RootLayoutProps {
 
 const RootLayout = ({ children }: RootLayoutProps) => (
   <html
-    className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    className={`${inter.variable} ${plusJakartaSans.variable} h-full antialiased`}
     lang="fr"
   >
-    <body className="bg-background text-foreground flex min-h-full flex-col">
+    <body className="bg-background text-foreground flex min-h-full flex-col font-sans">
       {children}
     </body>
   </html>

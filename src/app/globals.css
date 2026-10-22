@@ -8,9 +8,10 @@
   --popover: #ffffff;
   --popover-foreground: #0d1c32;
   --primary: #2563eb;
+  --primary-hover: #1d4ed8;
   --primary-foreground: #ffffff;
-  --secondary: #eff6ff;
-  --secondary-foreground: #1e3a8a;
+  --secondary: #0d1c32;
+  --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #eff6ff;
@@ -31,6 +32,7 @@
   --popover: #111e38;
   --popover-foreground: #f8faff;
   --primary: #3b82f6;
+  --primary-hover: #2563eb;
   --primary-foreground: #ffffff;
   --secondary: #1e293b;
   --secondary-foreground: #f8faff;
@@ -38,7 +40,7 @@
   --muted-foreground: #94a3b8;
   --accent: #1e293b;
   --accent-foreground: #f8faff;
-  --destructive: #7f1d1d;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #1e293b;
   --input: #1e293b;
@@ -71,21 +73,23 @@
   --color-brand: #2563eb;
   --color-brand-foreground: #ffffff;
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-heading), system-ui, -apple-system, sans-serif;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family:
-    var(--font-sans),
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
 }
 
 .custom-gradient-bg {

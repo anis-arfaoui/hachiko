@@ -1,5 +1,21 @@
-import { Award, Sparkles, Stamp } from "lucide-react";
+import { Activity, Award, Sparkles, Stamp } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { RecentActivityItem } from "@/dal/stats";
 
 interface RecentActivityFeedProps {
@@ -19,117 +35,113 @@ const formatDate = (date: Date): string => {
   return `${dayMonth} à ${time}`;
 };
 
-const getTypeBadgeStyle = (type: string): string => {
+const renderTypeBadge = (type: RecentActivityItem["type"], label: string) => {
   if (type === "redeem") {
-    return "bg-secondary text-primary border border-primary/20";
+    return (
+      <Badge variant="warning" size="sm" className="gap-1 font-semibold">
+        <Award className="h-3 w-3 shrink-0" />
+        <span>{label}</span>
+      </Badge>
+    );
   }
-  if (type === "points") {
-    return "bg-amber-500/10 text-amber-700 dark:text-amber-300";
-  }
-  return "bg-primary/10 text-primary";
-};
 
-const renderTypeIcon = (type: string) => {
-  if (type === "redeem") {
-    return <Award className="h-3 w-3" />;
-  }
   if (type === "points") {
-    return <Sparkles className="h-3 w-3" />;
+    return (
+      <Badge variant="accent" size="sm" className="gap-1 font-semibold">
+        <Sparkles className="h-3 w-3 shrink-0" />
+        <span>{label}</span>
+      </Badge>
+    );
   }
-  return <Stamp className="h-3 w-3" />;
+
+  return (
+    <Badge variant="brand" size="sm" className="gap-1 font-semibold">
+      <Stamp className="h-3 w-3 shrink-0" />
+      <span>{label}</span>
+    </Badge>
+  );
 };
 
 export const RecentActivityFeed = ({ activities }: RecentActivityFeedProps) => (
-  <div className="border-border bg-card overflow-hidden rounded-2xl border shadow-xs">
-    <div className="border-border border-b p-6">
-      <h2 className="text-foreground text-base font-bold">
-        Transactions & Passages Récents
-      </h2>
-      <p className="text-muted-foreground mt-0.5 text-xs">
-        Flux en temps réel des passages en caisse et des cadeaux offerts
-      </p>
-    </div>
-
-    <div className="overflow-x-auto">
-      {activities.length === 0 ? (
-        <div className="text-muted-foreground flex h-36 items-center justify-center text-xs">
-          Aucune transaction récente enregistrée.
+  <Card className="overflow-hidden shadow-xs">
+    <CardHeader className="border-border border-b p-5 sm:p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <CardTitle className="text-base sm:text-lg">
+            Transactions & Passages Récents
+          </CardTitle>
+          <CardDescription className="mt-1">
+            Flux en direct des passages en caisse et des récompenses débloquées
+          </CardDescription>
         </div>
-      ) : (
-        <table className="w-full text-left text-xs">
-          <thead>
-            <tr className="border-border text-muted-foreground border-b font-semibold tracking-wider uppercase">
-              <th scope="col" className="px-6 py-3.5">
-                Client
-              </th>
-              <th scope="col" className="px-6 py-3.5">
-                Type
-              </th>
-              <th scope="col" className="px-6 py-3.5 text-right">
-                Pts / Tampons
-              </th>
-              <th scope="col" className="px-6 py-3.5 text-right">
-                Montant
-              </th>
-              <th scope="col" className="px-6 py-3.5 text-right">
-                Date
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-border divide-y">
-            {activities.map((act) => {
-              const isRedeem = act.type === "redeem";
+        <Badge variant="neutral" size="sm">
+          {activities.length} récentes
+        </Badge>
+      </div>
+    </CardHeader>
 
-              return (
-                <tr
-                  key={act.id}
-                  className="hover:bg-muted/40 transition-colors"
-                >
-                  <td className="px-6 py-3.5" aria-label={act.customerName}>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary/10 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                        {act.initials}
-                      </div>
-                      <span className="text-foreground font-semibold">
-                        {act.customerName}
-                      </span>
+    {activities.length === 0 ? (
+      <TableEmptyState
+        icon={<Activity className="h-6 w-6" />}
+        title="Aucune transaction récente"
+        description="Les passages en caisse et récompenses apparaîtront ici dès le premier scan."
+      />
+    ) : (
+      <Table className="rounded-none border-0">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[30%]">Client</TableHead>
+            <TableHead className="w-[20%]">Opération</TableHead>
+            <TableHead className="w-[18%] text-right">Pts / Tampons</TableHead>
+            <TableHead className="w-[17%] text-right">Montant</TableHead>
+            <TableHead className="w-[15%] text-right">Date</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {activities.map((act) => {
+            const isRedeem = act.type === "redeem";
+
+            return (
+              <TableRow key={act.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold">
+                      {act.initials}
                     </div>
-                  </td>
-
-                  <td className="px-6 py-3.5">
-                    <span
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${getTypeBadgeStyle(act.type)}`}
-                    >
-                      {renderTypeIcon(act.type)}
-                      <span>{act.typeLabel}</span>
+                    <span className="text-foreground font-semibold">
+                      {act.customerName}
                     </span>
-                  </td>
+                  </div>
+                </TableCell>
 
-                  <td className="px-6 py-3.5 text-right font-bold">
-                    <span
-                      className={
-                        isRedeem
-                          ? "text-primary font-bold"
-                          : "font-bold text-emerald-600 dark:text-emerald-400"
-                      }
-                    >
-                      {act.deltaText}
-                    </span>
-                  </td>
+                <TableCell>
+                  {renderTypeBadge(act.type, act.typeLabel)}
+                </TableCell>
 
-                  <td className="text-muted-foreground px-6 py-3.5 text-right font-medium">
-                    {act.spendText}
-                  </td>
+                <TableCell className="text-right font-bold">
+                  <span
+                    className={
+                      isRedeem
+                        ? "text-primary font-bold"
+                        : "font-bold text-emerald-600 dark:text-emerald-400"
+                    }
+                  >
+                    {act.deltaText}
+                  </span>
+                </TableCell>
 
-                  <td className="text-muted-foreground px-6 py-3.5 text-right whitespace-nowrap">
-                    {formatDate(act.createdAt)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
-    </div>
-  </div>
+                <TableCell className="text-muted-foreground text-right font-medium">
+                  {act.spendText}
+                </TableCell>
+
+                <TableCell className="text-muted-foreground text-right text-xs whitespace-nowrap">
+                  {formatDate(act.createdAt)}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    )}
+  </Card>
 );

@@ -1,5 +1,6 @@
 import { and, desc, eq, or } from "drizzle-orm";
 
+import type { OrganizationMetadata } from "@/app/actions/program";
 import { db } from "@/db";
 import { organization } from "@/db/schema/auth";
 import {
@@ -57,6 +58,7 @@ export const getCardByToken = async (token: string) => {
       brandColor: programs.brandColor,
       businessId: organization.id,
       businessLogo: organization.logo,
+      businessMetadata: organization.metadata,
       businessName: organization.name,
       cardCreatedAt: cards.createdAt,
       cardId: cards.id,
@@ -113,8 +115,20 @@ export const getCardByToken = async (token: string) => {
       .orderBy(desc(locations.isDefault), locations.createdAt),
   ]);
 
+  let metadataObj: OrganizationMetadata = {};
+  if (card.businessMetadata) {
+    try {
+      metadataObj = JSON.parse(card.businessMetadata) as OrganizationMetadata;
+    } catch {
+      metadataObj = {};
+    }
+  }
+
+  const { bgImageUrl = null } = metadataObj;
+
   return {
     ...card,
+    bgImageUrl,
     locations: activeLocations,
     rewards: programRewards,
   };

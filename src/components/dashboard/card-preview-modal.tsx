@@ -230,10 +230,18 @@ export const CardPreviewModal = ({
               {/* Loyalty Card Container */}
               <div
                 className={cn(
-                  "overflow-hidden rounded-3xl p-5 text-white shadow-xl transition-colors",
+                  "relative overflow-hidden rounded-3xl p-5 text-white shadow-xl transition-colors",
                   bgClass
                 )}
               >
+                {/* Optional background banner overlay */}
+                {data.bgImageUrl && (
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-35 mix-blend-overlay transition-opacity"
+                    style={{ backgroundImage: `url(${data.bgImageUrl})` }}
+                    aria-hidden="true"
+                  />
+                )}
                 {/* Card Header */}
                 <div className="flex items-center justify-between border-b border-white/20 pb-3">
                   <div className="flex items-center gap-2.5">

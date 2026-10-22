@@ -7,9 +7,7 @@ import {
   Check,
   CheckCircle2,
   Clock,
-  Copy,
   CreditCard,
-  Info,
   Loader2,
   MessageCircle,
   Minus,
@@ -23,17 +21,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import {
-  adminSetSubscriptionStatusAction,
-  requestSubscriptionAction,
-} from "@/app/actions/subscription";
+import { requestSubscriptionAction } from "@/app/actions/subscription";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type {
-  SubscriptionDetails,
-  SubscriptionInfo,
-  SubscriptionStatus,
-} from "@/dal/subscription";
+import type { SubscriptionDetails, SubscriptionInfo } from "@/dal/subscription";
 import { cn } from "@/lib/utils";
 
 interface BillingViewProps {
@@ -103,22 +94,9 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
   );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTogglingAdmin, setIsTogglingAdmin] = useState(false);
   const [actionSuccessMessage, setActionSuccessMessage] = useState<
     string | null
   >(null);
-
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-
-  const handleCopy = async (text: string, fieldId: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedField(fieldId);
-      setTimeout(() => setCopiedField(null), 2000);
-    } catch {
-      // ignore
-    }
-  };
 
   // Switch plan and reset points of sale if starter
   const handleSelectPlan = (plan: "starter" | "pro") => {
@@ -212,37 +190,6 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
     }
 
     setIsSubmitting(false);
-  };
-
-  // Admin Quick Switch (For testing / platform owner)
-  const handleAdminToggle = async (
-    targetStatus: SubscriptionStatus,
-    months = 1
-  ) => {
-    setIsTogglingAdmin(true);
-    const res = await adminSetSubscriptionStatusAction(targetStatus, months);
-    if (res.success) {
-      setDetails((prev) => ({
-        ...prev,
-        subscription: {
-          ...prev.subscription,
-          activatedAt:
-            targetStatus === "active" ? new Date().toISOString() : null,
-          expiresAt:
-            targetStatus === "active"
-              ? new Date(
-                  Date.now() + months * 30 * 24 * 60 * 60 * 1000
-                ).toISOString()
-              : null,
-          graceUntil:
-            targetStatus === "grace"
-              ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
-              : null,
-          status: targetStatus,
-        },
-      }));
-    }
-    setIsTogglingAdmin(false);
   };
 
   return (
@@ -858,101 +805,7 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
         </Card>
       </div>
 
-      {/* 4. Coordonnées de règlement BaridiMob & CCP */}
-      <Card className="border-border bg-card rounded-2xl p-5 shadow-xs sm:p-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="bg-primary/10 text-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
-              <CreditCard className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-foreground text-sm font-bold">
-                Coordonnées de règlement BaridiMob &amp; CCP
-              </h3>
-              <p className="text-muted-foreground text-xs">
-                Effectuez votre virement BaridiMob ou versement CCP, puis
-                envoyez le reçu sur WhatsApp au <strong>0796841801</strong>.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {/* BaridiMob RIP */}
-            <div className="border-border bg-muted/40 flex flex-col justify-between rounded-xl border p-3">
-              <span className="text-muted-foreground text-[10px] font-bold uppercase">
-                BaridiMob RIP (20 chiffres)
-              </span>
-              <div className="mt-1 flex items-center justify-between gap-2">
-                <code className="text-foreground font-mono text-xs font-bold sm:text-sm">
-                  00799999000000000000
-                </code>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleCopy("00799999000000000000", "rip")}
-                  className="h-7 rounded-lg px-2 text-[11px]"
-                >
-                  {copiedField === "rip" ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-500" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5" />
-                  )}
-                  <span className="ml-1">
-                    {copiedField === "rip" ? "Copié !" : "Copier"}
-                  </span>
-                </Button>
-              </div>
-            </div>
-
-            {/* CCP Account */}
-            <div className="border-border bg-muted/40 flex flex-col justify-between rounded-xl border p-3">
-              <span className="text-muted-foreground text-[10px] font-bold uppercase">
-                Compte CCP
-              </span>
-              <div className="mt-1 flex items-center justify-between gap-2">
-                <code className="text-foreground font-mono text-xs font-bold sm:text-sm">
-                  0021345678 Clé 90
-                </code>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleCopy("002134567890", "ccp")}
-                  className="h-7 rounded-lg px-2 text-[11px]"
-                >
-                  {copiedField === "ccp" ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-500" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5" />
-                  )}
-                  <span className="ml-1">
-                    {copiedField === "ccp" ? "Copié !" : "Copier"}
-                  </span>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-border flex flex-col gap-2 border-t pt-3 text-xs sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-muted-foreground text-[11px]">
-              Titulaire : <strong>Walaa Loyalty Platform</strong> &bull; Contact
-              assistance : <strong>0796841801</strong>
-            </span>
-            <a
-              href={`https://wa.me/${WHATSAPP_CONTACT_PHONE}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
-            >
-              <MessageCircle className="h-3.5 w-3.5" />
-              <span>Ouvrir WhatsApp (+213 796 841 801)</span>
-            </a>
-          </div>
-        </div>
-      </Card>
-
-      {/* 5. Full Plan Description Card (matching Fidelix bottom card) */}
+      {/* 4. Full Plan Description Card (matching Fidelix bottom card) */}
       <div className="space-y-4">
         <Card className="border-border bg-card rounded-2xl p-6 text-center shadow-xs sm:p-8">
           <div className="bg-muted text-foreground mx-auto flex h-12 w-12 items-center justify-center rounded-2xl">
@@ -980,111 +833,6 @@ export const BillingView = ({ initialDetails }: BillingViewProps) => {
             </a>
           </div>
         </Card>
-      </div>
-
-      {/* 6. Owner / Dev Quick Switcher (Discreet testing helper for user) */}
-      <div className="border-border bg-muted/20 rounded-2xl border border-dashed p-4 text-xs">
-        <div className="text-muted-foreground flex items-center gap-2 font-semibold">
-          <Info className="h-4 w-4" />
-          <span>Contrôle administrateur (Simuler l&apos;activation) :</span>
-        </div>
-        <p className="text-muted-foreground mt-1 text-[11px]">
-          En tant que propriétaire, vous pouvez tester les différents états de
-          l&apos;application avant la création de votre espace super-admin
-          dédié.
-        </p>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isTogglingAdmin}
-            onClick={() => handleAdminToggle("active", 1)}
-            className="rounded-xl text-xs font-semibold"
-          >
-            {isTogglingAdmin ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              "Passer en Actif (1 mois)"
-            )}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isTogglingAdmin}
-            onClick={() => handleAdminToggle("active", 12)}
-            className="rounded-xl text-xs font-semibold"
-          >
-            {isTogglingAdmin ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              "Passer en Actif (1 an)"
-            )}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isTogglingAdmin}
-            onClick={() => handleAdminToggle("prepaid")}
-            className="rounded-xl text-xs font-semibold"
-          >
-            {isTogglingAdmin ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              "Simuler Prépayé"
-            )}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isTogglingAdmin}
-            onClick={() => handleAdminToggle("grace")}
-            className="rounded-xl text-xs font-semibold"
-          >
-            {isTogglingAdmin ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              "Simuler Grâce (3 jours)"
-            )}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isTogglingAdmin}
-            onClick={() => handleAdminToggle("expired")}
-            className="rounded-xl text-xs font-semibold"
-          >
-            {isTogglingAdmin ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              "Simuler Expiré"
-            )}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isTogglingAdmin}
-            onClick={() => handleAdminToggle("trial")}
-            className="rounded-xl text-xs font-semibold"
-          >
-            {isTogglingAdmin ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              "Remettre en Essai gratuit (< 30)"
-            )}
-          </Button>
-        </div>
       </div>
     </div>
   );

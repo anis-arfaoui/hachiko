@@ -6,12 +6,10 @@ import {
   BarChart3,
   Clock,
   CreditCard,
-  Eye,
   Gift,
   LogOut,
   Menu,
   Palette,
-  Plus,
   QrCode,
   ScanLine,
   Settings,
@@ -33,7 +31,7 @@ import { useEffect, useState } from "react";
 import { getLocationsAction } from "@/app/actions/location";
 import { AddStoreModal } from "@/components/dashboard/add-store-modal";
 import { CardPreviewModal } from "@/components/dashboard/card-preview-modal";
-import { StoreSwitcher } from "@/components/dashboard/store-switcher";
+import { StoreHeroCard } from "@/components/dashboard/store-hero-card";
 import type { LocationItem } from "@/dal/location";
 import type { SubscriptionDetails } from "@/dal/subscription";
 import { signOut, useActiveOrganization } from "@/lib/auth-client";
@@ -41,14 +39,20 @@ import { cn } from "@/lib/utils";
 
 interface MerchantNavProps {
   children: ReactNode;
+  initialOrgBanner?: string | null;
+  initialOrgLogo?: string | null;
   initialOrgName?: string;
+  initialOrgSlug?: string | null;
   isSuperAdmin?: boolean;
   subscriptionDetails?: SubscriptionDetails | null;
 }
 
 export const MerchantNav = ({
   children,
+  initialOrgBanner,
+  initialOrgLogo,
   initialOrgName = "Mon Commerce",
+  initialOrgSlug,
   isSuperAdmin = false,
   subscriptionDetails,
 }: MerchantNavProps) => {
@@ -240,99 +244,28 @@ export const MerchantNav = ({
   ];
 
   const orgName = activeOrg?.name || initialOrgName;
-  const currentStore =
-    locations.find((l) => l.id === selectedLocationId) || locations[0];
+  const logoUrl = activeOrg?.logo || initialOrgLogo || null;
+  const slug = activeOrg?.slug || initialOrgSlug || null;
+  const bannerUrl = initialOrgBanner || null;
 
   return (
     <div className="bg-background text-foreground flex min-h-screen">
       {/* 1. Desktop Left Sidebar */}
       <aside className="border-border bg-card sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r p-5 md:flex">
-        {/* Top Section: Logo & Navigation */}
-        <div className="space-y-6">
-          {/* Brand header */}
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 transition-opacity hover:opacity-90"
-          >
-            <Image
-              src="/walaa-logo.png"
-              alt="Walaa"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-full object-cover shadow-xs"
-            />
-            <div className="flex flex-col">
-              <span className="text-foreground text-lg leading-none font-black tracking-tight">
-                Walaa
-              </span>
-              <span className="text-muted-foreground mt-0.5 text-[11px] font-medium">
-                Fidélité Digitale
-              </span>
-            </div>
-          </Link>
-
-          {/* Commerce & Multi-Store Hub */}
-          <div className="border-border bg-muted/40 space-y-2 rounded-2xl border p-3 shadow-2xs">
-            <div className="flex items-center gap-2.5">
-              <div className="bg-primary/10 text-primary border-border relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border">
-                {activeOrg?.logo ? (
-                  <Image
-                    src={activeOrg.logo}
-                    alt={orgName}
-                    fill
-                    sizes="36px"
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <Store className="h-4 w-4" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-foreground truncate text-xs font-bold">
-                  {orgName}
-                </div>
-                <div className="text-muted-foreground truncate text-[10px]">
-                  {currentStore
-                    ? currentStore.city || currentStore.name
-                    : "Espace Commerçant"}
-                </div>
-              </div>
-            </div>
-
-            {/* Store Switcher (if 2+ stores) */}
-            {locations.length > 1 && (
-              <StoreSwitcher
-                locations={locations}
-                selectedLocationId={selectedLocationId}
-                onSelectStore={(id) => setSelectedLocationId(id)}
-                onAddStoreClick={() => setIsAddStoreOpen(true)}
-              />
-            )}
-
-            {/* Quick Actions: Voir carte client & Ajouter boutique */}
-            <div className="grid grid-cols-2 gap-1.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setIsCardPreviewOpen(true)}
-                className="border-border bg-card hover:bg-muted text-foreground flex items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[11px] font-semibold shadow-2xs transition-all"
-                title="Voir la carte client"
-              >
-                <Eye className="text-primary h-3.5 w-3.5" />
-                <span>Voir carte</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsAddStoreOpen(true)}
-                className="border-border bg-card hover:bg-muted text-foreground flex items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[11px] font-semibold shadow-2xs transition-all"
-                title="Ajouter une boutique"
-              >
-                <Plus className="h-3.5 w-3.5 text-emerald-500" />
-                <span>Boutique</span>
-              </button>
-            </div>
-          </div>
+        {/* Top Section: Store Header & Navigation */}
+        <div className="space-y-5">
+          {/* Commerce & Multi-Store Hub (Sleek app-icon + ambient glow + domain pill aesthetic) */}
+          <StoreHeroCard
+            bannerUrl={bannerUrl}
+            locations={locations}
+            logoUrl={logoUrl}
+            onOpenAddStore={() => setIsAddStoreOpen(true)}
+            onOpenCardPreview={() => setIsCardPreviewOpen(true)}
+            onSelectStore={(id) => setSelectedLocationId(id)}
+            orgName={orgName}
+            selectedLocationId={selectedLocationId}
+            slug={slug}
+          />
 
           {/* Navigation Links */}
           <nav className="space-y-1">
@@ -377,18 +310,29 @@ export const MerchantNav = ({
       {/* 2. Mobile Header & Drawer */}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="border-border bg-card/90 sticky top-0 z-30 flex items-center justify-between border-b px-4 py-3 backdrop-blur-xs md:hidden">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <Image
-              src="/walaa-logo.png"
-              alt="Walaa"
-              width={28}
-              height={28}
-              className="h-7 w-7 rounded-full object-cover"
-            />
+          <button
+            type="button"
+            onClick={() => setIsCardPreviewOpen(true)}
+            className="flex items-center gap-2.5 text-left"
+          >
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={orgName}
+                width={28}
+                height={28}
+                className="h-7 w-7 rounded-lg object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-lg">
+                <Store className="h-4 w-4" />
+              </div>
+            )}
             <span className="text-foreground max-w-[160px] truncate text-sm font-bold">
               {orgName}
             </span>
-          </Link>
+          </button>
 
           <button
             type="button"
@@ -411,90 +355,36 @@ export const MerchantNav = ({
             />
 
             <div className="border-border bg-card relative z-10 flex h-full w-4/5 max-w-xs flex-col justify-between border-r p-5 shadow-2xl">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <Image
-                      src="/walaa-logo.png"
-                      alt="Walaa"
-                      width={32}
-                      height={32}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                    <span className="text-foreground text-base font-bold">
-                      Walaa
-                    </span>
-                  </div>
-
+              <div className="space-y-4">
+                <div className="flex items-center justify-end">
                   <button
                     type="button"
                     onClick={() => setMobileMenuOpen(false)}
                     aria-label="Fermer"
-                    className="text-muted-foreground hover:text-foreground rounded-lg p-1.5"
+                    className="hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg p-1.5 transition-colors"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
 
                 {/* Store Hub for Mobile */}
-                <div className="border-border bg-muted/40 space-y-2 rounded-2xl border p-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="bg-primary/10 text-primary border-border relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl border">
-                      {activeOrg?.logo ? (
-                        <Image
-                          src={activeOrg.logo}
-                          alt={orgName}
-                          fill
-                          sizes="32px"
-                          className="object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <Store className="h-4 w-4" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1 truncate text-xs font-bold">
-                      {orgName}
-                    </div>
-                  </div>
-
-                  {locations.length > 1 && (
-                    <StoreSwitcher
-                      locations={locations}
-                      selectedLocationId={selectedLocationId}
-                      onSelectStore={(id) => setSelectedLocationId(id)}
-                      onAddStoreClick={() => {
-                        setMobileMenuOpen(false);
-                        setIsAddStoreOpen(true);
-                      }}
-                    />
-                  )}
-
-                  <div className="grid grid-cols-2 gap-1.5 pt-0.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setIsCardPreviewOpen(true);
-                      }}
-                      className="border-border bg-card hover:bg-muted text-foreground flex items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[11px] font-semibold"
-                    >
-                      <Eye className="text-primary h-3.5 w-3.5" />
-                      <span>Voir carte</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setIsAddStoreOpen(true);
-                      }}
-                      className="border-border bg-card hover:bg-muted text-foreground flex items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[11px] font-semibold"
-                    >
-                      <Plus className="h-3.5 w-3.5 text-emerald-500" />
-                      <span>Boutique</span>
-                    </button>
-                  </div>
-                </div>
+                <StoreHeroCard
+                  bannerUrl={bannerUrl}
+                  locations={locations}
+                  logoUrl={logoUrl}
+                  onOpenAddStore={() => {
+                    setMobileMenuOpen(false);
+                    setIsAddStoreOpen(true);
+                  }}
+                  onOpenCardPreview={() => {
+                    setMobileMenuOpen(false);
+                    setIsCardPreviewOpen(true);
+                  }}
+                  onSelectStore={(id) => setSelectedLocationId(id)}
+                  orgName={orgName}
+                  selectedLocationId={selectedLocationId}
+                  slug={slug}
+                />
 
                 <nav className="space-y-1">
                   {navLinks.map((item) => {

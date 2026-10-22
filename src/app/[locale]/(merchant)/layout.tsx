@@ -35,6 +35,9 @@ const MerchantLayout = async ({ children }: MerchantLayoutProps) => {
   return (
     <MerchantNav
       initialOrgName={merchantSession.organization.name}
+      initialOrgSlug={merchantSession.organization.slug}
+      initialOrgLogo={merchantSession.organization.logo}
+      initialOrgBanner={merchantSession.organization.bgImageUrl}
       subscriptionDetails={subDetails}
       isSuperAdmin={Boolean(adminSession)}
     >

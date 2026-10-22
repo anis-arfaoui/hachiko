@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
+import type { OrganizationMetadata } from "@/app/actions/program";
 import { db } from "@/db";
 import {
   member,
@@ -13,7 +14,9 @@ import { generateUniqueSlug } from "@/lib/slug";
 
 export interface ResolvedMerchantSession {
   organization: {
+    bgImageUrl?: string | null;
     id: string;
+    logo?: string | null;
     name: string;
     slug: string | null;
   };
@@ -40,13 +43,20 @@ export const getMerchantSession =
       session.session as { activeOrganizationId?: string | null }
     ).activeOrganizationId;
     let organizationId = activeOrgId;
-    let orgData: { id: string; name: string; slug: string | null } | null =
-      null;
+    let orgData: {
+      bgImageUrl?: string | null;
+      id: string;
+      logo?: string | null;
+      name: string;
+      slug: string | null;
+    } | null = null;
 
     if (organizationId) {
       const [firstOrg] = await db
         .select({
           id: organization.id,
+          logo: organization.logo,
+          metadata: organization.metadata,
           name: organization.name,
           slug: organization.slug,
         })
@@ -55,7 +65,23 @@ export const getMerchantSession =
         .limit(1);
 
       if (firstOrg) {
-        orgData = firstOrg;
+        let bgImageUrl: string | null = null;
+        if (firstOrg.metadata) {
+          try {
+            const meta = JSON.parse(firstOrg.metadata) as OrganizationMetadata;
+            const { bgImageUrl: parsedBg = null } = meta;
+            bgImageUrl = parsedBg;
+          } catch {
+            // ignore
+          }
+        }
+        orgData = {
+          bgImageUrl,
+          id: firstOrg.id,
+          logo: firstOrg.logo,
+          name: firstOrg.name,
+          slug: firstOrg.slug,
+        };
       }
     }
 
@@ -64,6 +90,8 @@ export const getMerchantSession =
       const [firstMembership] = await db
         .select({
           id: organization.id,
+          logo: organization.logo,
+          metadata: organization.metadata,
           name: organization.name,
           slug: organization.slug,
         })
@@ -73,7 +101,25 @@ export const getMerchantSession =
         .limit(1);
 
       if (firstMembership) {
-        orgData = firstMembership;
+        let bgImageUrl: string | null = null;
+        if (firstMembership.metadata) {
+          try {
+            const meta = JSON.parse(
+              firstMembership.metadata
+            ) as OrganizationMetadata;
+            const { bgImageUrl: parsedBg = null } = meta;
+            bgImageUrl = parsedBg;
+          } catch {
+            // ignore
+          }
+        }
+        orgData = {
+          bgImageUrl,
+          id: firstMembership.id,
+          logo: firstMembership.logo,
+          name: firstMembership.name,
+          slug: firstMembership.slug,
+        };
         organizationId = orgData.id;
 
         // Persist active organization on the session in DB
