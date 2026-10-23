@@ -48,8 +48,80 @@ const DEFAULT_INACTIVE_MESSAGE =
 const DEFAULT_REWARD_MESSAGE =
   "Plus que quelques points pour débloquer votre récompense chez nous ! 🎁";
 
-const DEFAULT_LOCATION_MESSAGE =
-  "Vous êtes à deux pas de notre établissement ! Venez nous rendre visite. 📍";
+const DEFAULT_LOCATION_MESSAGE = "Un café vous attend chez nous ☕";
+
+/**
+ * Parses geographic coordinates from a Google Maps URL, short link, or raw coordinate string.
+ */
+export const parseCoordinatesFromLocationInput = async (
+  input: string
+): Promise<{ latitude: string; longitude: string } | null> => {
+  if (!input) {
+    return null;
+  }
+
+  let text = input.trim();
+
+  // If short link like maps.app.goo.gl or goo.gl/maps, follow redirect to expand full URL
+  if (text.includes("goo.gl/") || text.includes("maps.app.goo.gl/")) {
+    try {
+      const response = await fetch(text, {
+        method: "HEAD",
+        redirect: "follow",
+      });
+      if (response.url) {
+        text = response.url;
+      }
+    } catch (error) {
+      console.warn(
+        "[parseCoordinatesFromLocationInput] Error resolving short maps URL:",
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  // 1. Direct coordinates: "33.5731, -7.5898" or "33.5731 -7.5898"
+  const directMatch = text
+    .replaceAll(/[()]/gu, "")
+    .match(/^(?<lat>-?\d+\.\d+)[,\s]+(?<lng>-?\d+\.\d+)$/u);
+  if (directMatch?.groups?.lat && directMatch.groups.lng) {
+    return {
+      latitude: directMatch.groups.lat,
+      longitude: directMatch.groups.lng,
+    };
+  }
+
+  // 2. Google Maps exact pin protobuf coordinates: !3d33.5731!4d-7.5898
+  const protoMatch = text.match(/!3d(?<lat>-?\d+\.\d+)!4d(?<lng>-?\d+\.\d+)/u);
+  if (protoMatch?.groups?.lat && protoMatch.groups.lng) {
+    return {
+      latitude: protoMatch.groups.lat,
+      longitude: protoMatch.groups.lng,
+    };
+  }
+
+  // 3. Google Maps viewport @lat,lng format
+  const atMatch = text.match(/@(?<lat>-?\d+\.\d+),(?<lng>-?\d+\.\d+)/u);
+  if (atMatch?.groups?.lat && atMatch.groups.lng) {
+    return {
+      latitude: atMatch.groups.lat,
+      longitude: atMatch.groups.lng,
+    };
+  }
+
+  // 4. Google Maps URL query format: ?q=lat,lng or ?ll=lat,lng or ?query=lat,lng
+  const qMatch = text.match(
+    /[?&](?:q|query|ll)=(?<lat>-?\d+\.\d+),(?<lng>-?\d+\.\d+)/u
+  );
+  if (qMatch?.groups?.lat && qMatch.groups.lng) {
+    return {
+      latitude: qMatch.groups.lat,
+      longitude: qMatch.groups.lng,
+    };
+  }
+
+  return null;
+};
 
 /**
  * Retrieves all 3 marketing & retention automations for an organization.
@@ -108,7 +180,7 @@ export const getAutomations = async (
     message: locationRow?.message ?? DEFAULT_LOCATION_MESSAGE,
     organizationId,
     placeId: locationRow?.placeId ?? null,
-    triggerValue: locationRow?.triggerValue ?? 200,
+    triggerValue: locationRow?.triggerValue ?? 100,
     type: "location_proximity",
     updatedAt: locationRow?.updatedAt,
   };
@@ -128,6 +200,34 @@ export const saveAutomation = async (
   organizationId: string,
   input: SaveAutomationInput
 ): Promise<AutomationItem> => {
+  let lat = input.latitude ? Number(input.latitude) : Number.NaN;
+  let lng = input.longitude ? Number(input.longitude) : Number.NaN;
+
+  if (
+    input.type === "location_proximity" &&
+    (Number.isNaN(lat) || Number.isNaN(lng)) &&
+    input.placeId
+  ) {
+    const parsed = await parseCoordinatesFromLocationInput(input.placeId);
+    if (parsed) {
+      lat = Number(parsed.latitude);
+      lng = Number(parsed.longitude);
+      input.latitude = parsed.latitude;
+      input.longitude = parsed.longitude;
+    }
+  }
+
+  if (
+    input.type === "location_proximity" &&
+    !input.placeId?.trim() &&
+    !input.latitude
+  ) {
+    input.latitude = null;
+    input.longitude = null;
+    lat = Number.NaN;
+    lng = Number.NaN;
+  }
+
   const [existing] = await db
     .select({ id: automations.id })
     .from(automations)
@@ -193,9 +293,6 @@ export const saveAutomation = async (
       .limit(1);
 
     if (program) {
-      const lat = input.latitude ? Number(input.latitude) : Number.NaN;
-      const lng = input.longitude ? Number(input.longitude) : Number.NaN;
-
       const hasValidCoords =
         input.isEnabled && !Number.isNaN(lat) && !Number.isNaN(lng);
 

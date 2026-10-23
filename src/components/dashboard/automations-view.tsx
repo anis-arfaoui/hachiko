@@ -7,10 +7,9 @@ import {
   MapPin,
   Moon,
   Save,
-  Sparkles,
   Star,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 import { saveAutomationAction } from "@/app/actions/automation";
 import { Button } from "@/components/ui/button";
@@ -61,11 +60,24 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
   const [locationAddress, setLocationAddress] = useState(
     initialConfig.locationProximity.address ?? ""
   );
-  const [locationLat, setLocationLat] = useState(
-    initialConfig.locationProximity.latitude ?? ""
-  );
-  const [locationLng, setLocationLng] = useState(
-    initialConfig.locationProximity.longitude ?? ""
+  const locationCoordsRef = useRef<{
+    latitude: string | null;
+    longitude: string | null;
+  }>({
+    latitude: initialConfig.locationProximity.latitude ?? null,
+    longitude: initialConfig.locationProximity.longitude ?? null,
+  });
+
+  const initialMapsUrl =
+    initialConfig.locationProximity.placeId ||
+    (initialConfig.locationProximity.latitude &&
+    initialConfig.locationProximity.longitude
+      ? `${initialConfig.locationProximity.latitude}, ${initialConfig.locationProximity.longitude}`
+      : "");
+
+  const [locationMapsUrl, setLocationMapsUrl] = useState(initialMapsUrl);
+  const [locationDistance, setLocationDistance] = useState(
+    initialConfig.locationProximity.triggerValue || 100
   );
 
   // Feedback & Loading states per card
@@ -101,10 +113,11 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
     return {
       address: locationAddress.trim() || null,
       isEnabled: locationEnabled,
-      latitude: locationLat.trim() || null,
-      longitude: locationLng.trim() || null,
-      message: locationMessage.trim(),
-      triggerValue: 200,
+      latitude: locationCoordsRef.current.latitude,
+      longitude: locationCoordsRef.current.longitude,
+      message: locationMessage.trim() || "Un café vous attend chez nous ☕",
+      placeId: locationMapsUrl.trim() || null,
+      triggerValue: Number(locationDistance) || 100,
       type: "location_proximity",
     };
   };
@@ -150,10 +163,12 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setIsDetectingGps(false);
-        setLocationLat(pos.coords.latitude.toFixed(6));
-        setLocationLng(pos.coords.longitude.toFixed(6));
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        locationCoordsRef.current = { latitude: lat, longitude: lng };
+        setLocationMapsUrl(`${lat}, ${lng}`);
         setActiveFeedback({
-          text: "Coordonnées GPS détectées avec succès !",
+          text: "Position GPS détectée avec succès !",
           type: "location_proximity",
           variant: "success",
         });
@@ -401,7 +416,7 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
           </div>
         </Card>
 
-        {/* CARD 3: Notification de proximité (Geofencing Lieu) */}
+        {/* CARD 3: Notification à proximité */}
         <Card className="border-border bg-card space-y-5 rounded-2xl border p-6 shadow-xs sm:p-7">
           {/* Header */}
           <div className="flex items-start justify-between gap-4">
@@ -410,17 +425,16 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
                 <MapPin className="h-5 w-5" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-foreground text-base font-bold sm:text-lg">
-                    Notification de proximité
-                  </h2>
-                  <span className="rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[11px] font-bold text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
-                    Geofencing
-                  </span>
-                </div>
-                <p className="text-muted-foreground text-xs sm:text-sm">
-                  Affiche automatiquement une alerte sur l&apos;écran verrouillé
-                  dès que le client s&apos;approche de votre commerce.
+                <h2 className="text-foreground text-base font-bold sm:text-lg">
+                  Notification à proximité
+                </h2>
+                <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">
+                  Vos clients reçoivent une notification quand ils passent près
+                  de chez vous, sans que vous ayez rien à envoyer. Il faut que
+                  la carte soit dans leur wallet. Comptez quelques minutes après
+                  leur entrée dans la zone : le téléphone n&apos;écoute pas le
+                  GPS en continu, il se réveille par intermittence pour
+                  préserver la batterie.
                 </p>
               </div>
             </div>
@@ -429,56 +443,20 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
               id="switch-location-proximity"
               checked={locationEnabled}
               onCheckedChange={setLocationEnabled}
-              ariaLabel="Activer ou désactiver la notification de proximité"
+              ariaLabel="Activer ou désactiver la notification à proximité"
             />
           </div>
 
           {/* Body */}
-          <div className="space-y-4 pt-1">
-            {/* Lockscreen Message */}
+          <div className="space-y-5 pt-1">
+            {/* 1. Emplacement de la boutique */}
             <div className="space-y-1.5">
-              <label
-                htmlFor="location-message"
-                className="text-foreground text-xs font-semibold"
-              >
-                Message affiché sur l&apos;écran verrouillé
-              </label>
-              <textarea
-                id="location-message"
-                rows={2}
-                value={locationMessage}
-                onChange={(e) => setLocationMessage(e.target.value)}
-                placeholder="Vous êtes à deux pas de notre établissement ! Venez nous rendre visite. 📍"
-                className="border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-foreground focus:ring-foreground w-full resize-none rounded-xl border p-3.5 text-sm transition focus:ring-1 focus:outline-none"
-              />
-            </div>
-
-            {/* Address & Store name */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="location-address"
-                className="text-foreground text-xs font-semibold"
-              >
-                Adresse de votre établissement
-              </label>
-              <Input
-                id="location-address"
-                type="text"
-                value={locationAddress}
-                onChange={(e) => setLocationAddress(e.target.value)}
-                placeholder="ex: 12 Boulevard Mohammed V, Casablanca"
-                className="h-10 rounded-xl text-sm"
-              />
-            </div>
-
-            {/* GPS Coordinates & Autofill */}
-            <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <label
-                  htmlFor="location-lat"
+                  htmlFor="location-maps-url"
                   className="text-foreground text-xs font-semibold"
                 >
-                  Coordonnées GPS (Latitude / Longitude)
+                  Emplacement de la boutique (lien Google Maps)
                 </label>
 
                 <Button
@@ -497,62 +475,103 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="location-lat"
-                    className="text-muted-foreground text-[11px]"
-                  >
-                    Latitude
-                  </label>
-                  <Input
-                    id="location-lat"
-                    type="text"
-                    value={locationLat}
-                    onChange={(e) => setLocationLat(e.target.value)}
-                    placeholder="ex: 33.5731"
-                    className="h-10 rounded-xl font-mono text-sm"
-                  />
-                </div>
+              <Input
+                id="location-maps-url"
+                type="text"
+                value={locationMapsUrl}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setLocationMapsUrl(val);
+                  const directMatch = val
+                    .replaceAll(/[()]/gu, "")
+                    .match(/^(?<lat>-?\d+\.\d+)[,\s]+(?<lng>-?\d+\.\d+)$/u);
+                  if (directMatch?.groups?.lat && directMatch.groups.lng) {
+                    locationCoordsRef.current = {
+                      latitude: directMatch.groups.lat,
+                      longitude: directMatch.groups.lng,
+                    };
+                  }
+                }}
+                placeholder="Collez votre lien Google Maps"
+                className="h-10 rounded-xl text-sm"
+              />
 
-                <div>
-                  <label
-                    htmlFor="location-lng"
-                    className="text-muted-foreground text-[11px]"
-                  >
-                    Longitude
-                  </label>
-                  <Input
-                    id="location-lng"
-                    type="text"
-                    value={locationLng}
-                    onChange={(e) => setLocationLng(e.target.value)}
-                    placeholder="ex: -7.5898"
-                    className="h-10 rounded-xl font-mono text-sm"
-                  />
-                </div>
-              </div>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Sur Google Maps : trouvez votre boutique, appuyez sur{" "}
+                <strong>Partager</strong>, puis copiez le lien. Vous pouvez
+                aussi saisir vos coordonnées : 33.5731, -7.5898. Laissez vide
+                pour désactiver.
+              </p>
             </div>
 
-            {/* Native Geofencing Highlights */}
-            <div className="border-border/80 bg-muted/40 text-muted-foreground space-y-1 rounded-xl border p-3.5 text-xs">
-              <div className="text-foreground flex items-center gap-1.5 font-medium">
-                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                <span>Fonctionnement du géofencing</span>
+            {/* 2. Adresse de votre établissement (without 'ex:') */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="location-address"
+                className="text-foreground text-xs font-semibold"
+              >
+                Adresse de votre établissement
+              </label>
+              <Input
+                id="location-address"
+                type="text"
+                value={locationAddress}
+                onChange={(e) => setLocationAddress(e.target.value)}
+                placeholder="12 Boulevard Mohammed V, Casablanca"
+                className="h-10 rounded-xl text-sm"
+              />
+            </div>
+
+            {/* 3. Distance de déclenchement & Message affiché */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {/* Distance de déclenchement */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="location-distance"
+                  className="text-foreground text-xs font-semibold"
+                >
+                  Distance de déclenchement
+                </label>
+                <Input
+                  id="location-distance"
+                  type="number"
+                  min={50}
+                  max={2000}
+                  value={locationDistance}
+                  onChange={(e) => setLocationDistance(Number(e.target.value))}
+                  className="h-10 rounded-xl text-sm font-semibold"
+                />
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  En mètres, jusqu&apos;à 2000. Couverture réelle :{" "}
+                  <strong>≈ 250 m</strong>. Apple et Google fixent eux-mêmes la
+                  portée de chaque point ; nous en plaçons plusieurs autour de
+                  votre boutique pour couvrir la zone, sans jamais pouvoir
+                  dépasser ce plafond.
+                </p>
               </div>
-              <p>
-                ✓ Compatible nativement avec <strong>Apple Wallet</strong> et{" "}
-                <strong>Google Wallet</strong>.
-              </p>
-              <p>
-                ✓ Dès que le client entre dans un rayon de ~150-300 mètres de
-                votre adresse, son pass apparaît directement sur son écran
-                verrouillé.
-              </p>
-              <p>
-                ✓ <strong>Ne consomme pas</strong> votre quota journalier de 3
-                notifications push.
-              </p>
+
+              {/* Message affiché */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="location-message"
+                  className="text-foreground text-xs font-semibold"
+                >
+                  Message affiché
+                </label>
+                <Input
+                  id="location-message"
+                  type="text"
+                  maxLength={120}
+                  value={locationMessage}
+                  onChange={(e) => setLocationMessage(e.target.value)}
+                  placeholder="Un café vous attend chez nous ☕"
+                  className="h-10 rounded-xl text-sm"
+                />
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  120 caractères maximum. Vide = « Vous êtes près de [votre
+                  commerce] ».
+                </p>
+              </div>
             </div>
 
             {/* Feedback Message */}
