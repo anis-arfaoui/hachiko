@@ -14,6 +14,11 @@ export interface ApplePassCardData {
   customerCode?: string | null;
   customerName: string;
   customerPhone?: string | null;
+  locations?: {
+    latitude: number;
+    longitude: number;
+    relevantText?: string;
+  }[];
   logoUrl?: string | null;
   programType?: string;
   rewardLabel?: string | null;
@@ -175,6 +180,11 @@ export const generateApplePassBuffer = async (
   pass.backgroundColor = card.brandColor || "#18181b";
   pass.foregroundColor = "#ffffff";
   pass.labelColor = "#d4d4d8";
+
+  // Native geofencing locations (Apple Wallet lock screen trigger)
+  if (card.locations && card.locations.length > 0) {
+    pass.locations = card.locations;
+  }
 
   // Assets
   await loadDefaultImages(pass);

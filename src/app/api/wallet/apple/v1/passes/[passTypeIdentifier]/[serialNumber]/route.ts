@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { getActiveLocationGeofence } from "@/dal/automation";
 import { verifyApplePassAuth } from "@/lib/wallet/apple/auth";
 import {
   AppleWalletNotConfiguredError,
@@ -41,6 +42,8 @@ export const GET = async (req: NextRequest, { params }: RouteParams) => {
 
   // 3. Generate updated pass
   try {
+    const geofence = await getActiveLocationGeofence(card.organizationId);
+
     const passBuffer = await generateApplePassBuffer({
       balance: card.balance,
       brandColor: card.brandColor,
@@ -49,6 +52,7 @@ export const GET = async (req: NextRequest, { params }: RouteParams) => {
       customerCode: card.customerCode,
       customerName: card.customerName,
       customerPhone: card.customerPhone,
+      locations: geofence ? [geofence] : undefined,
       logoUrl: card.logoUrl,
       programType: card.programType,
       rewardLabel: card.rewardLabel,

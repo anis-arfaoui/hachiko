@@ -33,6 +33,7 @@ export const verifyApplePassAuth = async (
       customerName: customers.name,
       customerPhone: customers.phone,
       logoUrl: programs.logoUrl,
+      organizationId: organization.id,
       programType: programs.type,
       rewardLabel: programs.rewardLabel,
       stampsRequired: programs.stampsRequired,

@@ -1,5 +1,6 @@
 "use server";
 
+import { getActiveLocationGeofence } from "@/dal/automation";
 import { getCardByToken } from "@/dal/card";
 import { isAppleWalletConfigured } from "@/lib/wallet/apple";
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google";
@@ -59,6 +60,8 @@ export const getGoogleWalletSaveUrlAction = async (
       return { error: "CARD_NOT_FOUND", success: false };
     }
 
+    const geofence = await getActiveLocationGeofence(card.businessId);
+
     const saveUrl = await generateGoogleWalletSaveUrl({
       card: {
         balance: card.balance,
@@ -74,6 +77,9 @@ export const getGoogleWalletSaveUrlAction = async (
       program: {
         brandColor: card.brandColor,
         businessName: card.businessName,
+        locations: geofence
+          ? [{ latitude: geofence.latitude, longitude: geofence.longitude }]
+          : undefined,
         logoUrl: card.logoUrl || card.businessLogo,
         programId: card.programId,
       },

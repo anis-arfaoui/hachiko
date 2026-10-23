@@ -21,6 +21,7 @@ import {
   Store,
   Users,
   X,
+  Zap,
 } from "lucide-react";
 import { useLocale } from "next-intl";
 import Image from "next/image";
@@ -171,6 +172,17 @@ export const MerchantNav = ({
       href: `/notifications`,
       icon: Bell,
       label: "Notifications",
+    },
+    {
+      aliases: [
+        "/automations",
+        "/dashboard/automations",
+        `/${locale}/automations`,
+        `/${locale}/dashboard/automations`,
+      ],
+      href: `/automations`,
+      icon: Zap,
+      label: "Automatisations",
     },
     {
       aliases: [

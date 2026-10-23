@@ -241,13 +241,17 @@ export const notifications = pgTable("notifications", {
 });
 
 export const automations = pgTable("automations", {
+  address: text("address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   id: text("id").primaryKey(),
   isEnabled: boolean("is_enabled").default(false).notNull(),
+  latitude: text("latitude"),
+  longitude: text("longitude"),
   message: text("message").notNull(),
   organizationId: text("organization_id")
     .notNull()
     .references(() => organization.id, { onDelete: "cascade" }),
+  placeId: text("place_id"),
   triggerValue: integer("trigger_value").notNull(),
   type: text("type").notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

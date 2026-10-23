@@ -6,6 +6,7 @@ import { getGoogleWalletConfig } from "./config";
 export interface ProgramClassData {
   brandColor?: string;
   businessName: string;
+  locations?: { latitude: number; longitude: number }[];
   logoUrl?: string | null;
   programId: string;
 }
@@ -37,6 +38,13 @@ export const ensureLoyaltyClass = async (
     hexBackgroundColor: hexColor,
     id: classId,
     issuerName: data.businessName,
+    locations:
+      data.locations && data.locations.length > 0
+        ? data.locations.map((loc) => ({
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          }))
+        : undefined,
     programLogo: {
       contentDescription: {
         defaultValue: {
@@ -82,4 +90,26 @@ export const ensureLoyaltyClass = async (
   });
 
   return inserted.data;
+};
+
+export const updateLoyaltyClassLocations = async (
+  programId: string,
+  locations: { latitude: number; longitude: number }[]
+): Promise<void> => {
+  const client = getGoogleWalletClient();
+  const classId = getLoyaltyClassId(programId);
+
+  try {
+    await client.loyaltyclass.patch({
+      requestBody: {
+        locations: locations.length > 0 ? locations : [],
+      },
+      resourceId: classId,
+    });
+  } catch (error: unknown) {
+    console.warn(
+      `[GoogleWallet] loyaltyclass locations patch error for ${programId}:`,
+      error instanceof Error ? error.message : error
+    );
+  }
 };
