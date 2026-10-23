@@ -56,9 +56,11 @@ export const ensureLoyaltyClass = async (
     // Check if class already exists
     const existing = await client.loyaltyclass.get({ resourceId: classId });
     if (existing.data) {
-      // Update with latest colors / business name
+      // Exclude reviewStatus from patch so we don't overwrite an APPROVED class
+      const { reviewStatus: _omittedReviewStatus, ...patchPayload } =
+        classPayload;
       const updated = await client.loyaltyclass.patch({
-        requestBody: classPayload,
+        requestBody: patchPayload,
         resourceId: classId,
       });
       return updated.data;

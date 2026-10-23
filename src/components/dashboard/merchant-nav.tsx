@@ -4,6 +4,7 @@ import {
   AlertCircle,
   AlertTriangle,
   BarChart3,
+  Bell,
   Clock,
   CreditCard,
   Gift,
@@ -159,6 +160,17 @@ export const MerchantNav = ({
       href: `/qrcode`,
       icon: QrCode,
       label: "QR Code",
+    },
+    {
+      aliases: [
+        "/notifications",
+        "/dashboard/notifications",
+        `/${locale}/notifications`,
+        `/${locale}/dashboard/notifications`,
+      ],
+      href: `/notifications`,
+      icon: Bell,
+      label: "Notifications",
     },
     {
       aliases: [

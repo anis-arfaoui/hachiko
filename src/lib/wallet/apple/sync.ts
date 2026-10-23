@@ -2,7 +2,7 @@ import { Template } from "@walletpass/pass-js";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { appleWalletRegistrations } from "@/db/schema/loyalty";
+import { appleWalletRegistrations, cards } from "@/db/schema/loyalty";
 
 import { getAppleWalletConfig, isAppleWalletConfigured } from "./config";
 
@@ -89,5 +89,67 @@ export const syncAppleWalletCard = async (
       `[AppleWalletSync] Error syncing Apple Wallet for card ${params.cardId}:`,
       error instanceof Error ? error.message : error
     );
+  }
+};
+
+/**
+ * Sends a push update to all registered Apple Wallet passes belonging to a loyalty program.
+ */
+export const broadcastAppleWalletNotification = async (
+  programId: string
+): Promise<number> => {
+  try {
+    if (!isAppleWalletConfigured()) {
+      return 0;
+    }
+
+    const registrations = await db
+      .select({
+        deviceLibraryIdentifier:
+          appleWalletRegistrations.deviceLibraryIdentifier,
+        id: appleWalletRegistrations.id,
+        pushToken: appleWalletRegistrations.pushToken,
+      })
+      .from(appleWalletRegistrations)
+      .innerJoin(cards, eq(cards.id, appleWalletRegistrations.serialNumber))
+      .where(eq(cards.programId, programId));
+
+    if (registrations.length === 0) {
+      return 0;
+    }
+
+    const template = getPushTemplate();
+    let sentCount = 0;
+
+    await Promise.allSettled(
+      registrations.map(async (reg) => {
+        try {
+          const res = await template.pushUpdates(reg.pushToken);
+          const rawStatus = res[":status"];
+          const statusCode = rawStatus ? Number(rawStatus) : 200;
+
+          if (statusCode === 410) {
+            await db
+              .delete(appleWalletRegistrations)
+              .where(eq(appleWalletRegistrations.id, reg.id));
+          } else {
+            sentCount += 1;
+          }
+        } catch (pushError) {
+          console.warn(
+            `[AppleWalletBroadcast] Push failed for device ${reg.deviceLibraryIdentifier}:`,
+            pushError instanceof Error ? pushError.message : pushError
+          );
+        }
+      })
+    );
+
+    return sentCount;
+  } catch (error) {
+    console.warn(
+      `[AppleWalletBroadcast] Error broadcasting to Apple Wallet for program ${programId}:`,
+      error instanceof Error ? error.message : error
+    );
+    return 0;
   }
 };

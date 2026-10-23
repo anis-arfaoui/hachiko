@@ -224,3 +224,40 @@ export const appleWalletRegistrations = pgTable(
     ),
   ]
 );
+
+export const notifications = pgTable("notifications", {
+  actionUrl: text("action_url"),
+  channel: text("channel").default("all").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  id: text("id").primaryKey(),
+  message: text("message").notNull(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  recipientCount: integer("recipient_count").default(0).notNull(),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  title: text("title").notNull(),
+  type: text("type").default("manual").notNull(),
+});
+
+export const automations = pgTable("automations", {
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  id: text("id").primaryKey(),
+  isEnabled: boolean("is_enabled").default(false).notNull(),
+  message: text("message").notNull(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  triggerValue: integer("trigger_value").notNull(),
+  type: text("type").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const notificationLogs = pgTable("notification_logs", {
+  automationType: text("automation_type").notNull(),
+  customerId: text("customer_id")
+    .notNull()
+    .references(() => customers.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey(),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+});

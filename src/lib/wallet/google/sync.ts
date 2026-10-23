@@ -46,18 +46,25 @@ export const syncGoogleWalletCard = async (
       resourceId: objectId,
     });
 
-    // 2. Deliver native notification if specified
+    // 2. Deliver native notification if specified (wrapped so notification quota limits don't block sync)
     if (params.notificationMessage) {
-      await client.loyaltyobject.addmessage({
-        requestBody: {
-          message: {
-            body: params.notificationMessage.body,
-            header: params.notificationMessage.header,
-            messageType: "TEXT_AND_NOTIFY",
+      try {
+        await client.loyaltyobject.addmessage({
+          requestBody: {
+            message: {
+              body: params.notificationMessage.body,
+              header: params.notificationMessage.header,
+              messageType: "TEXT_AND_NOTIFY",
+            },
           },
-        },
-        resourceId: objectId,
-      });
+          resourceId: objectId,
+        });
+      } catch (msgError: unknown) {
+        console.warn(
+          `[GoogleWalletSync] Message delivery note for pass ${params.cardId}:`,
+          msgError instanceof Error ? msgError.message : msgError
+        );
+      }
     }
   } catch (error: unknown) {
     const status = (error as { status?: number })?.status;

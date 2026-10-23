@@ -8,4 +8,8 @@ export {
   AppleWalletNotConfiguredError,
   generateApplePassBuffer,
 } from "./pass";
-export { type SyncAppleWalletParams, syncAppleWalletCard } from "./sync";
+export {
+  broadcastAppleWalletNotification,
+  type SyncAppleWalletParams,
+  syncAppleWalletCard,
+} from "./sync";
