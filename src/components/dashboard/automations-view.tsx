@@ -7,11 +7,15 @@ import {
   MapPin,
   Moon,
   Save,
+  Sparkles,
   Star,
 } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 
-import { saveAutomationAction } from "@/app/actions/automation";
+import {
+  runAutomationsAction,
+  saveAutomationAction,
+} from "@/app/actions/automation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
@@ -89,7 +93,27 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
 
   const [savingCard, setSavingCard] = useState<AutomationType | null>(null);
   const [isDetectingGps, setIsDetectingGps] = useState(false);
+  const [isRunningCheck, setIsRunningCheck] = useState(false);
+  const [checkFeedback, setCheckFeedback] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const handleRunCheck = () => {
+    setIsRunningCheck(true);
+    setCheckFeedback(null);
+    startTransition(async () => {
+      const res = await runAutomationsAction();
+      setIsRunningCheck(false);
+      if (res.success) {
+        setCheckFeedback(
+          `Vérification terminée : ${res.inactiveSent} client(s) inactif(s) relancé(s), ${res.rewardSent} client(s) proche(s) d'une récompense notifié(s).`
+        );
+      } else {
+        setCheckFeedback(
+          res.message || "Une erreur est survenue lors de la vérification."
+        );
+      }
+    });
+  };
 
   const getPayload = (cardType: AutomationType): SaveAutomationInput => {
     if (cardType === "inactive_client") {
@@ -499,12 +523,12 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
               <p className="text-muted-foreground text-xs leading-relaxed">
                 Sur Google Maps : trouvez votre boutique, appuyez sur{" "}
                 <strong>Partager</strong>, puis copiez le lien. Vous pouvez
-                aussi saisir vos coordonnées : 33.5731, -7.5898. Laissez vide
+                aussi saisir vos coordonnées : 36.3650, 6.6147. Laissez vide
                 pour désactiver.
               </p>
             </div>
 
-            {/* 2. Adresse de votre établissement (without 'ex:') */}
+            {/* 2. Adresse de votre établissement */}
             <div className="space-y-1.5">
               <label
                 htmlFor="location-address"
@@ -517,7 +541,7 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
                 type="text"
                 value={locationAddress}
                 onChange={(e) => setLocationAddress(e.target.value)}
-                placeholder="12 Boulevard Mohammed V, Casablanca"
+                placeholder="ex: 15 Rue Didouche Mourad, Constantine"
                 className="h-10 rounded-xl text-sm"
               />
             </div>
@@ -603,11 +627,36 @@ export const AutomationsView = ({ initialConfig }: AutomationsViewProps) => {
         </Card>
       </div>
 
-      {/* 3. Footer Muted Note (as in mockup) */}
-      <p className="text-muted-foreground text-center text-xs">
-        Les envois sont vérifiés chaque jour. Un même client n&apos;est jamais
-        contacté deux fois pour le même déclencheur.
-      </p>
+      {/* 3. Footer Muted Note & Manual Trigger */}
+      <div className="flex flex-col items-center gap-2.5 pt-2 text-center">
+        <p className="text-muted-foreground text-xs">
+          Les envois sont vérifiés chaque jour. Un même client n&apos;est jamais
+          contacté deux fois pour le même déclencheur.
+        </p>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleRunCheck}
+          disabled={isRunningCheck || isPending}
+          className="h-8 gap-1.5 rounded-full px-4 text-xs font-semibold"
+        >
+          {isRunningCheck ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+          )}
+          <span>Vérifier et exécuter les déclencheurs maintenant</span>
+        </Button>
+
+        {checkFeedback && (
+          <div className="bg-muted text-foreground flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+            <span>{checkFeedback}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,8 +1,15 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, gte, lt } from "drizzle-orm";
 
 import { db } from "@/db";
-import { automations, locations, programs } from "@/db/schema/loyalty";
+import {
+  automations,
+  cards,
+  locations,
+  notifications,
+  programs,
+} from "@/db/schema/loyalty";
 import { broadcastAppleWalletNotification } from "@/lib/wallet/apple";
+import { broadcastGoogleWalletNotification } from "@/lib/wallet/google";
 import { updateLoyaltyClassLocations } from "@/lib/wallet/google/class";
 
 export type AutomationType =
@@ -353,5 +360,136 @@ export const getActiveLocationGeofence = async (
     latitude: lat,
     longitude: lng,
     relevantText: row.message || undefined,
+  };
+};
+
+export interface RunAutomationsResult {
+  inactiveSent: number;
+  message?: string;
+  rewardSent: number;
+  success: boolean;
+}
+
+/**
+ * Checks and triggers active automated retention notifications for an organization:
+ * 1. Inactive customers: haven't visited in X days.
+ * 2. Approaching reward: within X points/stamps of unlocking their gift.
+ */
+export const runAutomationsForOrganization = async (
+  organizationId: string
+): Promise<RunAutomationsResult> => {
+  const [config, programList] = await Promise.all([
+    getAutomations(organizationId),
+    db
+      .select()
+      .from(programs)
+      .where(eq(programs.organizationId, organizationId))
+      .limit(1),
+  ]);
+
+  const [prog] = programList;
+  if (!prog) {
+    return {
+      inactiveSent: 0,
+      message: "Programme introuvable",
+      rewardSent: 0,
+      success: false,
+    };
+  }
+
+  let inactiveSent = 0;
+  let rewardSent = 0;
+  const now = new Date();
+
+  // 1. Inactive customer relance
+  if (config.inactiveClient.isEnabled) {
+    const days = config.inactiveClient.triggerValue || 30;
+    const cutoffDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+    const inactiveCards = await db
+      .select({ id: cards.id })
+      .from(cards)
+      .where(
+        and(eq(cards.programId, prog.id), lt(cards.updatedAt, cutoffDate))
+      );
+
+    if (inactiveCards.length > 0) {
+      const cardIds = inactiveCards.map((c) => c.id);
+
+      await Promise.allSettled([
+        broadcastGoogleWalletNotification({
+          body: config.inactiveClient.message,
+          cardIds,
+          header: "Relance fidélité",
+          programId: prog.id,
+        }),
+        broadcastAppleWalletNotification(prog.id),
+      ]);
+
+      await db.insert(notifications).values({
+        channel: "all",
+        createdAt: now,
+        id: crypto.randomUUID(),
+        message: config.inactiveClient.message,
+        organizationId,
+        recipientCount: inactiveCards.length,
+        sentAt: now,
+        title: "Relance client inactif (Automatique)",
+        type: "automated",
+      });
+
+      inactiveSent = inactiveCards.length;
+    }
+  }
+
+  // 2. Approaching reward notification
+  if (config.rewardProximity.isEnabled) {
+    const threshold = config.rewardProximity.triggerValue || 20;
+    const minBalance = Math.max(0, prog.stampsRequired - threshold);
+
+    const rewardCards = await db
+      .select({ id: cards.id })
+      .from(cards)
+      .where(
+        and(
+          eq(cards.programId, prog.id),
+          gte(cards.balance, minBalance),
+          lt(cards.balance, prog.stampsRequired)
+        )
+      );
+
+    if (rewardCards.length > 0) {
+      const cardIds = rewardCards.map((c) => c.id);
+
+      await Promise.allSettled([
+        broadcastGoogleWalletNotification({
+          body: config.rewardProximity.message,
+          cardIds,
+          header: "Bientôt votre récompense !",
+          programId: prog.id,
+        }),
+        broadcastAppleWalletNotification(prog.id),
+      ]);
+
+      await db.insert(notifications).values({
+        channel: "all",
+        createdAt: now,
+        id: crypto.randomUUID(),
+        message: config.rewardProximity.message,
+        organizationId,
+        recipientCount: rewardCards.length,
+        sentAt: now,
+        title: "Bientôt une récompense (Automatique)",
+        type: "automated",
+      });
+
+      rewardSent = rewardCards.length;
+    }
+  }
+
+  return {
+    inactiveSent,
+    rewardSent,
+    success: true,
   };
 };

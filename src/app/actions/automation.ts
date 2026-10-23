@@ -2,10 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getAutomations, saveAutomation } from "@/dal/automation";
+import {
+  getAutomations,
+  runAutomationsForOrganization,
+  saveAutomation,
+} from "@/dal/automation";
 import type {
   AutomationItem,
   AutomationsConfig,
+  RunAutomationsResult,
   SaveAutomationInput,
 } from "@/dal/automation";
 import { getMerchantSession } from "@/dal/merchant";
@@ -63,6 +68,36 @@ export const saveAutomationAction = async (
         error instanceof Error
           ? error.message
           : "Erreur lors de l'enregistrement de l'automatisation",
+      success: false,
+    };
+  }
+};
+
+export const runAutomationsAction = async (): Promise<RunAutomationsResult> => {
+  const session = await getMerchantSession();
+  if (!session) {
+    return {
+      inactiveSent: 0,
+      message: "Non autorisé",
+      rewardSent: 0,
+      success: false,
+    };
+  }
+
+  try {
+    const res = await runAutomationsForOrganization(session.organizationId);
+    revalidatePath("/notifications");
+    revalidatePath("/automations");
+    revalidatePath("/dashboard/notifications");
+    revalidatePath("/dashboard/automations");
+    return res;
+  } catch (error) {
+    console.error("[runAutomationsAction] Error:", error);
+    return {
+      inactiveSent: 0,
+      message:
+        error instanceof Error ? error.message : "Erreur lors de l'exécution",
+      rewardSent: 0,
       success: false,
     };
   }
