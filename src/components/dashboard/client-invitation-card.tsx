@@ -4,7 +4,7 @@ import { Check, Copy, ExternalLink, QrCode, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,9 @@ interface ClientInvitationCardProps {
   orgSlug: string;
 }
 
+const unsubscribe = () => null;
+const emptySubscribe = () => unsubscribe;
+
 export const ClientInvitationCard = ({
   businessName,
   orgSlug,
@@ -23,14 +26,17 @@ export const ClientInvitationCard = ({
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const relativePath = `/j/${orgSlug}`;
 
-  const getFullUrl = useCallback(() => {
-    const origin = typeof window === "undefined" ? "" : window.location.origin;
-    return origin ? `${origin}/j/${orgSlug}` : relativePath;
-  }, [orgSlug, relativePath]);
+  const origin = useSyncExternalStore(
+    emptySubscribe,
+    () => window.location.origin,
+    () => ""
+  );
+
+  const fullUrl = origin ? `${origin}${relativePath}` : relativePath;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(getFullUrl());
+      await navigator.clipboard.writeText(fullUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -43,7 +49,7 @@ export const ClientInvitationCard = ({
 
     const generateQr = async () => {
       try {
-        const url = await QRCode.toDataURL(getFullUrl(), {
+        const qrUrl = await QRCode.toDataURL(fullUrl, {
           errorCorrectionLevel: "H",
           margin: 1,
           scale: 6,
@@ -51,7 +57,7 @@ export const ClientInvitationCard = ({
         });
 
         if (isActive) {
-          setQrDataUrl(url);
+          setQrDataUrl(qrUrl);
         }
       } catch {
         if (isActive) {
@@ -60,12 +66,12 @@ export const ClientInvitationCard = ({
       }
     };
 
-    generateQr();
+    void generateQr();
 
     return () => {
       isActive = false;
     };
-  }, [getFullUrl]);
+  }, [fullUrl]);
 
   return (
     <Card className="border-primary/20 from-primary/5 via-card to-card overflow-hidden bg-gradient-to-br p-6 shadow-xs sm:p-8">
@@ -97,7 +103,7 @@ export const ClientInvitationCard = ({
                 URL :
               </span>
               <span className="text-foreground flex-1 truncate font-mono text-xs">
-                {getFullUrl()}
+                {fullUrl}
               </span>
             </div>
 
