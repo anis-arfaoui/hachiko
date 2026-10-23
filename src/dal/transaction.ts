@@ -165,33 +165,12 @@ export const addStampToCard = async (
 
   const rewardReady = newBalance >= card.stampsRequired;
 
-  const headerText = isPoints
-    ? `+${increment} Points ! 🎉`
-    : `+${increment} ${increment > 1 ? "Tampons" : "Tampon"} ! 🎉`;
-
-  const bodyText = isPoints
-    ? `Votre solde a été crédité chez ${card.businessName}. Nouveau solde : ${newBalance} / ${card.stampsRequired} pts.`
-    : `Votre carte a été créditée chez ${card.businessName}. Nouveau solde : ${newBalance} / ${card.stampsRequired} tampons.`;
-
-  const rewardBodyText = isPoints
-    ? `Félicitations ! Vous avez atteint ${newBalance} points chez ${card.businessName}. Votre récompense "${card.rewardLabel || "Cadeau"}" est débloquée ! 🎁`
-    : `Félicitations ! Vous avez complété vos ${card.stampsRequired} tampons chez ${card.businessName}. Votre récompense "${card.rewardLabel || "Cadeau"}" est débloquée ! 🎁`;
-
-  // Reliably sync pass on Google & Apple Wallet with push notification before returning
+  // Reliably sync pass balance on Google & Apple Wallet silently without push notification spam
   await Promise.allSettled([
     syncGoogleWalletCard({
       balance: newBalance,
       businessName: card.businessName,
       cardId: card.cardId,
-      notificationMessage: rewardReady
-        ? {
-            body: rewardBodyText,
-            header: "Récompense débloquée ! 🎁",
-          }
-        : {
-            body: bodyText,
-            header: headerText,
-          },
       programType: card.programType,
       rewardLabel: card.rewardLabel ?? undefined,
       stampsRequired: card.stampsRequired,

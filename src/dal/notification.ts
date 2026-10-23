@@ -168,19 +168,23 @@ export const sendManualBroadcastNotification = async (
     };
   }
 
-  // 3. Broadcast to Google Wallet and Apple Wallet, and count recipients in parallel
-  const [_googleResult, _appleResult, totalCardsList] = await Promise.all([
+  // 3. Fetch cards and broadcast to Google Wallet & Apple Wallet
+  const totalCardsList = await db
+    .select({ id: cards.id })
+    .from(cards)
+    .where(eq(cards.programId, program.id));
+
+  const cardIds = totalCardsList.map((c) => c.id);
+
+  const [_googleResult, _appleResult] = await Promise.all([
     broadcastGoogleWalletNotification({
       actionUrl,
       body: message,
+      cardIds,
       header: title,
       programId: program.id,
     }),
     broadcastAppleWalletNotification(program.id),
-    db
-      .select({ id: cards.id })
-      .from(cards)
-      .where(eq(cards.programId, program.id)),
   ]);
 
   const recipientCount = totalCardsList.length;
